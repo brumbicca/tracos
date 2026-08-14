@@ -90,3 +90,12 @@ dump-*.csx
 /fase-*.pdf
 /fase-*.tracos-lib
 
+# Local CNC / scratch na raiz (não sobem)
+/*.tap
+/*.pp
+/*.tool
+/Projeto*.tracos
+/JRGCNC*
+/TAP*
+/teste*.tap
+
