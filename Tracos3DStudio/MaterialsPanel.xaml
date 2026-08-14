@@ -1,0 +1,95 @@
+<UserControl x:Class="Tracos3DStudio.MaterialsPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             AutomationProperties.Name="Materiais"
+             AutomationProperties.AutomationId="MaterialsPanel">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="4">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0"
+                       x:Name="ProjectTitleText"
+                       FontSize="13"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,6"/>
+
+            <TextBlock Grid.Row="1"
+                       x:Name="SummaryText"
+                       Margin="0,0,0,6"
+                       TextWrapping="Wrap"
+                       FontSize="11"
+                       AutomationProperties.AutomationId="MaterialsSummaryText"/>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="Grupo:" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="11"/>
+                <ComboBox x:Name="FilterCombo"
+                          Width="140"
+                          SelectionChanged="FilterCombo_SelectionChanged"
+                          AutomationProperties.Name="Grupo de materiais"
+                          AutomationProperties.AutomationId="MaterialsFilterCombo">
+                    <ComboBoxItem Content="Todos" Tag="All"/>
+                    <ComboBoxItem Content="Módulos" Tag="Modules"/>
+                    <ComboBoxItem Content="Pisos" Tag="Floors"/>
+                </ComboBox>
+            </StackPanel>
+
+            <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="Modo:" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="11"/>
+                <ComboBox x:Name="ModeCombo"
+                          Width="160"
+                          SelectionChanged="ModeCombo_SelectionChanged"
+                          AutomationProperties.Name="Modo de aplicação"
+                          AutomationProperties.AutomationId="MaterialsModeCombo">
+                    <ComboBoxItem Content="Automático" Tag="Auto"/>
+                    <ComboBoxItem Content="Módulo" Tag="Module"/>
+                    <ComboBoxItem Content="Face da parede" Tag="WallFace"/>
+                    <ComboBoxItem Content="Faixa da parede" Tag="WallBand"/>
+                    <ComboBoxItem Content="Região da parede" Tag="WallRegion"/>
+                    <ComboBoxItem Content="Piso" Tag="Floor"/>
+                    <ComboBoxItem Content="Região do piso" Tag="FloorZone"/>
+                </ComboBox>
+            </StackPanel>
+
+            <ListBox Grid.Row="4"
+                     x:Name="MaterialsListBox"
+                     MinHeight="180"
+                     SelectionChanged="MaterialsListBox_SelectionChanged"
+                     AutomationProperties.Name="Lista de materiais"
+                     AutomationProperties.AutomationId="MaterialsListBox"/>
+
+            <TextBlock Grid.Row="5"
+                       x:Name="StatusText"
+                       Margin="0,6,0,0"
+                       TextWrapping="Wrap"
+                       Foreground="#666666"
+                       FontSize="11"
+                       AutomationProperties.AutomationId="MaterialsStatusText"/>
+
+            <StackPanel Grid.Row="6"
+                        Orientation="Horizontal"
+                        Margin="0,8,0,0">
+                <Button x:Name="MaterialsCopyFromSelectionButton"
+                        Content="Copiar do selecionado"
+                        Height="28"
+                        Margin="0,0,6,0"
+                        Padding="6,0"
+                        Click="MaterialsCopyFromSelectionButton_Click"
+                        AutomationProperties.AutomationId="MaterialsCopyFromSelectionButton"/>
+                <Button x:Name="MaterialsCopyViewportButton"
+                        Content="Copiar no viewport"
+                        Height="28"
+                        Padding="6,0"
+                        Click="MaterialsCopyViewportButton_Click"
+                        AutomationProperties.AutomationId="MaterialsCopyViewportButton"/>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

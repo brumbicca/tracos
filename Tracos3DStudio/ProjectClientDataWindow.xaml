@@ -1,0 +1,167 @@
+<Window x:Class="Tracos3DStudio.ProjectClientDataWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:Tracos3DStudio"
+        Title="Dados do cliente e da obra"
+        Width="720"
+        Height="720"
+        MinWidth="640"
+        MinHeight="600"
+        WindowStartupLocation="CenterOwner"
+        Background="#F5F5F5"
+        AutomationProperties.Name="Dados do cliente e da obra"
+        AutomationProperties.AutomationId="ProjectClientDataWindow">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="Informações vinculadas ao projeto — usadas no orçamento e no PDF comercial (Promob)."
+                   TextWrapping="Wrap"
+                   Foreground="#666666"
+                   Margin="0,0,0,12"/>
+
+        <Expander Grid.Row="1"
+                  Header="Dados da obra"
+                  IsExpanded="True"
+                  Margin="0,0,0,8"
+                  AutomationProperties.AutomationId="ProjectWorkExpander">
+            <Grid Margin="0,8,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,8">
+                    <TextBlock Text="Nome do projeto"/>
+                    <TextBox x:Name="ProjectNameBox"
+                             Margin="0,4,0,0"
+                             LostFocus="WorkField_Changed"
+                             AutomationProperties.AutomationId="ProjectNameBox"/>
+                </StackPanel>
+                <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,8">
+                    <TextBlock Text="Obra"/>
+                    <TextBox x:Name="WorkNameBox"
+                             Margin="0,4,0,0"
+                             LostFocus="WorkField_Changed"
+                             AutomationProperties.AutomationId="WorkNameBox"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,8">
+                    <TextBlock Text="Ambiente (título no orçamento)"/>
+                    <TextBox x:Name="EnvironmentNameBox"
+                             Margin="0,4,0,0"
+                             LostFocus="WorkField_Changed"
+                             AutomationProperties.AutomationId="EnvironmentNameBox"/>
+                    <TextBlock Text="Ambiente (título no orçamento e nome do cômodo na lista)"
+                               Foreground="#888888"
+                               FontSize="11"
+                               Margin="0,2,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,0,8">
+                    <TextBlock Text="Validade do orçamento (dias)"/>
+                    <TextBox x:Name="BudgetValidityDaysBox"
+                             Margin="0,4,0,0"
+                             LostFocus="WorkField_Changed"
+                             AutomationProperties.AutomationId="BudgetValidityDaysBox"/>
+                    <TextBlock Text="Prazo exibido no PDF comercial (padrão: 30 dias)."
+                               Foreground="#888888"
+                               FontSize="11"
+                               Margin="0,2,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,0,0,8">
+                    <TextBlock Text="Desconto comercial (%)"/>
+                    <TextBox x:Name="BudgetDiscountPercentBox"
+                             Margin="0,4,0,0"
+                             LostFocus="WorkField_Changed"
+                             AutomationProperties.AutomationId="BudgetDiscountPercentBox"/>
+                    <TextBlock Text="0 = sem desconto. Aplicado sobre o total do PDF."
+                               Foreground="#888888"
+                               FontSize="11"
+                               Margin="0,2,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,8">
+                    <TextBlock Text="Condições de pagamento"/>
+                    <TextBox x:Name="BudgetPaymentTermsBox"
+                             Margin="0,4,0,0"
+                             MinHeight="56"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+                             VerticalScrollBarVisibility="Auto"
+                             LostFocus="WorkField_Changed"
+                             AutomationProperties.AutomationId="BudgetPaymentTermsBox"/>
+                    <TextBlock Text="Ex.: 30% na assinatura, 70% na entrega."
+                               Foreground="#888888"
+                               FontSize="11"
+                               Margin="0,2,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,8">
+                    <TextBlock Text="Vendedor / consultor"/>
+                    <TextBox x:Name="BudgetSalesPersonBox"
+                             Margin="0,4,0,0"
+                             LostFocus="WorkField_Changed"
+                             AutomationProperties.AutomationId="BudgetSalesPersonBox"/>
+                    <TextBlock Text="Nome exibido no cabeçalho do PDF comercial."
+                               Foreground="#888888"
+                               FontSize="11"
+                               Margin="0,2,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,8">
+                    <TextBlock Text="Observações comerciais"/>
+                    <TextBox x:Name="BudgetCommercialNotesBox"
+                             Margin="0,4,0,0"
+                             MinHeight="56"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+                             VerticalScrollBarVisibility="Auto"
+                             LostFocus="WorkField_Changed"
+                             AutomationProperties.AutomationId="BudgetCommercialNotesBox"/>
+                    <TextBlock Text="Texto livre no PDF (prazo de entrega, exclusões, etc.). Distinto das anotações do cliente."
+                               Foreground="#888888"
+                               FontSize="11"
+                               Margin="0,2,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Expander>
+
+        <Expander Grid.Row="2"
+                  Header="Dados do cliente"
+                  IsExpanded="True"
+                  AutomationProperties.AutomationId="ProjectClientExpander">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
+                <local:ClientDataFieldsPanel x:Name="ClientFields"
+                                             FieldsChanged="ClientFields_FieldsChanged"/>
+            </ScrollViewer>
+        </Expander>
+
+        <StackPanel Grid.Row="3"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,12,0,0">
+            <Button Content="OK"
+                    Width="88"
+                    Height="32"
+                    IsDefault="True"
+                    Click="Ok_Click"
+                    AutomationProperties.AutomationId="ProjectClientDataOkButton"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,1472 @@
+<Window x:Class="Tracos3DStudio.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:gl="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
+        xmlns:local="clr-namespace:Tracos3DStudio"
+        Title="Tracos 3D Studio V1"
+        WindowState="Maximized"
+        Background="#F2F2F2"
+        AutomationProperties.Name="Tracos 3D Studio V1"
+        AutomationProperties.AutomationId="MainWindow"
+        PreviewKeyDown="MainWindow_PreviewKeyDown">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="28"/>
+            <RowDefinition Height="32"/>
+            <RowDefinition Height="58"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="28"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="170"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="280"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Row="0" Grid.ColumnSpan="3" Background="#E0E0E0" BorderBrush="#C8C8C8" BorderThickness="0,0,0,1">
+            <DockPanel LastChildFill="True">
+                <Button x:Name="ProjectTabNewButton"
+                        DockPanel.Dock="Right"
+                        Content="+"
+                        Width="28"
+                        Height="24"
+                        Margin="2,2,4,2"
+                        ToolTip="Novo projeto em nova aba"
+                        Click="ProjectTabNew_Click"
+                        AutomationProperties.AutomationId="ProjectTabNewButton"/>
+                <ListBox x:Name="ProjectTabList"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                         ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                         SelectionChanged="ProjectTabList_SelectionChanged"
+                         AutomationProperties.AutomationId="ProjectTabBar">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Margin" Value="2,2,0,2"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border x:Name="TabBorder"
+                                                Background="#F2F2F2"
+                                                BorderBrush="#C8C8C8"
+                                                BorderThickness="1,1,1,0"
+                                                CornerRadius="4,4,0,0"
+                                                Padding="0">
+                                            <ContentPresenter/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="TabBorder" Property="Background" Value="White"/>
+                                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="#A0A0A0"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="4,2">
+                                <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center"/>
+                                <Button Content="×"
+                                        Width="18"
+                                        Height="18"
+                                        Margin="6,0,0,0"
+                                        Padding="0"
+                                        VerticalAlignment="Center"
+                                        ToolTip="Fechar aba"
+                                        Click="ProjectTabClose_Click"
+                                        Tag="{Binding}"
+                                        AutomationProperties.AutomationId="ProjectTabCloseButton"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Border>
+
+        <Menu x:Name="MainMenu" Grid.Row="1" Grid.ColumnSpan="3" Background="#F2F2F2">
+            <MenuItem Header="Arquivo">
+                <MenuItem Header="Novo" Click="NewProject_Click" InputGestureText=""/>
+                <MenuItem Header="Abrir..." Click="OpenProject_Click"/>
+                <Separator/>
+                <MenuItem Header="Salvar" Click="SaveProject_Click" InputGestureText="Ctrl+S"/>
+                <MenuItem Header="Salvar como..." Click="SaveProjectAs_Click"/>
+                <Separator/>
+                <MenuItem Header="Fechar aba"
+                          Click="CloseProjectTab_Click"
+                          InputGestureText="Ctrl+W"
+                          AutomationProperties.AutomationId="CloseProjectTabMenuItem"/>
+            </MenuItem>
+            <MenuItem Header="Editar"/>
+            <MenuItem Header="Exibir">
+                <MenuItem Header="Camadas..."
+                          Click="OpenWallLayers_Click"
+                          AutomationProperties.AutomationId="WallLayersMenuItem"/>
+                <MenuItem Header="Materiais..."
+                          Click="OpenMaterials_Click"
+                          AutomationProperties.AutomationId="MaterialsMenuItem"/>
+                <MenuItem Header="Editor de Faixas..."
+                          Click="OpenWallBandsEditor_Click"
+                          AutomationProperties.AutomationId="WallBandsEditorMenuItem"/>
+                <Separator/>
+                <MenuItem Header="Exportar viewport PNG..." Click="ExportViewportPng_Click"/>
+                <MenuItem Header="Exportar PNG apresentação (2x, só 3D)..."
+                          Click="ExportPresentationPng_Click"
+                          AutomationProperties.AutomationId="ExportPresentationPngMenuItem"/>
+                <MenuItem Header="Exportar PNG planta com cotas..." Click="ExportFloorPlanPng_Click"/>
+                <Separator/>
+                <MenuItem Header="Alternar teto automático" Click="ToggleAutomaticCeiling_Click"/>
+            </MenuItem>
+            <MenuItem Header="Inserir"/>
+            <MenuItem Header="Projeto">
+                <MenuItem Header="Dados do cliente e da obra..."
+                          Click="OpenProjectClientData_Click"
+                          AutomationProperties.AutomationId="ProjectClientDataMenuItem"/>
+                <MenuItem Header="Adicionar cômodo..."
+                          Click="AddCompartment_Click"
+                          AutomationProperties.AutomationId="AddCompartmentMenuItem"/>
+                <Separator/>
+                <MenuItem Header="Lista de peças..."
+                          Click="OpenPartsList_Click"
+                          AutomationProperties.AutomationId="PartsListMenuItem"/>
+                <MenuItem Header="Exportar PDF técnico..."
+                          Click="ExportTechnicalPdf_Click"
+                          AutomationProperties.AutomationId="ExportTechnicalPdfMenuItem"/>
+                <MenuItem Header="Exportar DXF planta..."
+                          Click="ExportDxf_Click"
+                          AutomationProperties.AutomationId="ExportDxfFloorPlanMenuItem"/>
+                <MenuItem Header="Exportar DXF peças..."
+                          Click="ExportDxfPieces_Click"
+                          AutomationProperties.AutomationId="ExportDxfPiecesMenuItem"/>
+                <MenuItem Header="Importar DXF planta..." Click="ImportDxf_Click"/>
+                <Separator/>
+                <MenuItem Header="Perfil de construção">
+                    <MenuItem Header="Padrão (18 mm)" Click="ConstructionProfilePadrao_Click"/>
+                    <MenuItem Header="Reforçado (25 mm)" Click="ConstructionProfileReforcado_Click"/>
+                    <MenuItem Header="Econômico (15 mm)" Click="ConstructionProfileEconomico_Click"/>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="Produção">
+                <MenuItem Header="Abrir plano de corte..."
+                          Click="OpenCutPlan_Click"
+                          AutomationProperties.AutomationId="OpenCutPlanMenuItem"/>
+                <MenuItem Header="Exportar CSV plano de corte..."
+                          Click="ExportCutPlanCsv_Click"
+                          AutomationProperties.AutomationId="ExportCutPlanCsvMenuItem"/>
+                <MenuItem Header="Exportar JSON plano de corte (máquina)..."
+                          Click="ExportMachineCutPlanJson_Click"
+                          AutomationProperties.AutomationId="ExportMachineCutPlanJsonMenuItem"/>
+                <MenuItem Header="Exportar CSV furos CNC..."
+                          Click="ExportCncDrillCsv_Click"
+                          AutomationProperties.AutomationId="ExportCncDrillCsvMenuItem"/>
+                <MenuItem Header="Exportar JSON CNC (tracos-cnc-job)..."
+                          Click="ExportCncJobJson_Click"
+                          AutomationProperties.AutomationId="ExportCncJobJsonMenuItem"/>
+                <MenuItem Header="Exportar .tap Jaraguá (Mach4)..."
+                          Click="ExportJaraguaTap_Click"
+                          AutomationProperties.AutomationId="ExportJaraguaTapMenuItem"/>
+                <MenuItem Header="Exportar etiquetas PDF..."
+                          Click="ExportPartLabelsPdf_Click"
+                          AutomationProperties.AutomationId="ExportPartLabelsPdfMenuItem"/>
+            </MenuItem>
+            <MenuItem Header="Orçamento">
+                <MenuItem Header="Auditar projeto..."
+                          Click="AuditBudget_Click"
+                          AutomationProperties.AutomationId="AuditBudgetMenuItem"/>
+                <MenuItem Header="Abrir orçamento..."
+                          Click="OpenBudget_Click"
+                          AutomationProperties.AutomationId="OpenBudgetMenuItem"/>
+            </MenuItem>
+            <MenuItem Header="Ferramentas">
+                <MenuItem Header="Configurar Dimensões..."
+                          Click="OpenDimensionConfigurator_Click"
+                          AutomationProperties.AutomationId="OpenDimensionConfiguratorMenuItem"/>
+                <Separator/>
+                <MenuItem Header="Gerenciar biblioteca..." Click="OpenLibraryEditor_Click"
+                          AutomationProperties.AutomationId="OpenLibraryEditorMenuItem"/>
+                <MenuItem Header="Recarregar biblioteca"
+                          Click="ReloadLibrary_Click"
+                          AutomationProperties.AutomationId="ReloadLibraryMenuItem"/>
+                <MenuItem Header="Exportar pacote ERP..." Click="ExportErp_Click"/>
+                <MenuItem Header="Backup do projeto..." Click="ExportBackup_Click"/>
+            </MenuItem>
+            <MenuItem Header="Ajuda"/>
+        </Menu>
+
+        <Border x:Name="MainToolbarBorder" Grid.Row="2" Grid.ColumnSpan="3" Background="#E8E8E8" BorderBrush="#C8C8C8" BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0">
+                <Button x:Name="NewProjectButton"
+                        Content="Novo"
+                        Width="64"
+                        Margin="3"
+                        Click="NewProject_Click"
+                        AutomationProperties.Name="Novo projeto"
+                        AutomationProperties.AutomationId="NewProjectButton"/>
+                <Button x:Name="OpenProjectButton"
+                        Content="Abrir"
+                        Width="64"
+                        Margin="3"
+                        Click="OpenProject_Click"
+                        AutomationProperties.Name="Abrir projeto"
+                        AutomationProperties.AutomationId="OpenProjectButton"/>
+                <Button x:Name="SaveProjectButton"
+                        Content="Salvar"
+                        Width="64"
+                        Margin="3"
+                        Click="SaveProject_Click"
+                        AutomationProperties.Name="Salvar projeto"
+                        AutomationProperties.AutomationId="SaveProjectButton"/>
+                <Separator Width="12"/>
+                <Button x:Name="WallButton"
+                        Content="Parede"
+                        Width="72"
+                        Margin="3"
+                        Click="WallButton_Click"
+                        AutomationProperties.Name="Parede"
+                        AutomationProperties.AutomationId="WallButton"/>
+                <Button x:Name="WallEditorButton"
+                        Content="Editor Paredes"
+                        Width="100"
+                        Margin="3"
+                        Click="WallEditorButton_Click"
+                        AutomationProperties.Name="Editor de Paredes"
+                        AutomationProperties.AutomationId="WallEditorButton"/>
+                <StackPanel x:Name="WallEditorToolsPanel" Orientation="Horizontal" Visibility="Collapsed">
+                    <Button x:Name="WallEditorLinearDimButton"
+                            Content="Cota Reta"
+                            Width="84"
+                            Margin="3"
+                            Click="WallEditorLinearDimButton_Click"
+                            AutomationProperties.Name="Cota Reta"
+                            AutomationProperties.AutomationId="WallEditorLinearDimButton"/>
+                    <Button x:Name="WallEditorAngularDimButton"
+                            Content="Cota Angular"
+                            Width="96"
+                            Margin="3"
+                            Click="WallEditorAngularDimButton_Click"
+                            AutomationProperties.Name="Cota Angular"
+                            AutomationProperties.AutomationId="WallEditorAngularDimButton"/>
+                    <Button x:Name="WallEditorRemoveDimButton"
+                            Content="Remover Cota"
+                            Width="100"
+                            Margin="3"
+                            Click="WallEditorRemoveDimButton_Click"
+                            AutomationProperties.Name="Remover Cota"
+                            AutomationProperties.AutomationId="WallEditorRemoveDimButton"/>
+                    <Button x:Name="WallEditorHotpointButton"
+                            Content="Mover HotPoint"
+                            Width="108"
+                            Margin="3"
+                            Click="WallEditorHotpointButton_Click"
+                            AutomationProperties.Name="Mover HotPoint"
+                            AutomationProperties.AutomationId="WallEditorHotpointButton"/>
+                    <Button x:Name="WallCornerJoinButton"
+                            Content="Encontro Canto"
+                            Width="108"
+                            Margin="3"
+                            Click="WallCornerJoinButton_Click"
+                            AutomationProperties.Name="Encontro Canto"
+                            AutomationProperties.AutomationId="WallCornerJoinButton"/>
+                    <Button x:Name="WallTJoinButton"
+                            Content="Encontro T"
+                            Width="88"
+                            Margin="3"
+                            Click="WallTJoinButton_Click"
+                            AutomationProperties.Name="Encontro T"
+                            AutomationProperties.AutomationId="WallTJoinButton"/>
+                </StackPanel>
+                <Button x:Name="DoorButton"
+                        Content="Porta"
+                        Width="64"
+                        Margin="3"
+                        Click="DoorButton_Click"
+                        AutomationProperties.Name="Porta"
+                        AutomationProperties.AutomationId="DoorButton"/>
+                <Button x:Name="WindowButton"
+                        Content="Janela"
+                        Width="72"
+                        Margin="3"
+                        Click="WindowButton_Click"
+                        AutomationProperties.Name="Janela"
+                        AutomationProperties.AutomationId="WindowButton"/>
+                <Separator Width="12"/>
+                <Button x:Name="DimensionConfiguratorButton"
+                        Content="Dimensões"
+                        Width="88"
+                        Margin="3"
+                        Click="OpenDimensionConfigurator_Click"
+                        AutomationProperties.Name="Configurar Dimensões"
+                        AutomationProperties.AutomationId="DimensionConfiguratorButton"/>
+                <Separator Width="12"/>
+                <Button x:Name="PerspectiveButton"
+                        Content="Perspectiva"
+                        Width="90"
+                        Margin="3"
+                        Click="PerspectiveButton_Click"
+                        AutomationProperties.Name="Perspectiva"
+                        AutomationProperties.AutomationId="PerspectiveButton"/>
+                <Button x:Name="TopViewButton"
+                        Content="Planta"
+                        Width="64"
+                        Margin="3"
+                        Click="TopViewButton_Click"
+                        AutomationProperties.Name="Planta"
+                        AutomationProperties.AutomationId="TopViewButton"/>
+                <Button x:Name="FrontViewButton"
+                        Content="Frontal"
+                        Width="64"
+                        Margin="3"
+                        Click="FrontViewButton_Click"
+                        AutomationProperties.Name="Frontal"
+                        AutomationProperties.AutomationId="FrontViewButton"/>
+                <Button x:Name="LeftViewButton"
+                        Content="Esquerda"
+                        Width="76"
+                        Margin="3"
+                        Click="LeftViewButton_Click"
+                        AutomationProperties.Name="Esquerda"
+                        AutomationProperties.AutomationId="LeftViewButton"/>
+                <Button x:Name="RightViewButton"
+                        Content="Direita"
+                        Width="64"
+                        Margin="3"
+                        Click="RightViewButton_Click"
+                        AutomationProperties.Name="Direita"
+                        AutomationProperties.AutomationId="RightViewButton"/>
+                <Button x:Name="XRayButton"
+                        Content="Raio X"
+                        Width="64"
+                        Margin="3"
+                        Click="XRayButton_Click"
+                        AutomationProperties.Name="Raio X"
+                        AutomationProperties.AutomationId="XRayButton"/>
+                <Separator Width="12"/>
+                <Button x:Name="MaterialCopyButton"
+                        Content="Copiar material"
+                        Width="110"
+                        Margin="3"
+                        Click="MaterialCopyButton_Click"
+                        AutomationProperties.Name="Copiar material"
+                        AutomationProperties.AutomationId="MaterialCopyButton"/>
+            </StackPanel>
+        </Border>
+
+        <Border x:Name="LeftLibraryBorder" Grid.Row="3" Grid.Column="0" Background="#F7F7F7" BorderBrush="#C8C8C8" BorderThickness="0,0,1,0">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Text="Bibliotecas" FontWeight="Bold" Margin="8" FontSize="14"/>
+                <TabControl x:Name="LibraryTabControl" Margin="8,0,8,8">
+                    <TabItem Header="Inserir"
+                             AutomationProperties.Name="Inserir"
+                             AutomationProperties.AutomationId="LibraryTabInsert">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="0,4,0,0">
+                                <TextBox x:Name="LibrarySearchBox"
+                                         Margin="0,0,0,6"
+                                         Height="26"
+                                         TextChanged="LibrarySearchBox_TextChanged"
+                                         AutomationProperties.Name="Buscar módulo no catálogo"
+                                         AutomationProperties.AutomationId="LibrarySearchBox"/>
+                                <TextBlock x:Name="LibrarySearchEmptyText"
+                                           Text="Nenhum módulo encontrado."
+                                           Margin="0,0,0,6"
+                                           Foreground="#666666"
+                                           FontSize="11"
+                                           Visibility="Collapsed"
+                                           AutomationProperties.AutomationId="LibrarySearchEmptyText"/>
+                                <Expander x:Name="CozinhasLibraryExpander" Header="Cozinhas" IsExpanded="True"
+                                          AutomationProperties.AutomationId="CozinhasLibraryExpander">
+                                    <StackPanel x:Name="CozinhasLibraryHost"
+                                                AutomationProperties.AutomationId="CozinhasLibraryHost"/>
+                                </Expander>
+                                <Expander x:Name="DormitoriosLibraryExpander" Header="Dormitórios" Margin="0,8,0,0">
+                                    <StackPanel>
+                                        <Button x:Name="ModuleWardrobeButton"
+                                                Content="Guarda-roupa 2 Portas"
+                                                Margin="0,4"
+                                                Height="32"
+                                                Click="ModuleWardrobeButton_Click"
+                                                AutomationProperties.AutomationId="ModuleWardrobeButton"/>
+                                        <Button x:Name="ModuleNightstandButton"
+                                                Content="Criado-mudo 2 Gavetas"
+                                                Margin="0,4"
+                                                Height="32"
+                                                Click="ModuleNightstandButton_Click"
+                                                AutomationProperties.AutomationId="ModuleNightstandButton"/>
+                                        <Button x:Name="ModuleChestButton"
+                                                Content="Cômoda 4 Gavetas"
+                                                Margin="0,4"
+                                                Height="32"
+                                                Click="ModuleChestButton_Click"
+                                                AutomationProperties.AutomationId="ModuleChestButton"/>
+                                    </StackPanel>
+                                </Expander>
+                                <Expander x:Name="CustomLibraryExpander" Header="Personalizados" Margin="0,8,0,0" IsExpanded="False">
+                                    <StackPanel x:Name="CustomModulesPanel"/>
+                                </Expander>
+                                <Expander x:Name="PanelsLibraryExpander" Header="Painéis" Margin="0,8,0,0" IsExpanded="False">
+                                    <StackPanel x:Name="PanelModulesPanel"/>
+                                </Expander>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+                    <TabItem x:Name="LibraryTabScene"
+                             Header="Ambiente"
+                             AutomationProperties.Name="Ambiente"
+                             AutomationProperties.AutomationId="LibraryTabScene">
+                        <DockPanel>
+                            <Button x:Name="SceneModuleDeleteButton"
+                                    DockPanel.Dock="Bottom"
+                                    Content="Excluir selecionado"
+                                    Height="28"
+                                    Margin="0,4,0,0"
+                                    IsEnabled="False"
+                                    Click="SceneModuleDeleteButton_Click"
+                                    AutomationProperties.Name="Excluir módulo da lista"
+                                    AutomationProperties.AutomationId="SceneModuleDeleteButton"/>
+                            <StackPanel DockPanel.Dock="Bottom" Margin="0,4,0,4">
+                                <CheckBox x:Name="SceneModuleVisibleCheck"
+                                          Content="Visível"
+                                          IsThreeState="True"
+                                          IsChecked="True"
+                                          IsEnabled="False"
+                                          Checked="SceneModuleVisibleCheck_Changed"
+                                          Unchecked="SceneModuleVisibleCheck_Changed"
+                                          AutomationProperties.Name="Visibilidade do módulo no ambiente"
+                                          AutomationProperties.AutomationId="SceneModuleVisibleCheck"/>
+                                <CheckBox x:Name="SceneModuleLockedCheck"
+                                          Margin="0,4,0,0"
+                                          Content="Bloqueado"
+                                          IsThreeState="True"
+                                          IsChecked="False"
+                                          IsEnabled="False"
+                                          Checked="SceneModuleLockedCheck_Changed"
+                                          Unchecked="SceneModuleLockedCheck_Changed"
+                                          AutomationProperties.Name="Bloqueio do módulo no ambiente"
+                                          AutomationProperties.AutomationId="SceneModuleLockedCheck"/>
+                                <TextBlock Text="Nome no ambiente"
+                                           Margin="0,8,0,0"
+                                           FontSize="11"
+                                           Foreground="#666666"/>
+                                <Grid Margin="0,2,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox x:Name="SceneModuleRenameBox"
+                                             Height="28"
+                                             IsEnabled="False"
+                                             KeyDown="SceneModuleRenameBox_KeyDown"
+                                             AutomationProperties.Name="Nome do módulo no ambiente"
+                                             AutomationProperties.AutomationId="SceneModuleRenameBox"/>
+                                    <Button x:Name="SceneModuleRenameButton"
+                                            Grid.Column="1"
+                                            Content="Aplicar"
+                                            Height="28"
+                                            Width="64"
+                                            Margin="4,0,0,0"
+                                            IsEnabled="False"
+                                            Click="SceneModuleRenameButton_Click"
+                                            AutomationProperties.Name="Aplicar nome do módulo"
+                                            AutomationProperties.AutomationId="SceneModuleRenameButton"/>
+                                </Grid>
+                            </StackPanel>
+                            <ListBox x:Name="SceneModuleListBox"
+                                     SelectionMode="Extended"
+                                     SelectionChanged="SceneModuleListBox_SelectionChanged"
+                                     MouseDoubleClick="SceneModuleListBox_MouseDoubleClick"
+                                     AutomationProperties.Name="Módulos no ambiente"
+                                     AutomationProperties.AutomationId="SceneModuleList">
+                                <ListBox.Resources>
+                                    <DataTemplate DataType="{x:Type local:SceneModuleListGroupEntry}">
+                                        <TextBlock Text="{Binding GroupTitle}"
+                                                   Margin="0,8,0,2"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#444444"
+                                                   AutomationProperties.AutomationId="SceneModuleListGroupHeader">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Kind}" Value="Compartment">
+                                                            <Setter Property="FontSize" Value="12"/>
+                                                            <Setter Property="Foreground" Value="#222222"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Kind}" Value="Wall">
+                                                            <Setter Property="Margin" Value="12,4,0,2"/>
+                                                            <Setter Property="FontWeight" Value="Normal"/>
+                                                            <Setter Property="Foreground" Value="#555555"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                    <DataTemplate DataType="{x:Type local:SceneModuleListItem}">
+                                        <StackPanel Orientation="Horizontal" Margin="2,4" Opacity="{Binding ListOpacity}">
+                                            <Border Width="28"
+                                                    Height="28"
+                                                    CornerRadius="2"
+                                                    BorderBrush="#888888"
+                                                    BorderThickness="1"
+                                                    Background="{Binding AccentBrush}">
+                                                <TextBlock Text="{Binding IconHint}"
+                                                           Foreground="White"
+                                                           FontSize="10"
+                                                           FontWeight="SemiBold"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                            </Border>
+                                            <TextBlock Text="{Binding DisplayLabel}"
+                                                       Margin="8,0,0,0"
+                                                       VerticalAlignment="Center"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.Resources>
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsGroupHeader}" Value="True">
+                                                <Setter Property="IsEnabled" Value="False"/>
+                                                <Setter Property="Focusable" Value="False"/>
+                                                <Setter Property="Padding" Value="0"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                            </ListBox>
+                        </DockPanel>
+                    </TabItem>
+                    <TabItem x:Name="LibraryTabMaterials"
+                             Header="Materiais"
+                             AutomationProperties.Name="Materiais"
+                             AutomationProperties.AutomationId="LibraryTabMaterials">
+                        <local:MaterialsPanel x:Name="MaterialsPanel"/>
+                    </TabItem>
+                </TabControl>
+            </DockPanel>
+        </Border>
+
+        <Border Grid.Row="3" Grid.Column="1" Background="#3A3A3A">
+            <Grid x:Name="ViewportHost"
+                  Background="#3A3A3A"
+                  AllowDrop="True"
+                  PreviewDragOver="ViewportHost_PreviewDragOver"
+                  DragLeave="ViewportHost_DragLeave"
+                  Drop="ViewportHost_Drop"
+                  AutomationProperties.AutomationId="ViewportHost">
+                <gl:GLWpfControl x:Name="Viewport"
+                         HorizontalAlignment="Stretch"
+                         VerticalAlignment="Stretch"
+                         Margin="0"
+                         Focusable="True"
+                         AutomationProperties.Name="Viewport 3D"
+                         AutomationProperties.AutomationId="Viewport"/>
+
+                <Canvas x:Name="DimensionLabelsCanvas"
+                        IsHitTestVisible="False"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"/>
+
+                <!-- Caixa Ctrl+arraste (Promob) — canvas próprio para não ser apagado com as cotas. -->
+                <Canvas x:Name="ModuleMarqueeCanvas"
+                        IsHitTestVisible="False"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        AutomationProperties.AutomationId="ModuleMarqueeCanvas"/>
+
+                <TextBox x:Name="MeasureBox"
+                         Width="100"
+                         Height="26"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Top"
+                         Margin="0,12,0,0"
+                         Visibility="Collapsed"
+                         PreviewKeyDown="MeasureBox_KeyDown"
+                         AutomationProperties.Name="Medida"
+                         AutomationProperties.AutomationId="MeasureBox"/>
+            </Grid>
+        </Border>
+
+        <Border x:Name="RightPropertiesBorder" Grid.Row="3" Grid.Column="2" Background="#F7F7F7" BorderBrush="#C8C8C8" BorderThickness="1,0,0,0">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Text="Propriedades" FontWeight="Bold" Margin="8" FontSize="14"/>
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              AutomationProperties.AutomationId="PropertyScrollViewer">
+                    <StackPanel Margin="8,0,8,8">
+
+                        <!-- ═══════════════════════════════════════════
+                             CONSTRUÇÃO DE PAREDE (modo desenho — Promob: Ferramentas / Construção)
+                             ═══════════════════════════════════════════ -->
+                        <StackPanel x:Name="WallConstructionPanel" Visibility="Collapsed">
+                            <TextBlock Text="Construção de parede"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,6"
+                                       FontSize="13"/>
+                            <Expander Header="Construção" IsExpanded="True">
+                                <StackPanel>
+                                    <TextBlock Text="Comprimento (mm)"/>
+                                    <TextBox x:Name="WallConstructionLengthBox"
+                                             Margin="0,2,0,0"
+                                             IsReadOnly="True"
+                                             Background="#EFEFEF"
+                                             AutomationProperties.Name="Comprimento em construção"
+                                             AutomationProperties.AutomationId="WallConstructionLengthBox"/>
+                                    <TextBlock Text="Orientação" Margin="0,6,0,0"/>
+                                    <ComboBox x:Name="WallConstructionMeasureSideCombo"
+                                              Margin="0,2,0,0"
+                                              SelectedIndex="0"
+                                              SelectionChanged="WallMeasureSideCombo_SelectionChanged"
+                                              AutomationProperties.Name="Orientação da parede"
+                                              AutomationProperties.AutomationId="WallConstructionMeasureSideCombo">
+                                        <ComboBoxItem Content="Interna"/>
+                                        <ComboBoxItem Content="Externa"/>
+                                    </ComboBox>
+                                    <TextBlock Text="Espessura (mm)" Margin="0,6,0,0"/>
+                                    <TextBox x:Name="WallConstructionThicknessBox"
+                                             Margin="0,2,0,0"
+                                             PreviewKeyDown="WallConstructionBox_PreviewKeyDown"
+                                             AutomationProperties.Name="Espessura em construção"
+                                             AutomationProperties.AutomationId="WallConstructionThicknessBox"/>
+                                    <TextBlock Text="Altura (mm)" Margin="0,6,0,0"/>
+                                    <TextBox x:Name="WallConstructionHeightBox"
+                                             Margin="0,2,0,0"
+                                             PreviewKeyDown="WallConstructionBox_PreviewKeyDown"
+                                             AutomationProperties.Name="Altura em construção"
+                                             AutomationProperties.AutomationId="WallConstructionHeightBox"/>
+                                    <TextBlock Text="Ângulo Absoluto (°)" Margin="0,6,0,0"/>
+                                    <TextBox x:Name="WallConstructionAngleAbsoluteBox"
+                                             Margin="0,2,0,0"
+                                             IsReadOnly="True"
+                                             Background="#EFEFEF"
+                                             AutomationProperties.AutomationId="WallConstructionAngleAbsoluteBox"/>
+                                    <TextBlock Text="Ângulo Relativo (°)" Margin="0,6,0,0"/>
+                                    <TextBox x:Name="WallConstructionAngleRelativeBox"
+                                             Margin="0,2,0,0"
+                                             IsReadOnly="True"
+                                             Background="#EFEFEF"
+                                             AutomationProperties.AutomationId="WallConstructionAngleRelativeBox"/>
+                                    <TextBlock x:Name="WallConstructionHintText"
+                                               Margin="0,8,0,0"
+                                               Foreground="#666666"
+                                               TextWrapping="Wrap"
+                                               FontSize="11"
+                                               Text="Orientação define o lado do Comprimento (Promob). Desenhe no sentido horário. R alterna Orientação."/>
+                                </StackPanel>
+                            </Expander>
+
+                            <Expander Header="Aparar Cantos" Margin="0,6,0,0" IsExpanded="False">
+                                <StackPanel>
+                                    <TextBlock Text="Aparo chanfro (mm)"/>
+                                    <TextBox x:Name="WallChamferDistanceBox"
+                                             Margin="0,2,0,0"
+                                             AutomationProperties.Name="Aparo chanfro"
+                                             AutomationProperties.AutomationId="WallChamferDistanceBox"/>
+                                    <Button x:Name="WallChamferButton"
+                                            Content="Aparar Parede"
+                                            Margin="0,8,0,0"
+                                            Height="32"
+                                            Click="WallChamferButton_Click"
+                                            AutomationProperties.Name="Aparar Parede"
+                                            AutomationProperties.AutomationId="WallChamferButton"/>
+                                    <TextBlock x:Name="WallChamferHintText"
+                                               Margin="0,8,0,0"
+                                               Foreground="#666666"
+                                               TextWrapping="Wrap"
+                                               FontSize="11"
+                                               Text="Chanfro: clique no canto da parede (hotpoint). Esc cancela."/>
+                                </StackPanel>
+                            </Expander>
+                        </StackPanel>
+
+                        <!-- ═══════════════════════════════════════════
+                             PAINEL DE PAREDES (visível apenas com parede selecionada)
+                             ═══════════════════════════════════════════ -->
+                        <StackPanel x:Name="WallPropertiesPanel" Visibility="Collapsed">
+
+                            <Expander Header="Dimensões" IsExpanded="True"
+                                      AutomationProperties.AutomationId="WallDimensionsExpander">
+                                <StackPanel>
+                                    <TextBlock Text="Comprimento (mm)"/>
+                                    <TextBox x:Name="WallLengthBox"
+                                             Margin="0,2,0,0"
+                                             PreviewKeyDown="WallPropertyBox_PreviewKeyDown"
+                                             AutomationProperties.Name="Comprimento da parede"
+                                             AutomationProperties.AutomationId="WallLengthBox"/>
+                                    <TextBlock Text="Orientação" Margin="0,6,0,0"/>
+                                    <ComboBox x:Name="WallMeasureSideCombo"
+                                              Margin="0,2,0,0"
+                                              SelectedIndex="0"
+                                              SelectionChanged="WallMeasureSideCombo_SelectionChanged"
+                                              AutomationProperties.Name="Orientação da parede selecionada"
+                                              AutomationProperties.AutomationId="WallMeasureSideCombo">
+                                        <ComboBoxItem Content="Interna"/>
+                                        <ComboBoxItem Content="Externa"/>
+                                    </ComboBox>
+                                    <TextBlock Text="Espessura (mm)" Margin="0,6,0,0"/>
+                                    <TextBox x:Name="WallThicknessBox"
+                                             Margin="0,2,0,0"
+                                             PreviewKeyDown="WallPropertyBox_PreviewKeyDown"
+                                             AutomationProperties.Name="Espessura da parede"
+                                             AutomationProperties.AutomationId="WallThicknessBox"/>
+                                    <TextBlock Text="Pé-direito Inicial (mm)" Margin="0,6,0,0"/>
+                                    <TextBox x:Name="WallHeightStartBox"
+                                             Margin="0,2,0,0"
+                                             PreviewKeyDown="WallPropertyBox_PreviewKeyDown"
+                                             AutomationProperties.Name="Pé-direito inicial"
+                                             AutomationProperties.AutomationId="WallHeightStartBox"/>
+                                    <TextBlock Text="Pé-direito Final (mm)" Margin="0,6,0,0"/>
+                                    <TextBox x:Name="WallHeightEndBox"
+                                             Margin="0,2,0,0"
+                                             PreviewKeyDown="WallPropertyBox_PreviewKeyDown"
+                                             AutomationProperties.Name="Pé-direito final"
+                                             AutomationProperties.AutomationId="WallHeightEndBox"/>
+                                    <TextBlock Text="Ângulo Absoluto (°)" Margin="0,6,0,0"/>
+                                    <TextBox x:Name="WallAngleAbsoluteBox"
+                                             Margin="0,2,0,0"
+                                             IsReadOnly="True"
+                                             Background="#EFEFEF"
+                                             AutomationProperties.Name="Ângulo absoluto"
+                                             AutomationProperties.AutomationId="WallAngleAbsoluteBox"/>
+                                    <TextBlock Text="Ângulo Relativo (°)" Margin="0,6,0,0"/>
+                                    <TextBox x:Name="WallAngleRelativeBox"
+                                             Margin="0,2,0,0"
+                                             IsReadOnly="True"
+                                             Background="#EFEFEF"
+                                             AutomationProperties.Name="Ângulo relativo"
+                                             AutomationProperties.AutomationId="WallAngleRelativeBox"/>
+                                    <TextBlock Text="Flecha (mm)" Margin="0,6,0,0"/>
+                                    <TextBox x:Name="WallFlechaBox"
+                                             Margin="0,2,0,0"
+                                             PreviewKeyDown="WallPropertyBox_PreviewKeyDown"
+                                             AutomationProperties.Name="Flecha da parede"
+                                             AutomationProperties.AutomationId="WallFlechaBox"/>
+                                    <TextBlock Text="Ângulo do Arco (°)" Margin="0,6,0,0"/>
+                                    <TextBox x:Name="WallArcAngleBox"
+                                             Margin="0,2,0,0"
+                                             IsReadOnly="True"
+                                             Background="#EFEFEF"
+                                             AutomationProperties.Name="Ângulo do arco"
+                                             AutomationProperties.AutomationId="WallArcAngleBox"/>
+                                    <TextBlock x:Name="WallDimensionHintText"
+                                               Margin="0,8,0,0"
+                                               Foreground="#666666"
+                                               TextWrapping="Wrap"
+                                               FontSize="11"
+                                               Text="Enter confirma cada campo."/>
+                                    <Button x:Name="WallSegmentButton"
+                                            Content="Segmentar parede"
+                                            Margin="0,10,0,0"
+                                            Height="32"
+                                            Click="WallSegmentButton_Click"
+                                            AutomationProperties.Name="Segmentar parede"
+                                            AutomationProperties.AutomationId="WallSegmentButton"/>
+                                </StackPanel>
+                            </Expander>
+
+                            <Expander Header="30-40-50" Margin="0,6,0,0" IsExpanded="False">
+                                <StackPanel>
+                                    <TextBlock Text="Medida A (mm)" />
+                                    <TextBox x:Name="Wall304050ABox"
+                                             Margin="0,2,0,0"
+                                             AutomationProperties.Name="Medida A 30-40-50"
+                                             AutomationProperties.AutomationId="Wall304050ABox"/>
+                                    <TextBlock Text="Medida B (mm)" Margin="0,6,0,0"/>
+                                    <TextBox x:Name="Wall304050BBox"
+                                             Margin="0,2,0,0"
+                                             AutomationProperties.Name="Medida B 30-40-50"
+                                             AutomationProperties.AutomationId="Wall304050BBox"/>
+                                    <TextBlock Text="Medida C (mm)" Margin="0,6,0,0"/>
+                                    <TextBox x:Name="Wall304050CBox"
+                                             Margin="0,2,0,0"
+                                             AutomationProperties.Name="Medida C 30-40-50"
+                                             AutomationProperties.AutomationId="Wall304050CBox"/>
+                                    <Button x:Name="Wall304050PickMovingButton"
+                                            Content="Selecionar parede deslocada"
+                                            Margin="0,8,0,0"
+                                            Height="32"
+                                            Click="Wall304050PickMovingButton_Click"
+                                            AutomationProperties.Name="Selecionar parede deslocada"
+                                            AutomationProperties.AutomationId="Wall304050PickMovingButton"/>
+                                    <Button x:Name="Wall304050ApplyButton"
+                                            Content="Aplicar 30-40-50"
+                                            Margin="0,6,0,0"
+                                            Height="32"
+                                            Click="Wall304050ApplyButton_Click"
+                                            AutomationProperties.Name="Aplicar 30-40-50"
+                                            AutomationProperties.AutomationId="Wall304050ApplyButton"/>
+                                    <TextBlock x:Name="Wall304050HintText"
+                                               Margin="0,8,0,0"
+                                               Foreground="#666666"
+                                               TextWrapping="Wrap"
+                                               FontSize="11"
+                                               Text="A e B a partir do canto na parede de referência; C entre os pontos medidos."/>
+                                </StackPanel>
+                            </Expander>
+
+                            <Expander Header="Cotas" Margin="0,6,0,0" IsExpanded="False">
+                                <StackPanel>
+                                    <TextBlock Text="Afastamento Piso (mm)"/>
+                                    <TextBox x:Name="WallFloorOffsetBox"
+                                             Margin="0,2,0,0"
+                                             PreviewKeyDown="WallPropertyBox_PreviewKeyDown"
+                                             AutomationProperties.Name="Afastamento piso"
+                                             AutomationProperties.AutomationId="WallFloorOffsetBox"/>
+                                    <TextBlock Text="Cota Anterior (mm)" Margin="0,6,0,0"/>
+                                    <TextBox x:Name="WallCotaAnteriorBox"
+                                             Margin="0,2,0,0"
+                                             PreviewKeyDown="WallPropertyBox_PreviewKeyDown"
+                                             AutomationProperties.Name="Cota anterior"
+                                             AutomationProperties.AutomationId="WallCotaAnteriorBox"/>
+                                    <TextBlock Text="Cota Posterior (mm)" Margin="0,6,0,0"/>
+                                    <TextBox x:Name="WallCotaPosteriorBox"
+                                             Margin="0,2,0,0"
+                                             PreviewKeyDown="WallPropertyBox_PreviewKeyDown"
+                                             AutomationProperties.Name="Cota posterior"
+                                             AutomationProperties.AutomationId="WallCotaPosteriorBox"/>
+                                    <TextBlock Text="Cota Inferior (mm)" Margin="0,6,0,0"/>
+                                    <TextBox x:Name="WallCotaInferiorBox"
+                                             Margin="0,2,0,0"
+                                             PreviewKeyDown="WallPropertyBox_PreviewKeyDown"
+                                             AutomationProperties.Name="Cota inferior"
+                                             AutomationProperties.AutomationId="WallCotaInferiorBox"/>
+                                    <TextBlock Text="Cota Superior (mm)" Margin="0,6,0,0"/>
+                                    <TextBox x:Name="WallCotaSuperiorBox"
+                                             Margin="0,2,0,0"
+                                             PreviewKeyDown="WallPropertyBox_PreviewKeyDown"
+                                             AutomationProperties.Name="Cota superior"
+                                             AutomationProperties.AutomationId="WallCotaSuperiorBox"/>
+                                </StackPanel>
+                            </Expander>
+
+                            <Expander Header="Desenho" Margin="0,6,0,0" IsExpanded="False">
+                                <StackPanel>
+                                    <CheckBox x:Name="WallDrawBottomFaceCheck"
+                                              Margin="0,4,0,0"
+                                              Content="Desenhar Face Inferior"
+                                              Click="WallDrawBottomFaceCheck_Click"
+                                              AutomationProperties.AutomationId="WallDrawBottomFaceCheck"/>
+                                </StackPanel>
+                            </Expander>
+
+                            <Expander Header="Outras" Margin="0,6,0,0" IsExpanded="False">
+                                <StackPanel>
+                                    <TextBlock Text="Tipo"/>
+                                    <ComboBox x:Name="WallConstructionTypeCombo"
+                                              Margin="0,2,0,0"
+                                              SelectedIndex="0"
+                                              SelectionChanged="WallConstructionTypeCombo_SelectionChanged"
+                                              AutomationProperties.Name="Tipo da parede"
+                                              AutomationProperties.AutomationId="WallConstructionTypeCombo">
+                                        <ComboBoxItem Content="Normal"/>
+                                        <ComboBoxItem Content="Dry Wall"/>
+                                    </ComboBox>
+                                    <CheckBox x:Name="WallIsMovableCheck"
+                                              Margin="0,4,0,0"
+                                              Content="Movível"
+                                              Click="WallIsMovableCheck_Click"
+                                              AutomationProperties.AutomationId="WallIsMovableCheck"/>
+                                    <CheckBox x:Name="WallIsVisibleCheck"
+                                              Margin="0,8,0,0"
+                                              Content="Visível"
+                                              IsChecked="True"
+                                              Click="WallIsVisibleCheck_Click"
+                                              AutomationProperties.AutomationId="WallIsVisibleCheck"/>
+                                    <TextBlock Text="Camada" Margin="0,8,0,0"/>
+                                    <ComboBox x:Name="WallLayerCombo"
+                                              Margin="0,2,0,0"
+                                              DisplayMemberPath="DisplayName"
+                                              SelectionChanged="WallLayerCombo_SelectionChanged"
+                                              AutomationProperties.Name="Camada da parede"
+                                              AutomationProperties.AutomationId="WallLayerCombo"/>
+                                    <TextBlock Text="Cômodo" Margin="0,8,0,0"/>
+                                    <ComboBox x:Name="WallCompartmentCombo"
+                                              Margin="0,2,0,0"
+                                              DisplayMemberPath="DisplayName"
+                                              SelectionChanged="WallCompartmentCombo_SelectionChanged"
+                                              AutomationProperties.Name="Cômodo da parede"
+                                              AutomationProperties.AutomationId="WallCompartmentCombo"/>
+                                </StackPanel>
+                            </Expander>
+
+                            <Expander x:Name="WallBandsExpander" Header="Faixas" Margin="0,6,0,0" IsExpanded="False"
+                                      AutomationProperties.AutomationId="WallBandsExpander">
+                                <StackPanel>
+                                    <TextBlock Foreground="#666666" FontSize="11" TextWrapping="Wrap"
+                                               Text="Divisões na parede. Dois cliques definem altura (horizontal) ou largura (vertical). Arraste linhas laranja (10 mm)."/>
+                                    <Button x:Name="WallOpenBandsEditorButton"
+                                            Margin="0,8,0,0"
+                                            Content="Abrir editor de faixas..."
+                                            Click="OpenWallBandsEditor_Click"
+                                            AutomationProperties.AutomationId="WallOpenBandsEditorButton"/>
+                                    <Button x:Name="WallAddBandButton"
+                                            Margin="0,6,0,0"
+                                            Content="Definir faixa horizontal (dois cliques)"
+                                            Click="WallAddBandButton_Click"
+                                            AutomationProperties.AutomationId="WallAddBandButton"/>
+                                    <Button x:Name="WallAddVerticalBandButton"
+                                            Margin="0,6,0,0"
+                                            Content="Definir faixa vertical (dois cliques)"
+                                            Click="WallAddVerticalBandButton_Click"
+                                            AutomationProperties.AutomationId="WallAddVerticalBandButton"/>
+                                    <TextBlock Text="Faixa" Margin="0,8,0,0"/>
+                                    <ComboBox x:Name="WallBandSelectorCombo"
+                                              Margin="0,2,0,0"
+                                              DisplayMemberPath="Label"
+                                              SelectionChanged="WallBandSelectorCombo_SelectionChanged"
+                                              AutomationProperties.AutomationId="WallBandSelectorCombo"/>
+                                    <TextBlock Text="Material da faixa" Margin="0,6,0,0"/>
+                                    <ComboBox x:Name="WallBandMaterialCombo"
+                                              Margin="0,2,0,0"
+                                              DisplayMemberPath="DisplayName"
+                                              SelectionChanged="WallBandMaterialCombo_SelectionChanged"
+                                              AutomationProperties.AutomationId="WallBandMaterialCombo"/>
+                                    <TextBlock x:Name="WallBandsSummaryText"
+                                               Margin="0,8,0,0"
+                                               Foreground="#666666"
+                                               TextWrapping="Wrap"
+                                               FontSize="11"
+                                               Text="Nenhuma faixa."/>
+                                </StackPanel>
+                            </Expander>
+
+                            <Expander x:Name="WallRegionsExpander" Header="Regiões" Margin="0,6,0,0" IsExpanded="False"
+                                      AutomationProperties.AutomationId="WallRegionsExpander">
+                                <StackPanel>
+                                    <TextBlock Foreground="#666666" FontSize="11" TextWrapping="Wrap"
+                                               Text="Regiões na face (retângulo, círculo ou polígono). Arraste o contorno azul no viewport para ajustar (10 mm). Offset expande a borda."/>
+                                    <TextBlock Text="Componente" Margin="0,6,0,0"/>
+                                    <ComboBox x:Name="WallRegionFaceCombo"
+                                              Margin="0,2,0,0"
+                                              SelectedIndex="0"
+                                              SelectionChanged="WallRegionFaceCombo_SelectionChanged"
+                                              AutomationProperties.AutomationId="WallRegionFaceCombo">
+                                        <ComboBoxItem Content="Face interna"/>
+                                        <ComboBoxItem Content="Face externa"/>
+                                    </ComboBox>
+                                    <TextBlock Text="Material da face" Margin="0,6,0,0"/>
+                                    <TextBlock Foreground="#666666" FontSize="11" TextWrapping="Wrap"
+                                               Text="Área livre da face (sem faixa nem região no ponto)."/>
+                                    <ComboBox x:Name="WallFaceMaterialCombo"
+                                              Margin="0,2,0,0"
+                                              DisplayMemberPath="DisplayName"
+                                              SelectionChanged="WallFaceMaterialCombo_SelectionChanged"
+                                              AutomationProperties.AutomationId="WallFaceMaterialCombo"/>
+                                    <Button x:Name="WallAddRegionButton"
+                                            Margin="0,8,0,0"
+                                            Content="Adicionar região retangular"
+                                            Click="WallAddRegionButton_Click"
+                                            AutomationProperties.AutomationId="WallAddRegionButton"/>
+                                    <Button x:Name="WallAddRegionByClickButton"
+                                            Margin="0,6,0,0"
+                                            Content="Definir região por clique"
+                                            Click="WallAddRegionByClickButton_Click"
+                                            AutomationProperties.AutomationId="WallAddRegionByClickButton"/>
+                                    <Button x:Name="WallAddCircleRegionByClickButton"
+                                            Margin="0,6,0,0"
+                                            Content="Definir região circular (clique)"
+                                            Click="WallAddCircleRegionByClickButton_Click"
+                                            AutomationProperties.AutomationId="WallAddCircleRegionByClickButton"/>
+                                    <Button x:Name="WallAddPolygonRegionByClickButton"
+                                            Margin="0,6,0,0"
+                                            Content="Definir região por pontos"
+                                            Click="WallAddPolygonRegionByClickButton_Click"
+                                            AutomationProperties.AutomationId="WallAddPolygonRegionByClickButton"/>
+                                    <Button x:Name="WallAddPolygonVertexButton"
+                                            Margin="0,6,0,0"
+                                            Content="Adicionar vértice na aresta"
+                                            Click="WallAddPolygonVertexButton_Click"
+                                            AutomationProperties.AutomationId="WallAddPolygonVertexButton"/>
+                                    <Button x:Name="WallRotateRegion90Button"
+                                            Margin="0,6,0,0"
+                                            Content="Girar região 90°"
+                                            Click="WallRotateRegion90Button_Click"
+                                            AutomationProperties.AutomationId="WallRotateRegion90Button"/>
+                                    <Button x:Name="WallVerticalCutRegionButton"
+                                            Margin="0,6,0,0"
+                                            Content="Corte vertical"
+                                            Click="WallVerticalCutRegionButton_Click"
+                                            AutomationProperties.AutomationId="WallVerticalCutRegionButton"/>
+                                    <Button x:Name="WallApplyVerticalCutButton"
+                                            Margin="0,6,0,0"
+                                            Content="Aplicar corte vertical"
+                                            IsEnabled="False"
+                                            Click="WallApplyVerticalCutButton_Click"
+                                            AutomationProperties.AutomationId="WallApplyVerticalCutButton"/>
+                                    <TextBlock Text="Região" Margin="0,8,0,0"/>
+                                    <ComboBox x:Name="WallRegionSelectorCombo"
+                                              Margin="0,2,0,0"
+                                              DisplayMemberPath="Label"
+                                              SelectionChanged="WallRegionSelectorCombo_SelectionChanged"
+                                              AutomationProperties.AutomationId="WallRegionSelectorCombo"/>
+                                    <TextBlock Text="Material da região" Margin="0,6,0,0"/>
+                                    <ComboBox x:Name="WallRegionMaterialCombo"
+                                              Margin="0,2,0,0"
+                                              DisplayMemberPath="DisplayName"
+                                              SelectionChanged="WallRegionMaterialCombo_SelectionChanged"
+                                              AutomationProperties.AutomationId="WallRegionMaterialCombo"/>
+                                    <TextBlock Text="Offset forma (mm)" Margin="0,6,0,0"/>
+                                    <TextBlock Text="Uniforme em todas as bordas (Promob Offset Forma)."
+                                               Foreground="#666666"
+                                               FontSize="11"
+                                               TextWrapping="Wrap"/>
+                                    <TextBox x:Name="PropertyRegionOffsetBox"
+                                             Margin="0,2,0,0"
+                                             PreviewKeyDown="PropertyRegionOffsetBox_PreviewKeyDown"
+                                             AutomationProperties.AutomationId="PropertyRegionOffsetBox"/>
+                                    <TextBlock Text="Offset por aresta (mm)" Margin="0,6,0,0"/>
+                                    <TextBlock Text="Início along / fim along / base / topo. Positivo expande para fora; negativo recua. Setas amarelas no viewport."
+                                               Foreground="#666666"
+                                               FontSize="11"
+                                               TextWrapping="Wrap"/>
+                                    <Grid Margin="0,2,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="4"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition Height="4"/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <TextBox x:Name="PropertyRegionOffsetStartAlongBox"
+                                                 Grid.Row="0" Grid.Column="0"
+                                                 PreviewKeyDown="PropertyRegionOffsetEdgeBox_PreviewKeyDown"
+                                                 AutomationProperties.AutomationId="PropertyRegionOffsetStartAlongBox"/>
+                                        <TextBox x:Name="PropertyRegionOffsetEndAlongBox"
+                                                 Grid.Row="0" Grid.Column="2"
+                                                 PreviewKeyDown="PropertyRegionOffsetEdgeBox_PreviewKeyDown"
+                                                 AutomationProperties.AutomationId="PropertyRegionOffsetEndAlongBox"/>
+                                        <TextBox x:Name="PropertyRegionOffsetBottomBox"
+                                                 Grid.Row="2" Grid.Column="0"
+                                                 PreviewKeyDown="PropertyRegionOffsetEdgeBox_PreviewKeyDown"
+                                                 AutomationProperties.AutomationId="PropertyRegionOffsetBottomBox"/>
+                                        <TextBox x:Name="PropertyRegionOffsetTopBox"
+                                                 Grid.Row="2" Grid.Column="2"
+                                                 PreviewKeyDown="PropertyRegionOffsetEdgeBox_PreviewKeyDown"
+                                                 AutomationProperties.AutomationId="PropertyRegionOffsetTopBox"/>
+                                    </Grid>
+                                    <TextBlock x:Name="WallRegionsSummaryText"
+                                               Margin="0,8,0,0"
+                                               Foreground="#666666"
+                                               TextWrapping="Wrap"
+                                               FontSize="11"
+                                               Text="Nenhuma região."/>
+                                </StackPanel>
+                            </Expander>
+
+                        </StackPanel>
+
+                        <StackPanel x:Name="FloorPropertiesPanel" Visibility="Collapsed">
+                            <Expander Header="Dimensões" IsExpanded="True">
+                                <StackPanel>
+                                    <TextBlock Text="Largura (mm)"/>
+                                    <TextBox x:Name="FloorWidthBox"
+                                             Margin="0,2,0,0"
+                                             IsReadOnly="True"
+                                             AutomationProperties.AutomationId="FloorWidthBox"/>
+                                    <TextBlock Text="Profundidade (mm)" Margin="0,6,0,0"/>
+                                    <TextBox x:Name="FloorDepthBox"
+                                             Margin="0,2,0,0"
+                                             IsReadOnly="True"
+                                             AutomationProperties.AutomationId="FloorDepthBox"/>
+                                    <TextBlock x:Name="FloorHintText"
+                                               Margin="0,8,0,0"
+                                               Foreground="#666666"
+                                               TextWrapping="Wrap"
+                                               FontSize="11"
+                                               Text="Selecione o piso ou uma área."/>
+                                </StackPanel>
+                            </Expander>
+                            <Expander Header="Materiais do piso" Margin="0,8,0,0" IsExpanded="True">
+                                <StackPanel>
+                                    <TextBlock Text="Acabamento"/>
+                                    <ComboBox x:Name="FloorMaterialCombo"
+                                              Margin="0,2,0,0"
+                                              DisplayMemberPath="DisplayName"
+                                              SelectionChanged="FloorMaterialCombo_SelectionChanged"
+                                              AutomationProperties.AutomationId="FloorMaterialCombo"/>
+                                    <CheckBox x:Name="FloorShowGridCheck"
+                                              Margin="0,8,0,0"
+                                              Content="Exibir grade de referência"
+                                              IsChecked="True"
+                                              Click="FloorShowGridCheck_Click"
+                                              AutomationProperties.AutomationId="FloorShowGridCheck"/>
+                                    <Button x:Name="FloorDefineZoneButton"
+                                            Margin="0,10,0,0"
+                                            Content="Definir região retangular (dois cliques)"
+                                            Click="FloorDefineZoneButton_Click"
+                                            AutomationProperties.AutomationId="FloorDefineZoneButton"/>
+                                    <TextBlock x:Name="FloorZonesSummaryText"
+                                               Margin="0,8,0,0"
+                                               Foreground="#666666"
+                                               TextWrapping="Wrap"
+                                               FontSize="11"
+                                               Text="Nenhuma região extra."/>
+                                </StackPanel>
+                            </Expander>
+                            <Expander x:Name="FloorRegionsExpander" Header="Regiões" Margin="0,8,0,0" IsExpanded="True">
+                                <StackPanel>
+                                    <TextBlock Text="Regiões no piso (Promob). Retângulo, círculo ou polígono com material e offset."
+                                               Foreground="#666666"
+                                               FontSize="11"
+                                               TextWrapping="Wrap"/>
+                                    <Button x:Name="FloorAddRegionButton"
+                                            Margin="0,8,0,0"
+                                            Content="Adicionar região retangular"
+                                            Click="FloorAddRegionButton_Click"
+                                            AutomationProperties.AutomationId="FloorAddRegionButton"/>
+                                    <Button x:Name="FloorAddCircleRegionButton"
+                                            Margin="0,6,0,0"
+                                            Content="Definir região circular (clique)"
+                                            Click="FloorAddCircleRegionButton_Click"
+                                            AutomationProperties.AutomationId="FloorAddCircleRegionButton"/>
+                                    <Button x:Name="FloorAddPolygonRegionButton"
+                                            Margin="0,6,0,0"
+                                            Content="Definir região por pontos"
+                                            Click="FloorAddPolygonRegionButton_Click"
+                                            AutomationProperties.AutomationId="FloorAddPolygonRegionButton"/>
+                                    <TextBlock Text="Região" Margin="0,8,0,0"/>
+                                    <ComboBox x:Name="FloorZoneSelectorCombo"
+                                              Margin="0,2,0,0"
+                                              DisplayMemberPath="Label"
+                                              SelectionChanged="FloorZoneSelectorCombo_SelectionChanged"
+                                              AutomationProperties.AutomationId="FloorZoneSelectorCombo"/>
+                                    <TextBlock Text="Material da região" Margin="0,6,0,0"/>
+                                    <ComboBox x:Name="FloorZoneMaterialCombo"
+                                              Margin="0,2,0,0"
+                                              DisplayMemberPath="DisplayName"
+                                              SelectionChanged="FloorZoneMaterialCombo_SelectionChanged"
+                                              AutomationProperties.AutomationId="FloorZoneMaterialCombo"/>
+                                    <TextBlock Text="Offset forma (mm)" Margin="0,6,0,0"/>
+                                    <TextBox x:Name="FloorRegionOffsetBox"
+                                             Margin="0,2,0,0"
+                                             PreviewKeyDown="FloorRegionOffsetBox_PreviewKeyDown"
+                                             AutomationProperties.AutomationId="FloorRegionOffsetBox"/>
+                                    <TextBlock Text="Offset por aresta (mm)" Margin="0,6,0,0"/>
+                                    <Grid Margin="0,2,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="4"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition Height="4"/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <TextBox x:Name="FloorRegionOffsetStartAlongBox"
+                                                 Grid.Row="0" Grid.Column="0"
+                                                 PreviewKeyDown="FloorRegionOffsetEdgeBox_PreviewKeyDown"
+                                                 AutomationProperties.AutomationId="FloorRegionOffsetStartAlongBox"/>
+                                        <TextBox x:Name="FloorRegionOffsetEndAlongBox"
+                                                 Grid.Row="0" Grid.Column="2"
+                                                 PreviewKeyDown="FloorRegionOffsetEdgeBox_PreviewKeyDown"
+                                                 AutomationProperties.AutomationId="FloorRegionOffsetEndAlongBox"/>
+                                        <TextBox x:Name="FloorRegionOffsetBottomBox"
+                                                 Grid.Row="2" Grid.Column="0"
+                                                 PreviewKeyDown="FloorRegionOffsetEdgeBox_PreviewKeyDown"
+                                                 AutomationProperties.AutomationId="FloorRegionOffsetBottomBox"/>
+                                        <TextBox x:Name="FloorRegionOffsetTopBox"
+                                                 Grid.Row="2" Grid.Column="2"
+                                                 PreviewKeyDown="FloorRegionOffsetEdgeBox_PreviewKeyDown"
+                                                 AutomationProperties.AutomationId="FloorRegionOffsetTopBox"/>
+                                    </Grid>
+                                    <Button x:Name="FloorDeleteZoneButton"
+                                            Margin="0,10,0,0"
+                                            Content="Excluir região selecionada"
+                                            Click="FloorDeleteZoneButton_Click"
+                                            AutomationProperties.AutomationId="FloorDeleteZoneButton"/>
+                                    <TextBlock x:Name="FloorRegionsSummaryText"
+                                               Margin="0,8,0,0"
+                                               Foreground="#666666"
+                                               TextWrapping="Wrap"
+                                               FontSize="11"
+                                               Text="Nenhuma região."/>
+                                </StackPanel>
+                            </Expander>
+                        </StackPanel>
+
+                        <!-- ═══════════════════════════════════════════
+                             PAINEL DE MÓDULOS / GENÉRICO
+                             ═══════════════════════════════════════════ -->
+                        <StackPanel x:Name="ModulePropertiesPanel">
+                            <Expander Header="Geral" IsExpanded="True">
+                                <StackPanel>
+                                    <TextBlock Text="Camada"/>
+                                    <ComboBox x:Name="ModuleLayerCombo"
+                                              Margin="0,2,0,0"
+                                              DisplayMemberPath="DisplayName"
+                                              SelectionChanged="ModuleLayerCombo_SelectionChanged"
+                                              AutomationProperties.Name="Camada do módulo"
+                                              AutomationProperties.AutomationId="ModuleLayerCombo"/>
+                                    <TextBlock Foreground="#666666"
+                                               FontSize="11"
+                                               Margin="0,4,0,0"
+                                               TextWrapping="Wrap"
+                                               Text="Visível e bloqueado também na aba Ambiente. Camadas globais em Exibir → Camadas..."/>
+                                </StackPanel>
+                            </Expander>
+                            <Expander Header="Dimensões" Margin="0,8,0,0" IsExpanded="True">
+                                <StackPanel>
+                                    <TextBlock x:Name="PropertyLengthLabel" Text="Comprimento (mm)"/>
+                                    <TextBox x:Name="PropertyLengthBox"
+                                             Margin="0,2,0,0"
+                                             PreviewKeyDown="PropertyPanelBox_PreviewKeyDown"
+                                             AutomationProperties.Name="Comprimento ou largura"
+                                             AutomationProperties.AutomationId="PropertyLengthBox"/>
+                                    <TextBlock x:Name="PropertyHeightLabel" Text="Altura (mm)" Margin="0,6,0,0"/>
+                                    <TextBox x:Name="PropertyHeightBox"
+                                             Margin="0,2,0,0"
+                                             PreviewKeyDown="PropertyPanelBox_PreviewKeyDown"
+                                             AutomationProperties.Name="Altura"
+                                             AutomationProperties.AutomationId="PropertyHeightBox"/>
+                                    <TextBlock x:Name="PropertyDepthLabel" Text="Espessura (mm)" Margin="0,6,0,0"/>
+                                    <TextBox x:Name="PropertyDepthBox"
+                                             Margin="0,2,0,0"
+                                             PreviewKeyDown="PropertyPanelBox_PreviewKeyDown"
+                                             AutomationProperties.Name="Espessura ou posição na parede"
+                                             AutomationProperties.AutomationId="PropertyDepthBox"/>
+                                    <StackPanel x:Name="PropertyCornerMeasuresPanel" Visibility="Collapsed" Margin="0,6,0,0">
+                                        <TextBlock Text="Medida A (mm)"
+                                                   ToolTip="Profundidade da asa A (Promob Avançado)"/>
+                                        <TextBox x:Name="PropertyCornerMeasureABox"
+                                                 Margin="0,2,0,0"
+                                                 PreviewKeyDown="PropertyPanelBox_PreviewKeyDown"
+                                                 AutomationProperties.Name="Medida A profundidade asa"
+                                                 AutomationProperties.AutomationId="PropertyCornerMeasureABox"/>
+                                        <TextBlock Text="Medida B (mm)"
+                                                   Margin="0,6,0,0"
+                                                   ToolTip="Profundidade da asa B (Promob Avançado)"/>
+                                        <TextBox x:Name="PropertyCornerMeasureBBox"
+                                                 Margin="0,2,0,0"
+                                                 PreviewKeyDown="PropertyPanelBox_PreviewKeyDown"
+                                                 AutomationProperties.Name="Medida B profundidade asa"
+                                                 AutomationProperties.AutomationId="PropertyCornerMeasureBBox"/>
+                                    </StackPanel>
+                                    <TextBlock x:Name="PropertyHintText"
+                                               Margin="0,8,0,0"
+                                               Foreground="#666666"
+                                               TextWrapping="Wrap"
+                                               FontSize="11"
+                                               Text="Selecione uma abertura ou módulo. Enter confirma."/>
+                                </StackPanel>
+                            </Expander>
+                            <Expander x:Name="PartParametrizationExpander" Header="Seta — dimensão da peça" Margin="0,8,0,0" IsExpanded="True" Visibility="Collapsed">
+                                <StackPanel>
+                                    <TextBlock Foreground="#666666" FontSize="11" TextWrapping="Wrap"
+                                               Text="Clique numa seta no 3D para escolher o eixo. Informe o ajuste (ex.: -150) e Aplicar — o valor permanece no campo como referência do parametrizado."/>
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="70"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock x:Name="PartWidthLabel" Grid.Row="0" Grid.Column="0" Text="Largura" VerticalAlignment="Center" Margin="0,0,6,4"/>
+                                        <TextBox   Grid.Row="0" Grid.Column="1" x:Name="PartWidthValueBox" IsReadOnly="True" IsTabStop="False" Background="#F2F2F2" Margin="0,0,6,4"
+                                                   AutomationProperties.AutomationId="PartWidthValueBox"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="2" Text="+" VerticalAlignment="Center" Margin="0,0,4,4"/>
+                                        <TextBox   Grid.Row="0" Grid.Column="3" x:Name="PartWidthDeltaBox" Margin="0,0,0,4"
+                                                   GotFocus="PartWidthDeltaBox_GotFocus"
+                                                   PreviewKeyDown="PartDeltaBox_PreviewKeyDown"
+                                                   AutomationProperties.Name="Ajuste de largura da peça"
+                                                   AutomationProperties.AutomationId="PartWidthDeltaBox"/>
+
+                                        <TextBlock x:Name="PartDepthLabel" Grid.Row="1" Grid.Column="0" Text="Profundidade" VerticalAlignment="Center" Margin="0,0,6,4"/>
+                                        <TextBox   Grid.Row="1" Grid.Column="1" x:Name="PartDepthValueBox" IsReadOnly="True" IsTabStop="False" Background="#F2F2F2" Margin="0,0,6,4"
+                                                   AutomationProperties.AutomationId="PartDepthValueBox"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="2" Text="+" VerticalAlignment="Center" Margin="0,0,4,4"/>
+                                        <TextBox   Grid.Row="1" Grid.Column="3" x:Name="PartDepthDeltaBox" Margin="0,0,0,4"
+                                                   GotFocus="PartDepthDeltaBox_GotFocus"
+                                                   PreviewKeyDown="PartDeltaBox_PreviewKeyDown"
+                                                   AutomationProperties.Name="Ajuste de profundidade da peça"
+                                                   AutomationProperties.AutomationId="PartDepthDeltaBox"/>
+
+                                        <TextBlock x:Name="PartHeightLabel" Grid.Row="2" Grid.Column="0" Text="Altura" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                        <TextBox   Grid.Row="2" Grid.Column="1" x:Name="PartHeightValueBox" IsReadOnly="True" IsTabStop="False" Background="#F2F2F2" Margin="0,0,6,0"
+                                                   AutomationProperties.AutomationId="PartHeightValueBox"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="2" Text="+" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                        <TextBox   Grid.Row="2" Grid.Column="3" x:Name="PartHeightDeltaBox"
+                                                   GotFocus="PartHeightDeltaBox_GotFocus"
+                                                   PreviewKeyDown="PartDeltaBox_PreviewKeyDown"
+                                                   AutomationProperties.Name="Ajuste de altura da peça"
+                                                   AutomationProperties.AutomationId="PartHeightDeltaBox"/>
+                                    </Grid>
+
+                                    <Button x:Name="PartApplyButton" Content="Aplicar" Margin="0,8,0,0" HorizontalAlignment="Right" Padding="16,3"
+                                            Click="PartApplyButton_Click"
+                                            AutomationProperties.AutomationId="PartApplyButton"/>
+
+                                    <TextBlock x:Name="PartParametrizationHintText"
+                                               Margin="0,8,0,0"
+                                               Foreground="#666666"
+                                               TextWrapping="Wrap"
+                                               FontSize="11"
+                                               Text="Selecione uma peça (duplo clique no módulo)."/>
+                                </StackPanel>
+                            </Expander>
+                            <Expander x:Name="ModuleCotasExpander" Header="Cotas" Margin="0,8,0,0" IsExpanded="True" Visibility="Collapsed">
+                                <StackPanel>
+                                    <TextBlock Text="Cota Anterior (mm)"/>
+                                    <TextBlock Foreground="#666666" FontSize="11" Text="Do encontro interno da parede até a face esquerda do módulo."/>
+                                    <TextBox x:Name="ModuleCotaAnteriorBox"
+                                             Margin="0,2,0,0"
+                                             PreviewKeyDown="ModuleCotaBox_PreviewKeyDown"
+                                             AutomationProperties.AutomationId="ModuleCotaAnteriorBox"/>
+                                    <TextBlock Text="Cota Posterior (mm)" Margin="0,6,0,0"/>
+                                    <TextBlock Foreground="#666666" FontSize="11" Text="Da face direita do módulo até o fim da face interna."/>
+                                    <TextBox x:Name="ModuleCotaPosteriorBox"
+                                             Margin="0,2,0,0"
+                                             PreviewKeyDown="ModuleCotaBox_PreviewKeyDown"
+                                             AutomationProperties.AutomationId="ModuleCotaPosteriorBox"/>
+                                    <TextBlock Text="Cota Inferior (mm)" Margin="0,6,0,0"/>
+                                    <TextBlock Foreground="#666666" FontSize="11" Text="Do piso (eixo vertical da parede) até a base do módulo."/>
+                                    <TextBox x:Name="ModuleCotaInferiorBox"
+                                             Margin="0,2,0,0"
+                                             PreviewKeyDown="ModuleCotaBox_PreviewKeyDown"
+                                             AutomationProperties.AutomationId="ModuleCotaInferiorBox"/>
+                                    <TextBlock Text="Cota Superior (mm)" Margin="0,6,0,0"/>
+                                    <TextBlock Foreground="#666666" FontSize="11" Text="Do topo do módulo até o pé-direito da parede."/>
+                                    <TextBox x:Name="ModuleCotaSuperiorBox"
+                                             Margin="0,2,0,0"
+                                             PreviewKeyDown="ModuleCotaBox_PreviewKeyDown"
+                                             AutomationProperties.AutomationId="ModuleCotaSuperiorBox"/>
+                                    <TextBlock x:Name="ModuleCotasHintText"
+                                               Margin="0,8,0,0"
+                                               Foreground="#666666"
+                                               TextWrapping="Wrap"
+                                               FontSize="11"
+                                               Text="Enter confirma cada cota. Referência: face interna (encontro das paredes)."/>
+                                </StackPanel>
+                            </Expander>
+                            <Expander x:Name="MaterialsExpander" Header="Materiais" Margin="0,8,0,0" IsExpanded="False">
+                                <StackPanel>
+                                    <TextBlock Text="Acabamento"/>
+                                    <ComboBox x:Name="PropertyMaterialCombo"
+                                              Margin="0,4,0,0"
+                                              DisplayMemberPath="DisplayName"
+                                              SelectionChanged="PropertyMaterialCombo_SelectionChanged"
+                                              AutomationProperties.AutomationId="PropertyMaterialCombo"/>
+                                    <TextBlock x:Name="PropertyMaterialHintText"
+                                               Margin="0,8,0,0"
+                                               Foreground="#666666"
+                                               TextWrapping="Wrap"
+                                               FontSize="11"
+                                               Text="Disponível ao selecionar um módulo."/>
+                                </StackPanel>
+                            </Expander>
+                            <Expander Header="Agregados" Margin="0,8,0,0"/>
+                            <Expander x:Name="MovementExpander" Header="Movimentação" Margin="0,8,0,0" IsExpanded="False">
+                                <StackPanel>
+                                    <Button x:Name="RotateModule90Button"
+                                            Content="Girar 90°"
+                                            Height="32"
+                                            Margin="0,4"
+                                            Click="RotateModule90Button_Click"
+                                            AutomationProperties.AutomationId="RotateModule90Button"/>
+                                    <TextBlock Foreground="#666666"
+                                               TextWrapping="Wrap"
+                                               FontSize="11"
+                                               Text="Atalho: R com módulo selecionado. Delete remove o módulo."/>
+                                </StackPanel>
+                            </Expander>
+                            <Expander Header="Multiplicação" Margin="0,8,0,0"/>
+                            <Expander Header="Ferragens" Margin="0,8,0,0"/>
+                        </StackPanel>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <Border x:Name="StatusBarBorder" Grid.Row="4" Grid.ColumnSpan="3" Background="#EAEAEA" BorderBrush="#C8C8C8" BorderThickness="0,1,0,0">
+            <DockPanel>
+                <Button x:Name="CollisionToggleButton"
+                        DockPanel.Dock="Right"
+                        Content="Colisão: ON"
+                        Width="104"
+                        Height="22"
+                        Margin="4,2"
+                        Click="CollisionToggleButton_Click"
+                        AutomationProperties.Name="Alternar colisão"
+                        AutomationProperties.AutomationId="CollisionToggleButton"/>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock x:Name="StatusBarProjectText"
+                               Margin="8,0,0,0"
+                               FontSize="11"
+                               AutomationProperties.Name="Status bar projeto"
+                               AutomationProperties.AutomationId="StatusBarProjectText"/>
+                    <Border Width="1"
+                            Height="14"
+                            Background="#C8C8C8"
+                            Margin="8,0"
+                            VerticalAlignment="Center"/>
+                    <TextBlock x:Name="StatusBarViewContextText"
+                               FontSize="11"
+                               AutomationProperties.Name="Status bar vista e seleção"
+                               AutomationProperties.AutomationId="StatusBarViewContextText"/>
+                    <Border Width="1"
+                            Height="14"
+                            Background="#C8C8C8"
+                            Margin="8,0"
+                            VerticalAlignment="Center"/>
+                    <TextBlock x:Name="StatusBarMaterialText"
+                               FontSize="11"
+                               Foreground="#444444"
+                               AutomationProperties.Name="Status bar material"
+                               AutomationProperties.AutomationId="StatusBarMaterialText"/>
+                    <Border x:Name="StatusBarHintSeparator"
+                            Width="1"
+                            Height="14"
+                            Background="#C8C8C8"
+                            Margin="8,0"
+                            VerticalAlignment="Center"
+                            Visibility="Collapsed"/>
+                    <TextBlock x:Name="StatusBarHintText"
+                               FontSize="11"
+                               Foreground="#005A9E"
+                               Visibility="Collapsed"
+                               AutomationProperties.Name="Status bar dica"
+                               AutomationProperties.AutomationId="StatusBarHintText"/>
+                    <Border Width="1"
+                            Height="14"
+                            Background="#C8C8C8"
+                            Margin="8,0"
+                            VerticalAlignment="Center"/>
+                    <TextBlock x:Name="StatusBarStatusText"
+                               Margin="0,0,8,0"
+                               FontSize="11"
+                               FontWeight="SemiBold"
+                               AutomationProperties.Name="Status bar status"
+                               AutomationProperties.AutomationId="StatusBarStatusText"/>
+                    <TextBlock x:Name="StatusBarText"
+                               Width="1"
+                               Height="1"
+                               Opacity="0"
+                               AutomationProperties.Name="Barra de status"
+                               AutomationProperties.AutomationId="StatusBarText"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>

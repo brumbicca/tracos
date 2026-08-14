@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Tracos3DStudio/Tracos3DStudio.csproj" />
+  <Project Path="Tracos3DStudio.Tests/Tracos3DStudio.Tests.csproj" />
+</Solution>

@@ -1,0 +1,1882 @@
+{
+  "schemaVersion": 1,
+  "format": "tracos-cnc-job",
+  "units": "mm",
+  "coordinateSystem": "sheet-origin-bottom-left",
+  "exportedUtc": "2026-07-25T03:32:44.9125369Z",
+  "project": {
+    "name": "Cozinha em L",
+    "constructionProfileId": "padrao"
+  },
+  "settings": {
+    "sheetLengthMm": 2750,
+    "sheetWidthMm": 1850,
+    "cutKerfMm": 3,
+    "sheetMarginMm": 10,
+    "panelThicknessMm": 18,
+    "algorithm": "MaxRects"
+  },
+  "summary": {
+    "totalSheets": 4,
+    "totalCutOperations": 38,
+    "totalDrillOperations": 60
+  },
+  "sheets": [
+    {
+      "index": 1,
+      "materialName": "MDF Branco",
+      "thicknessMm": 18,
+      "lengthMm": 2750,
+      "widthMm": 1850,
+      "operations": [
+        {
+          "type": "cut",
+          "instanceId": 12,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Base inferior",
+          "rotated": true,
+          "edgeBand": "Frente",
+          "contourMm": [
+            [
+              10,
+              10
+            ],
+            [
+              554,
+              10
+            ],
+            [
+              554,
+              1174
+            ],
+            [
+              10,
+              1174
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 12,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Base inferior",
+          "sheetXmm": 47,
+          "sheetYmm": 1124,
+          "localXmm": 50,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "drill",
+          "instanceId": 12,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Base inferior",
+          "sheetXmm": 47,
+          "sheetYmm": 60,
+          "localXmm": 1114,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "cut",
+          "instanceId": 13,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Tampo interno",
+          "rotated": false,
+          "edgeBand": "Frente",
+          "contourMm": [
+            [
+              10,
+              1177
+            ],
+            [
+              1174,
+              1177
+            ],
+            [
+              1174,
+              1721
+            ],
+            [
+              10,
+              1721
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 13,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Tampo interno",
+          "sheetXmm": 60,
+          "sheetYmm": 1214,
+          "localXmm": 50,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "drill",
+          "instanceId": 13,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Tampo interno",
+          "sheetXmm": 1124,
+          "sheetYmm": 1214,
+          "localXmm": 1114,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "cut",
+          "instanceId": 15,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Prateleira",
+          "rotated": true,
+          "edgeBand": "Frente",
+          "contourMm": [
+            [
+              557,
+              10
+            ],
+            [
+              1081,
+              10
+            ],
+            [
+              1081,
+              1170
+            ],
+            [
+              557,
+              1170
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 15,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Prateleira",
+          "sheetXmm": 594,
+          "sheetYmm": 1120,
+          "localXmm": 50,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "drill",
+          "instanceId": 15,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Prateleira",
+          "sheetXmm": 594,
+          "sheetYmm": 60,
+          "localXmm": 1110,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "cut",
+          "instanceId": 1,
+          "moduleName": "2P 800mm",
+          "pieceName": "Lateral",
+          "rotated": false,
+          "edgeBand": "Frente \u002B topo",
+          "contourMm": [
+            [
+              1084,
+              10
+            ],
+            [
+              1634,
+              10
+            ],
+            [
+              1634,
+              860
+            ],
+            [
+              1084,
+              860
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 1,
+          "moduleName": "2P 800mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 1121,
+          "sheetYmm": 60,
+          "localXmm": 37,
+          "localYmm": 50,
+          "kind": "minifixCam",
+          "edge": "front",
+          "diameterMm": 15,
+          "depthMm": 13
+        },
+        {
+          "type": "drill",
+          "instanceId": 1,
+          "moduleName": "2P 800mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 1121,
+          "sheetYmm": 810,
+          "localXmm": 37,
+          "localYmm": 800,
+          "kind": "minifixCam",
+          "edge": "front",
+          "diameterMm": 15,
+          "depthMm": 13
+        },
+        {
+          "type": "cut",
+          "instanceId": 2,
+          "moduleName": "2P 800mm",
+          "pieceName": "Lateral",
+          "rotated": false,
+          "edgeBand": "Frente \u002B topo",
+          "contourMm": [
+            [
+              1177,
+              863
+            ],
+            [
+              1727,
+              863
+            ],
+            [
+              1727,
+              1713
+            ],
+            [
+              1177,
+              1713
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 2,
+          "moduleName": "2P 800mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 1214,
+          "sheetYmm": 913,
+          "localXmm": 37,
+          "localYmm": 50,
+          "kind": "minifixCam",
+          "edge": "front",
+          "diameterMm": 15,
+          "depthMm": 13
+        },
+        {
+          "type": "drill",
+          "instanceId": 2,
+          "moduleName": "2P 800mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 1214,
+          "sheetYmm": 1663,
+          "localXmm": 37,
+          "localYmm": 800,
+          "kind": "minifixCam",
+          "edge": "front",
+          "diameterMm": 15,
+          "depthMm": 13
+        },
+        {
+          "type": "cut",
+          "instanceId": 10,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Lateral",
+          "rotated": false,
+          "edgeBand": "Frente \u002B topo",
+          "contourMm": [
+            [
+              1637,
+              10
+            ],
+            [
+              2187,
+              10
+            ],
+            [
+              2187,
+              860
+            ],
+            [
+              1637,
+              860
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 10,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 1674,
+          "sheetYmm": 60,
+          "localXmm": 37,
+          "localYmm": 50,
+          "kind": "minifixCam",
+          "edge": "front",
+          "diameterMm": 15,
+          "depthMm": 13
+        },
+        {
+          "type": "drill",
+          "instanceId": 10,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 1674,
+          "sheetYmm": 810,
+          "localXmm": 37,
+          "localYmm": 800,
+          "kind": "minifixCam",
+          "edge": "front",
+          "diameterMm": 15,
+          "depthMm": 13
+        },
+        {
+          "type": "cut",
+          "instanceId": 11,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Lateral",
+          "rotated": false,
+          "edgeBand": "Frente \u002B topo",
+          "contourMm": [
+            [
+              1730,
+              863
+            ],
+            [
+              2280,
+              863
+            ],
+            [
+              2280,
+              1713
+            ],
+            [
+              1730,
+              1713
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 11,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 1767,
+          "sheetYmm": 913,
+          "localXmm": 37,
+          "localYmm": 50,
+          "kind": "minifixCam",
+          "edge": "front",
+          "diameterMm": 15,
+          "depthMm": 13
+        },
+        {
+          "type": "drill",
+          "instanceId": 11,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 1767,
+          "sheetYmm": 1663,
+          "localXmm": 37,
+          "localYmm": 800,
+          "kind": "minifixCam",
+          "edge": "front",
+          "diameterMm": 15,
+          "depthMm": 13
+        },
+        {
+          "type": "cut",
+          "instanceId": 3,
+          "moduleName": "2P 800mm",
+          "pieceName": "Base inferior",
+          "rotated": true,
+          "edgeBand": "Frente",
+          "contourMm": [
+            [
+              2190,
+              10
+            ],
+            [
+              2734,
+              10
+            ],
+            [
+              2734,
+              774
+            ],
+            [
+              2190,
+              774
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 3,
+          "moduleName": "2P 800mm",
+          "pieceName": "Base inferior",
+          "sheetXmm": 2227,
+          "sheetYmm": 724,
+          "localXmm": 50,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "drill",
+          "instanceId": 3,
+          "moduleName": "2P 800mm",
+          "pieceName": "Base inferior",
+          "sheetXmm": 2227,
+          "sheetYmm": 60,
+          "localXmm": 714,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "cut",
+          "instanceId": 7,
+          "moduleName": "2P 800mm",
+          "pieceName": "Frente porta 1",
+          "rotated": false,
+          "edgeBand": "4 lados",
+          "contourMm": [
+            [
+              2283,
+              777
+            ],
+            [
+              2679,
+              777
+            ],
+            [
+              2679,
+              1619
+            ],
+            [
+              2283,
+              1619
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 7,
+          "moduleName": "2P 800mm",
+          "pieceName": "Frente porta 1",
+          "sheetXmm": 2657,
+          "sheetYmm": 877,
+          "localXmm": 374,
+          "localYmm": 100,
+          "kind": "hingeCup",
+          "edge": "right",
+          "diameterMm": 35,
+          "depthMm": 13
+        },
+        {
+          "type": "drill",
+          "instanceId": 7,
+          "moduleName": "2P 800mm",
+          "pieceName": "Frente porta 1",
+          "sheetXmm": 2657,
+          "sheetYmm": 1519,
+          "localXmm": 374,
+          "localYmm": 742,
+          "kind": "hingeCup",
+          "edge": "right",
+          "diameterMm": 35,
+          "depthMm": 13
+        },
+        {
+          "type": "cut",
+          "instanceId": 25,
+          "moduleName": "4G 400mm",
+          "pieceName": "Frente gaveta 1",
+          "rotated": false,
+          "edgeBand": "4 lados",
+          "contourMm": [
+            [
+              2283,
+              1622
+            ],
+            [
+              2675,
+              1622
+            ],
+            [
+              2675,
+              1830.5
+            ],
+            [
+              2283,
+              1830.5
+            ]
+          ]
+        },
+        {
+          "type": "cut",
+          "instanceId": 19,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Sarrafo",
+          "rotated": false,
+          "contourMm": [
+            [
+              10,
+              1724
+            ],
+            [
+              1174,
+              1724
+            ],
+            [
+              1174,
+              1794
+            ],
+            [
+              10,
+              1794
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 19,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Sarrafo",
+          "sheetXmm": 60,
+          "sheetYmm": 1761,
+          "localXmm": 50,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "drill",
+          "instanceId": 19,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Sarrafo",
+          "sheetXmm": 1124,
+          "sheetYmm": 1761,
+          "localXmm": 1114,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "cut",
+          "instanceId": 9,
+          "moduleName": "2P 800mm",
+          "pieceName": "Sarrafo",
+          "rotated": false,
+          "contourMm": [
+            [
+              1177,
+              1716
+            ],
+            [
+              1941,
+              1716
+            ],
+            [
+              1941,
+              1786
+            ],
+            [
+              1177,
+              1786
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 9,
+          "moduleName": "2P 800mm",
+          "pieceName": "Sarrafo",
+          "sheetXmm": 1227,
+          "sheetYmm": 1753,
+          "localXmm": 50,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "drill",
+          "instanceId": 9,
+          "moduleName": "2P 800mm",
+          "pieceName": "Sarrafo",
+          "sheetXmm": 1891,
+          "sheetYmm": 1753,
+          "localXmm": 714,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "materialName": "MDF Branco",
+      "thicknessMm": 18,
+      "lengthMm": 2750,
+      "widthMm": 1850,
+      "operations": [
+        {
+          "type": "cut",
+          "instanceId": 20,
+          "moduleName": "4G 400mm",
+          "pieceName": "Lateral",
+          "rotated": false,
+          "edgeBand": "Frente \u002B topo",
+          "contourMm": [
+            [
+              10,
+              10
+            ],
+            [
+              560,
+              10
+            ],
+            [
+              560,
+              860
+            ],
+            [
+              10,
+              860
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 20,
+          "moduleName": "4G 400mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 47,
+          "sheetYmm": 60,
+          "localXmm": 37,
+          "localYmm": 50,
+          "kind": "minifixCam",
+          "edge": "front",
+          "diameterMm": 15,
+          "depthMm": 13
+        },
+        {
+          "type": "drill",
+          "instanceId": 20,
+          "moduleName": "4G 400mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 47,
+          "sheetYmm": 810,
+          "localXmm": 37,
+          "localYmm": 800,
+          "kind": "minifixCam",
+          "edge": "front",
+          "diameterMm": 15,
+          "depthMm": 13
+        },
+        {
+          "type": "cut",
+          "instanceId": 21,
+          "moduleName": "4G 400mm",
+          "pieceName": "Lateral",
+          "rotated": false,
+          "edgeBand": "Frente \u002B topo",
+          "contourMm": [
+            [
+              10,
+              863
+            ],
+            [
+              560,
+              863
+            ],
+            [
+              560,
+              1713
+            ],
+            [
+              10,
+              1713
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 21,
+          "moduleName": "4G 400mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 47,
+          "sheetYmm": 913,
+          "localXmm": 37,
+          "localYmm": 50,
+          "kind": "minifixCam",
+          "edge": "front",
+          "diameterMm": 15,
+          "depthMm": 13
+        },
+        {
+          "type": "drill",
+          "instanceId": 21,
+          "moduleName": "4G 400mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 47,
+          "sheetYmm": 1663,
+          "localXmm": 37,
+          "localYmm": 800,
+          "kind": "minifixCam",
+          "edge": "front",
+          "diameterMm": 15,
+          "depthMm": 13
+        },
+        {
+          "type": "cut",
+          "instanceId": 4,
+          "moduleName": "2P 800mm",
+          "pieceName": "Tampo interno",
+          "rotated": true,
+          "edgeBand": "Frente",
+          "contourMm": [
+            [
+              563,
+              10
+            ],
+            [
+              1107,
+              10
+            ],
+            [
+              1107,
+              774
+            ],
+            [
+              563,
+              774
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 4,
+          "moduleName": "2P 800mm",
+          "pieceName": "Tampo interno",
+          "sheetXmm": 600,
+          "sheetYmm": 724,
+          "localXmm": 50,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "drill",
+          "instanceId": 4,
+          "moduleName": "2P 800mm",
+          "pieceName": "Tampo interno",
+          "sheetXmm": 600,
+          "sheetYmm": 60,
+          "localXmm": 714,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "cut",
+          "instanceId": 6,
+          "moduleName": "2P 800mm",
+          "pieceName": "Prateleira",
+          "rotated": true,
+          "edgeBand": "Frente",
+          "contourMm": [
+            [
+              563,
+              777
+            ],
+            [
+              1087,
+              777
+            ],
+            [
+              1087,
+              1537
+            ],
+            [
+              563,
+              1537
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 6,
+          "moduleName": "2P 800mm",
+          "pieceName": "Prateleira",
+          "sheetXmm": 600,
+          "sheetYmm": 1487,
+          "localXmm": 50,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "drill",
+          "instanceId": 6,
+          "moduleName": "2P 800mm",
+          "pieceName": "Prateleira",
+          "sheetXmm": 600,
+          "sheetYmm": 827,
+          "localXmm": 710,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "cut",
+          "instanceId": 8,
+          "moduleName": "2P 800mm",
+          "pieceName": "Frente porta 2",
+          "rotated": false,
+          "edgeBand": "4 lados",
+          "contourMm": [
+            [
+              1090,
+              777
+            ],
+            [
+              1486,
+              777
+            ],
+            [
+              1486,
+              1619
+            ],
+            [
+              1090,
+              1619
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 8,
+          "moduleName": "2P 800mm",
+          "pieceName": "Frente porta 2",
+          "sheetXmm": 1112,
+          "sheetYmm": 877,
+          "localXmm": 22,
+          "localYmm": 100,
+          "kind": "hingeCup",
+          "edge": "left",
+          "diameterMm": 35,
+          "depthMm": 13
+        },
+        {
+          "type": "drill",
+          "instanceId": 8,
+          "moduleName": "2P 800mm",
+          "pieceName": "Frente porta 2",
+          "sheetXmm": 1112,
+          "sheetYmm": 1519,
+          "localXmm": 22,
+          "localYmm": 742,
+          "kind": "hingeCup",
+          "edge": "left",
+          "diameterMm": 35,
+          "depthMm": 13
+        },
+        {
+          "type": "cut",
+          "instanceId": 16,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Frente porta 1",
+          "rotated": true,
+          "edgeBand": "4 lados",
+          "contourMm": [
+            [
+              1110,
+              10
+            ],
+            [
+              1952,
+              10
+            ],
+            [
+              1952,
+              406
+            ],
+            [
+              1110,
+              406
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 16,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Frente porta 1",
+          "sheetXmm": 1210,
+          "sheetYmm": 32,
+          "localXmm": 374,
+          "localYmm": 100,
+          "kind": "hingeCup",
+          "edge": "right",
+          "diameterMm": 35,
+          "depthMm": 13
+        },
+        {
+          "type": "drill",
+          "instanceId": 16,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Frente porta 1",
+          "sheetXmm": 1852,
+          "sheetYmm": 32,
+          "localXmm": 374,
+          "localYmm": 742,
+          "kind": "hingeCup",
+          "edge": "right",
+          "diameterMm": 35,
+          "depthMm": 13
+        },
+        {
+          "type": "cut",
+          "instanceId": 17,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Frente porta 2",
+          "rotated": false,
+          "edgeBand": "4 lados",
+          "contourMm": [
+            [
+              1955,
+              10
+            ],
+            [
+              2351,
+              10
+            ],
+            [
+              2351,
+              852
+            ],
+            [
+              1955,
+              852
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 17,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Frente porta 2",
+          "sheetXmm": 1977,
+          "sheetYmm": 110,
+          "localXmm": 22,
+          "localYmm": 100,
+          "kind": "hingeCup",
+          "edge": "left",
+          "diameterMm": 35,
+          "depthMm": 13
+        },
+        {
+          "type": "drill",
+          "instanceId": 17,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Frente porta 2",
+          "sheetXmm": 1977,
+          "sheetYmm": 752,
+          "localXmm": 22,
+          "localYmm": 742,
+          "kind": "hingeCup",
+          "edge": "left",
+          "diameterMm": 35,
+          "depthMm": 13
+        },
+        {
+          "type": "cut",
+          "instanceId": 18,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Frente porta 3",
+          "rotated": false,
+          "edgeBand": "4 lados",
+          "contourMm": [
+            [
+              1489,
+              409
+            ],
+            [
+              1885,
+              409
+            ],
+            [
+              1885,
+              1251
+            ],
+            [
+              1489,
+              1251
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 18,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Frente porta 3",
+          "sheetXmm": 1863,
+          "sheetYmm": 509,
+          "localXmm": 374,
+          "localYmm": 100,
+          "kind": "hingeCup",
+          "edge": "right",
+          "diameterMm": 35,
+          "depthMm": 13
+        },
+        {
+          "type": "drill",
+          "instanceId": 18,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Frente porta 3",
+          "sheetXmm": 1863,
+          "sheetYmm": 1151,
+          "localXmm": 374,
+          "localYmm": 742,
+          "kind": "hingeCup",
+          "edge": "right",
+          "diameterMm": 35,
+          "depthMm": 13
+        },
+        {
+          "type": "cut",
+          "instanceId": 36,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Frente porta 1",
+          "rotated": true,
+          "edgeBand": "4 lados",
+          "contourMm": [
+            [
+              1888,
+              855
+            ],
+            [
+              2600,
+              855
+            ],
+            [
+              2600,
+              1251
+            ],
+            [
+              1888,
+              1251
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 36,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Frente porta 1",
+          "sheetXmm": 1988,
+          "sheetYmm": 877,
+          "localXmm": 374,
+          "localYmm": 100,
+          "kind": "hingeCup",
+          "edge": "right",
+          "diameterMm": 35,
+          "depthMm": 13
+        },
+        {
+          "type": "drill",
+          "instanceId": 36,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Frente porta 1",
+          "sheetXmm": 2500,
+          "sheetYmm": 877,
+          "localXmm": 374,
+          "localYmm": 612,
+          "kind": "hingeCup",
+          "edge": "right",
+          "diameterMm": 35,
+          "depthMm": 13
+        },
+        {
+          "type": "cut",
+          "instanceId": 37,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Frente porta 2",
+          "rotated": true,
+          "edgeBand": "4 lados",
+          "contourMm": [
+            [
+              1489,
+              1254
+            ],
+            [
+              2201,
+              1254
+            ],
+            [
+              2201,
+              1650
+            ],
+            [
+              1489,
+              1650
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 37,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Frente porta 2",
+          "sheetXmm": 1589,
+          "sheetYmm": 1628,
+          "localXmm": 22,
+          "localYmm": 100,
+          "kind": "hingeCup",
+          "edge": "left",
+          "diameterMm": 35,
+          "depthMm": 13
+        },
+        {
+          "type": "drill",
+          "instanceId": 37,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Frente porta 2",
+          "sheetXmm": 2101,
+          "sheetYmm": 1628,
+          "localXmm": 22,
+          "localYmm": 612,
+          "kind": "hingeCup",
+          "edge": "left",
+          "diameterMm": 35,
+          "depthMm": 13
+        },
+        {
+          "type": "cut",
+          "instanceId": 32,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Base inferior",
+          "rotated": true,
+          "edgeBand": "Frente",
+          "contourMm": [
+            [
+              2354,
+              10
+            ],
+            [
+              2698,
+              10
+            ],
+            [
+              2698,
+              774
+            ],
+            [
+              2354,
+              774
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 32,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Base inferior",
+          "sheetXmm": 2391,
+          "sheetYmm": 724,
+          "localXmm": 50,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "drill",
+          "instanceId": 32,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Base inferior",
+          "sheetXmm": 2391,
+          "sheetYmm": 60,
+          "localXmm": 714,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "cut",
+          "instanceId": 22,
+          "moduleName": "4G 400mm",
+          "pieceName": "Base inferior",
+          "rotated": false,
+          "edgeBand": "Frente",
+          "contourMm": [
+            [
+              2204,
+              1254
+            ],
+            [
+              2568,
+              1254
+            ],
+            [
+              2568,
+              1798
+            ],
+            [
+              2204,
+              1798
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 22,
+          "moduleName": "4G 400mm",
+          "pieceName": "Base inferior",
+          "sheetXmm": 2254,
+          "sheetYmm": 1291,
+          "localXmm": 50,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "drill",
+          "instanceId": 22,
+          "moduleName": "4G 400mm",
+          "pieceName": "Base inferior",
+          "sheetXmm": 2518,
+          "sheetYmm": 1291,
+          "localXmm": 314,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "cut",
+          "instanceId": 26,
+          "moduleName": "4G 400mm",
+          "pieceName": "Frente gaveta 2",
+          "rotated": false,
+          "edgeBand": "4 lados",
+          "contourMm": [
+            [
+              563,
+              1622
+            ],
+            [
+              955,
+              1622
+            ],
+            [
+              955,
+              1830.5
+            ],
+            [
+              563,
+              1830.5
+            ]
+          ]
+        },
+        {
+          "type": "cut",
+          "instanceId": 27,
+          "moduleName": "4G 400mm",
+          "pieceName": "Frente gaveta 3",
+          "rotated": false,
+          "edgeBand": "4 lados",
+          "contourMm": [
+            [
+              958,
+              1622
+            ],
+            [
+              1350,
+              1622
+            ],
+            [
+              1350,
+              1830.5
+            ],
+            [
+              958,
+              1830.5
+            ]
+          ]
+        },
+        {
+          "type": "cut",
+          "instanceId": 38,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Sarrafo",
+          "rotated": true,
+          "contourMm": [
+            [
+              2603,
+              777
+            ],
+            [
+              2673,
+              777
+            ],
+            [
+              2673,
+              1541
+            ],
+            [
+              2603,
+              1541
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 38,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Sarrafo",
+          "sheetXmm": 2640,
+          "sheetYmm": 1491,
+          "localXmm": 50,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "drill",
+          "instanceId": 38,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Sarrafo",
+          "sheetXmm": 2640,
+          "sheetYmm": 827,
+          "localXmm": 714,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "cut",
+          "instanceId": 29,
+          "moduleName": "4G 400mm",
+          "pieceName": "Sarrafo",
+          "rotated": true,
+          "contourMm": [
+            [
+              1110,
+              409
+            ],
+            [
+              1180,
+              409
+            ],
+            [
+              1180,
+              773
+            ],
+            [
+              1110,
+              773
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 29,
+          "moduleName": "4G 400mm",
+          "pieceName": "Sarrafo",
+          "sheetXmm": 1147,
+          "sheetYmm": 723,
+          "localXmm": 50,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "drill",
+          "instanceId": 29,
+          "moduleName": "4G 400mm",
+          "pieceName": "Sarrafo",
+          "sheetXmm": 1147,
+          "sheetYmm": 459,
+          "localXmm": 314,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "materialName": "MDF Branco",
+      "thicknessMm": 18,
+      "lengthMm": 2750,
+      "widthMm": 1850,
+      "operations": [
+        {
+          "type": "cut",
+          "instanceId": 33,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Tampo interno",
+          "rotated": true,
+          "edgeBand": "Frente",
+          "contourMm": [
+            [
+              10,
+              10
+            ],
+            [
+              354,
+              10
+            ],
+            [
+              354,
+              774
+            ],
+            [
+              10,
+              774
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 33,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Tampo interno",
+          "sheetXmm": 47,
+          "sheetYmm": 724,
+          "localXmm": 50,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "drill",
+          "instanceId": 33,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Tampo interno",
+          "sheetXmm": 47,
+          "sheetYmm": 60,
+          "localXmm": 714,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "cut",
+          "instanceId": 30,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Lateral",
+          "rotated": false,
+          "edgeBand": "Frente \u002B topo",
+          "contourMm": [
+            [
+              10,
+              777
+            ],
+            [
+              360,
+              777
+            ],
+            [
+              360,
+              1497
+            ],
+            [
+              10,
+              1497
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 30,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 47,
+          "sheetYmm": 827,
+          "localXmm": 37,
+          "localYmm": 50,
+          "kind": "minifixCam",
+          "edge": "front",
+          "diameterMm": 15,
+          "depthMm": 13
+        },
+        {
+          "type": "drill",
+          "instanceId": 30,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 47,
+          "sheetYmm": 1447,
+          "localXmm": 37,
+          "localYmm": 670,
+          "kind": "minifixCam",
+          "edge": "front",
+          "diameterMm": 15,
+          "depthMm": 13
+        },
+        {
+          "type": "cut",
+          "instanceId": 31,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Lateral",
+          "rotated": false,
+          "edgeBand": "Frente \u002B topo",
+          "contourMm": [
+            [
+              357,
+              10
+            ],
+            [
+              707,
+              10
+            ],
+            [
+              707,
+              730
+            ],
+            [
+              357,
+              730
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 31,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 394,
+          "sheetYmm": 60,
+          "localXmm": 37,
+          "localYmm": 50,
+          "kind": "minifixCam",
+          "edge": "front",
+          "diameterMm": 15,
+          "depthMm": 13
+        },
+        {
+          "type": "drill",
+          "instanceId": 31,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 394,
+          "sheetYmm": 680,
+          "localXmm": 37,
+          "localYmm": 670,
+          "kind": "minifixCam",
+          "edge": "front",
+          "diameterMm": 15,
+          "depthMm": 13
+        },
+        {
+          "type": "cut",
+          "instanceId": 35,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Prateleira",
+          "rotated": false,
+          "edgeBand": "Frente",
+          "contourMm": [
+            [
+              10,
+              1500
+            ],
+            [
+              770,
+              1500
+            ],
+            [
+              770,
+              1824
+            ],
+            [
+              10,
+              1824
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 35,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Prateleira",
+          "sheetXmm": 60,
+          "sheetYmm": 1537,
+          "localXmm": 50,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "drill",
+          "instanceId": 35,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Prateleira",
+          "sheetXmm": 720,
+          "sheetYmm": 1537,
+          "localXmm": 710,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "cut",
+          "instanceId": 23,
+          "moduleName": "4G 400mm",
+          "pieceName": "Tampo interno",
+          "rotated": false,
+          "edgeBand": "Frente",
+          "contourMm": [
+            [
+              363,
+              733
+            ],
+            [
+              727,
+              733
+            ],
+            [
+              727,
+              1277
+            ],
+            [
+              363,
+              1277
+            ]
+          ]
+        },
+        {
+          "type": "drill",
+          "instanceId": 23,
+          "moduleName": "4G 400mm",
+          "pieceName": "Tampo interno",
+          "sheetXmm": 413,
+          "sheetYmm": 770,
+          "localXmm": 50,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "drill",
+          "instanceId": 23,
+          "moduleName": "4G 400mm",
+          "pieceName": "Tampo interno",
+          "sheetXmm": 677,
+          "sheetYmm": 770,
+          "localXmm": 314,
+          "localYmm": 37,
+          "kind": "minifixDowel",
+          "edge": "front",
+          "diameterMm": 5,
+          "depthMm": 10
+        },
+        {
+          "type": "cut",
+          "instanceId": 28,
+          "moduleName": "4G 400mm",
+          "pieceName": "Frente gaveta 4",
+          "rotated": false,
+          "edgeBand": "4 lados",
+          "contourMm": [
+            [
+              363,
+              1280
+            ],
+            [
+              755,
+              1280
+            ],
+            [
+              755,
+              1488.5
+            ],
+            [
+              363,
+              1488.5
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "materialName": "MDF Branco",
+      "thicknessMm": 6,
+      "lengthMm": 2750,
+      "widthMm": 1850,
+      "operations": [
+        {
+          "type": "cut",
+          "instanceId": 14,
+          "moduleName": "3P 1200mm",
+          "pieceName": "Fundo",
+          "rotated": true,
+          "contourMm": [
+            [
+              10,
+              10
+            ],
+            [
+              824,
+              10
+            ],
+            [
+              824,
+              1174
+            ],
+            [
+              10,
+              1174
+            ]
+          ]
+        },
+        {
+          "type": "cut",
+          "instanceId": 5,
+          "moduleName": "2P 800mm",
+          "pieceName": "Fundo",
+          "rotated": false,
+          "contourMm": [
+            [
+              827,
+              10
+            ],
+            [
+              1591,
+              10
+            ],
+            [
+              1591,
+              824
+            ],
+            [
+              827,
+              824
+            ]
+          ]
+        },
+        {
+          "type": "cut",
+          "instanceId": 34,
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Fundo",
+          "rotated": true,
+          "contourMm": [
+            [
+              827,
+              827
+            ],
+            [
+              1511,
+              827
+            ],
+            [
+              1511,
+              1591
+            ],
+            [
+              827,
+              1591
+            ]
+          ]
+        },
+        {
+          "type": "cut",
+          "instanceId": 24,
+          "moduleName": "4G 400mm",
+          "pieceName": "Fundo",
+          "rotated": true,
+          "contourMm": [
+            [
+              10,
+              1177
+            ],
+            [
+              824,
+              1177
+            ],
+            [
+              824,
+              1541
+            ],
+            [
+              10,
+              1541
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+<Window x:Class="Tracos3DStudio.WallLayersWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Camadas"
+        Width="560"
+        Height="440"
+        MinWidth="480"
+        MinHeight="360"
+        WindowStartupLocation="CenterOwner"
+        Background="#F5F5F5"
+        AutomationProperties.Name="Camadas"
+        AutomationProperties.AutomationId="WallLayersWindow">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   x:Name="ProjectTitleText"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,8"/>
+
+        <TextBlock Grid.Row="1"
+                   x:Name="SummaryText"
+                   Margin="0,0,0,12"
+                   TextWrapping="Wrap"
+                   AutomationProperties.AutomationId="WallLayersSummaryText"/>
+
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <StackPanel x:Name="LayersPanel"
+                        AutomationProperties.AutomationId="WallLayersPanel"/>
+        </ScrollViewer>
+
+        <Grid Grid.Row="3" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="NewLayerNameBox"
+                     Height="28"
+                     VerticalContentAlignment="Center"
+                     AutomationProperties.Name="Nome da nova camada"
+                     AutomationProperties.AutomationId="WallLayersNewLayerNameBox"/>
+            <Button Grid.Column="1"
+                    Content="Adicionar camada"
+                    Width="130"
+                    Height="28"
+                    Margin="8,0,0,0"
+                    Click="AddLayer_Click"
+                    AutomationProperties.AutomationId="WallLayersAddLayerButton"/>
+        </Grid>
+
+        <StackPanel Grid.Row="4"
+                    Orientation="Horizontal"
+                    Margin="0,12,0,0">
+            <Button Content="Mostrar todas"
+                    Width="110"
+                    Height="28"
+                    Margin="0,0,8,0"
+                    Click="ShowAll_Click"
+                    AutomationProperties.AutomationId="WallLayersShowAllButton"/>
+            <Button Content="Ocultar todas"
+                    Width="110"
+                    Height="28"
+                    Margin="0,0,8,0"
+                    Click="HideAll_Click"
+                    AutomationProperties.AutomationId="WallLayersHideAllButton"/>
+            <Button Content="Remover camadas vazias"
+                    Height="28"
+                    Click="RemoveEmptyLayers_Click"
+                    AutomationProperties.AutomationId="WallLayersRemoveEmptyButton"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="5"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,12,0,0">
+            <Button Content="Fechar"
+                    Width="88"
+                    Height="32"
+                    IsCancel="True"
+                    Click="Close_Click"
+                    AutomationProperties.AutomationId="WallLayersCloseButton"/>
+        </StackPanel>
+    </Grid>
+</Window>

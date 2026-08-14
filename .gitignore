@@ -1,0 +1,92 @@
+# Build
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+*.dll
+*.exe
+*.pdb
+*.cache
+*.ilk
+*.meta
+*.obj
+*.pch
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*.log
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+# Visual Studio / Rider / VS Code
+.vs/
+*.user
+*.useros
+*.suo
+*.userchost.*
+*.sln.docstates
+_ReSharper*/
+*.DotSettings.user
+.idea/
+
+# Publish / packaging outputs
+publish/
+dist/
+*.msi
+*.msix
+*.appx
+*.nupkg
+
+# .NET
+project.lock.json
+project.fragment.lock.json
+artifacts/
+TestResults/
+[Pp]ackages/
+!**/packages/build/
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Secrets / local env
+.env
+.env.*
+!.env.example
+*.pfx
+*.snk
+credentials.json
+appsettings.*.local.json
+
+# Cursor / agent local noise (keep rules)
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
+
+# Temp / debug / local experiments
+tmp_*
+pickdbg.txt
+picklog.txt
+winapp-test-err.txt
+dump-*.csx
+*.rar
+*.zip
+!docs/**/*.png
+
+# Root screenshot/debug noise (canonical: docs/screenshots/)
+/fase-*.png
+/fase-*.tracos
+/fase-*.pdf
+/fase-*.tracos-lib
+

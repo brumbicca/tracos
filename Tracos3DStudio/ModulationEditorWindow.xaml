@@ -1,0 +1,161 @@
+<Window x:Class="Tracos3DStudio.ModulationEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Editor de modulação"
+        Width="520"
+        Height="620"
+        MinWidth="460"
+        MinHeight="520"
+        WindowStartupLocation="CenterOwner"
+        Background="#F5F5F5"
+        AutomationProperties.Name="Editor de modulação"
+        AutomationProperties.AutomationId="ModulationEditorWindow">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="ModuleTitleText"
+                   Grid.Row="0"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,4"
+                   AutomationProperties.AutomationId="ModulationEditorModuleTitleText"/>
+
+        <TextBlock x:Name="ModuleInfoText"
+                   Grid.Row="1"
+                   Foreground="#555"
+                   TextWrapping="Wrap"
+                   Margin="0,0,0,12"
+                   AutomationProperties.AutomationId="ModulationEditorModuleInfoText"/>
+
+        <GroupBox Grid.Row="2" Header="Estrutura (mm)" Margin="0,0,0,8">
+            <Grid Margin="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,8">
+                    <TextBlock Text="Painéis"/>
+                    <TextBox x:Name="PanelThicknessBox"
+                             Margin="0,4,0,0"
+                             AutomationProperties.AutomationId="ModulationEditorPanelThicknessBox"/>
+                </StackPanel>
+                <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,8">
+                    <TextBlock Text="Fundo"/>
+                    <TextBox x:Name="BackThicknessBox"
+                             Margin="0,4,0,0"
+                             AutomationProperties.AutomationId="ModulationEditorBackThicknessBox"/>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="0">
+                    <TextBlock Text="Frentes"/>
+                    <TextBox x:Name="FrontThicknessBox"
+                             Margin="0,4,0,0"
+                             AutomationProperties.AutomationId="ModulationEditorFrontThicknessBox"/>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="2">
+                    <TextBlock Text="Folga entre frentes"/>
+                    <TextBox x:Name="FrontGapBox"
+                             Margin="0,4,0,0"
+                             AutomationProperties.AutomationId="ModulationEditorFrontGapBox"/>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Grid.Row="3" Header="Vãos e frentes">
+            <Grid Margin="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Portas"/>
+                        <TextBox x:Name="DoorCountBox"
+                                 Margin="0,4,0,0"
+                                 AutomationProperties.AutomationId="ModulationEditorDoorCountBox"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Gavetas"/>
+                        <TextBox x:Name="DrawerCountBox"
+                                 Margin="0,4,0,0"
+                                 AutomationProperties.AutomationId="ModulationEditorDrawerCountBox"/>
+                    </StackPanel>
+                </Grid>
+
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,8">
+                    <CheckBox x:Name="IncludeShelfCheck"
+                              Content="Prateleira interna (módulos com portas)"
+                              VerticalAlignment="Center"
+                              AutomationProperties.AutomationId="ModulationEditorIncludeShelfCheck"/>
+                    <TextBlock Text="Altura %"
+                               Margin="16,0,6,0"
+                               VerticalAlignment="Center"/>
+                    <TextBox x:Name="ShelfHeightBox"
+                             Width="56"
+                             AutomationProperties.AutomationId="ModulationEditorShelfHeightBox"/>
+                </StackPanel>
+
+                <TextBlock Grid.Row="2"
+                           x:Name="PreviewSummaryText"
+                           TextWrapping="Wrap"
+                           Foreground="#666"
+                           FontSize="11"
+                           Margin="0,0,0,6"
+                           AutomationProperties.AutomationId="ModulationEditorPreviewSummaryText"/>
+
+                <ListBox Grid.Row="3"
+                         x:Name="FrontBaysList"
+                         DisplayMemberPath="Label"
+                         AutomationProperties.AutomationId="ModulationEditorFrontBaysList"/>
+            </Grid>
+        </GroupBox>
+
+        <TextBlock Grid.Row="4"
+                   x:Name="PiecesSummaryText"
+                   Margin="0,8,0,8"
+                   TextWrapping="Wrap"
+                   Foreground="#444"
+                   AutomationProperties.AutomationId="ModulationEditorPiecesSummaryText"/>
+
+        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Pré-visualizar regras"
+                    Width="130"
+                    Height="32"
+                    Margin="0,0,8,0"
+                    Click="PreviewRules_Click"
+                    AutomationProperties.AutomationId="ModulationEditorPreviewButton"/>
+            <Button Content="OK"
+                    Width="88"
+                    Height="32"
+                    Margin="0,0,8,0"
+                    IsDefault="True"
+                    Click="Ok_Click"
+                    AutomationProperties.AutomationId="ModulationEditorOkButton"/>
+            <Button Content="Cancelar"
+                    Width="88"
+                    Height="32"
+                    IsCancel="True"
+                    AutomationProperties.AutomationId="ModulationEditorCancelButton"/>
+        </StackPanel>
+    </Grid>
+</Window>

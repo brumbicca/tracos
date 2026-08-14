@@ -1,0 +1,57 @@
+---
+description: Paridade Traços × Promob — só Promob aberto + documentação; nunca inventar nem assumir igualdade entre nós
+alwaysApply: true
+---
+
+# Referência Promob para paridade
+
+Ao implementar ou validar **qualquer** comportamento alinhado ao Promob (paredes, ambiente, aberturas, módulos, configurador de dimensões, chapas, montagem de caixa, etc.):
+
+## Regra de ouro — não inventar
+
+**Não invente. Não faça nada da sua cabeça.**
+
+As **únicas** fontes de requisito são:
+
+1. **Promob Plus aberto** — processo `Promob5`; consultar árvore, painéis, valores e fluxos reais via **WinApp MCP** (`user-winapp`) **antes** de implementar no Traços.
+2. **Documentação oficial Promob** — artigos e KB em suporte.promob.com como **fonte de requisito** (ler e entender, não só citar).
+
+**Proibido:**
+
+- Inferir regras só pelo código do Traços, memória do modelo ou “parece igual”.
+- Assumir que **A = B** ou **A = C** (ex.: copiar `InferiorSchema` inteiro em **Armários** porque Bancadas|Criados ou Cozinha Inferior usam o mesmo schema).
+- Reutilizar schema/árvore/campos de **outro nó** sem conferir **aquele nó específico** no Promob aberto.
+- Marcar paridade concluída sem comparar Promob × Traços (screenshot + MCP quando aplicável).
+
+**Obrigatório em cada implementação:**
+
+1. Abrir o **nó exato** no Promob (ex.: `Dormitórios → Montagem de Caixa - Armários`, não “montagem inferior genérica”).
+2. Ler a **documentação** correspondente, se existir.
+3. Implementar no Traços **igual** ao que foi visto e lido — folha a folha, campo a campo.
+4. Validar visualmente Promob × Traços antes de considerar entrega.
+
+## Tríade obrigatória (nesta ordem)
+
+1. **Documentação Promob** — requisito escrito.
+2. **Promob Plus aberto** — comportamento real (MCP).
+3. **Traços** — só entrega concluída o que **bater** com 1 e 2.
+
+## Comportamento do agente
+
+- Registrar no `docs/PLANO-EXECUCAO.md` itens de checklist Promob conforme forem fechados.
+- Processos WinApp: **Promob** = `Promob5`; **Traços** = `Tracos3DStudio`.
+- Complementa `winapp-mcp-testes.mdc` (automação e screenshots do Traços).
+
+## Exemplo de erro (não repetir)
+
+| Nó Promob | Folhas reais | Erro comum |
+|-----------|--------------|------------|
+| Montagem de Caixa - **Armários** | 8 (Lateral, Rodapé, Fundo + 2 cantos) | Reutilizar `InferiorSchema` (21 folhas) “porque é montagem de caixa” |
+
+Cada nó do configurador tem sua própria árvore — **sempre** levantar no Promob aberto.
+
+## Links úteis
+
+- [Promob — Paredes](https://suporte.promob.com/hc/pt-br/articles/31122539571345-Promob-Paredes)
+- [Índice Plus](https://suporte.promob.com/hc/pt-br/articles/31123224474257-Plus)
+- Checklist: `docs/PLANO-EXECUCAO.md`

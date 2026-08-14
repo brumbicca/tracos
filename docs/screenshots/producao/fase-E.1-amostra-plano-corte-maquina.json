@@ -1,0 +1,1060 @@
+{
+  "schemaVersion": 1,
+  "format": "tracos-cut-plan",
+  "exportedUtc": "2026-07-25T03:32:43.8659691Z",
+  "project": {
+    "name": "Cozinha em L",
+    "constructionProfileId": "padrao"
+  },
+  "settings": {
+    "sheetLengthMm": 2750,
+    "sheetWidthMm": 1850,
+    "cutKerfMm": 3,
+    "sheetMarginMm": 10,
+    "panelThicknessMm": 18,
+    "algorithm": "MaxRects"
+  },
+  "summary": {
+    "totalSheets": 4,
+    "totalPlacedPieces": 38,
+    "overallUtilizationPercent": 62.55216
+  },
+  "sheets": [
+    {
+      "index": 1,
+      "materialName": "MDF Branco",
+      "thicknessMm": 18,
+      "lengthMm": 2750,
+      "widthMm": 1850,
+      "utilizationPercent": 92.46569,
+      "pieces": [
+        {
+          "instanceId": 12,
+          "moduleId": "06e307ff-626e-4ae6-9456-e69a52fc003f",
+          "moduleName": "3P 1200mm",
+          "pieceName": "Base inferior",
+          "sheetXmm": 10,
+          "sheetYmm": 10,
+          "lengthMm": 544,
+          "widthMm": 1164,
+          "rotated": true,
+          "edgeBand": "Frente",
+          "holes": [
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 50,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            },
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 1114,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            }
+          ]
+        },
+        {
+          "instanceId": 13,
+          "moduleId": "06e307ff-626e-4ae6-9456-e69a52fc003f",
+          "moduleName": "3P 1200mm",
+          "pieceName": "Tampo interno",
+          "sheetXmm": 10,
+          "sheetYmm": 1177,
+          "lengthMm": 1164,
+          "widthMm": 544,
+          "rotated": false,
+          "edgeBand": "Frente",
+          "holes": [
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 50,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            },
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 1114,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            }
+          ]
+        },
+        {
+          "instanceId": 15,
+          "moduleId": "06e307ff-626e-4ae6-9456-e69a52fc003f",
+          "moduleName": "3P 1200mm",
+          "pieceName": "Prateleira",
+          "sheetXmm": 557,
+          "sheetYmm": 10,
+          "lengthMm": 524,
+          "widthMm": 1160,
+          "rotated": true,
+          "edgeBand": "Frente",
+          "holes": [
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 50,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            },
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 1110,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            }
+          ]
+        },
+        {
+          "instanceId": 1,
+          "moduleId": "18c50fc2-6495-4f8b-9353-03e2355c76c2",
+          "moduleName": "2P 800mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 1084,
+          "sheetYmm": 10,
+          "lengthMm": 550,
+          "widthMm": 850,
+          "rotated": false,
+          "edgeBand": "Frente \u002B topo",
+          "holes": [
+            {
+              "kind": "minifixCam",
+              "edge": "front",
+              "posXmm": 37,
+              "posYmm": 50,
+              "diameterMm": 15,
+              "depthMm": 13
+            },
+            {
+              "kind": "minifixCam",
+              "edge": "front",
+              "posXmm": 37,
+              "posYmm": 800,
+              "diameterMm": 15,
+              "depthMm": 13
+            }
+          ]
+        },
+        {
+          "instanceId": 2,
+          "moduleId": "18c50fc2-6495-4f8b-9353-03e2355c76c2",
+          "moduleName": "2P 800mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 1177,
+          "sheetYmm": 863,
+          "lengthMm": 550,
+          "widthMm": 850,
+          "rotated": false,
+          "edgeBand": "Frente \u002B topo",
+          "holes": [
+            {
+              "kind": "minifixCam",
+              "edge": "front",
+              "posXmm": 37,
+              "posYmm": 50,
+              "diameterMm": 15,
+              "depthMm": 13
+            },
+            {
+              "kind": "minifixCam",
+              "edge": "front",
+              "posXmm": 37,
+              "posYmm": 800,
+              "diameterMm": 15,
+              "depthMm": 13
+            }
+          ]
+        },
+        {
+          "instanceId": 10,
+          "moduleId": "06e307ff-626e-4ae6-9456-e69a52fc003f",
+          "moduleName": "3P 1200mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 1637,
+          "sheetYmm": 10,
+          "lengthMm": 550,
+          "widthMm": 850,
+          "rotated": false,
+          "edgeBand": "Frente \u002B topo",
+          "holes": [
+            {
+              "kind": "minifixCam",
+              "edge": "front",
+              "posXmm": 37,
+              "posYmm": 50,
+              "diameterMm": 15,
+              "depthMm": 13
+            },
+            {
+              "kind": "minifixCam",
+              "edge": "front",
+              "posXmm": 37,
+              "posYmm": 800,
+              "diameterMm": 15,
+              "depthMm": 13
+            }
+          ]
+        },
+        {
+          "instanceId": 11,
+          "moduleId": "06e307ff-626e-4ae6-9456-e69a52fc003f",
+          "moduleName": "3P 1200mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 1730,
+          "sheetYmm": 863,
+          "lengthMm": 550,
+          "widthMm": 850,
+          "rotated": false,
+          "edgeBand": "Frente \u002B topo",
+          "holes": [
+            {
+              "kind": "minifixCam",
+              "edge": "front",
+              "posXmm": 37,
+              "posYmm": 50,
+              "diameterMm": 15,
+              "depthMm": 13
+            },
+            {
+              "kind": "minifixCam",
+              "edge": "front",
+              "posXmm": 37,
+              "posYmm": 800,
+              "diameterMm": 15,
+              "depthMm": 13
+            }
+          ]
+        },
+        {
+          "instanceId": 3,
+          "moduleId": "18c50fc2-6495-4f8b-9353-03e2355c76c2",
+          "moduleName": "2P 800mm",
+          "pieceName": "Base inferior",
+          "sheetXmm": 2190,
+          "sheetYmm": 10,
+          "lengthMm": 544,
+          "widthMm": 764,
+          "rotated": true,
+          "edgeBand": "Frente",
+          "holes": [
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 50,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            },
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 714,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            }
+          ]
+        },
+        {
+          "instanceId": 7,
+          "moduleId": "18c50fc2-6495-4f8b-9353-03e2355c76c2",
+          "moduleName": "2P 800mm",
+          "pieceName": "Frente porta 1",
+          "sheetXmm": 2283,
+          "sheetYmm": 777,
+          "lengthMm": 396,
+          "widthMm": 842,
+          "rotated": false,
+          "edgeBand": "4 lados",
+          "holes": [
+            {
+              "kind": "hingeCup",
+              "edge": "right",
+              "posXmm": 374,
+              "posYmm": 100,
+              "diameterMm": 35,
+              "depthMm": 13
+            },
+            {
+              "kind": "hingeCup",
+              "edge": "right",
+              "posXmm": 374,
+              "posYmm": 742,
+              "diameterMm": 35,
+              "depthMm": 13
+            }
+          ]
+        },
+        {
+          "instanceId": 25,
+          "moduleId": "4b006643-d18c-4f18-8f56-3879608f0009",
+          "moduleName": "4G 400mm",
+          "pieceName": "Frente gaveta 1",
+          "sheetXmm": 2283,
+          "sheetYmm": 1622,
+          "lengthMm": 392,
+          "widthMm": 208.5,
+          "rotated": false,
+          "edgeBand": "4 lados",
+          "holes": []
+        },
+        {
+          "instanceId": 19,
+          "moduleId": "06e307ff-626e-4ae6-9456-e69a52fc003f",
+          "moduleName": "3P 1200mm",
+          "pieceName": "Sarrafo",
+          "sheetXmm": 10,
+          "sheetYmm": 1724,
+          "lengthMm": 1164,
+          "widthMm": 65,
+          "rotated": false,
+          "holes": [
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 50,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            },
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 1114,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            }
+          ]
+        },
+        {
+          "instanceId": 38,
+          "moduleId": "04a88649-b62b-4a80-ad87-9c46c83a9104",
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Sarrafo",
+          "sheetXmm": 1177,
+          "sheetYmm": 1716,
+          "lengthMm": 764,
+          "widthMm": 70,
+          "rotated": false,
+          "holes": [
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 50,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            },
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 714,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "materialName": "MDF Branco",
+      "thicknessMm": 18,
+      "lengthMm": 2750,
+      "widthMm": 1850,
+      "utilizationPercent": 85.387794,
+      "pieces": [
+        {
+          "instanceId": 20,
+          "moduleId": "4b006643-d18c-4f18-8f56-3879608f0009",
+          "moduleName": "4G 400mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 10,
+          "sheetYmm": 10,
+          "lengthMm": 550,
+          "widthMm": 850,
+          "rotated": false,
+          "edgeBand": "Frente \u002B topo",
+          "holes": [
+            {
+              "kind": "minifixCam",
+              "edge": "front",
+              "posXmm": 37,
+              "posYmm": 50,
+              "diameterMm": 15,
+              "depthMm": 13
+            },
+            {
+              "kind": "minifixCam",
+              "edge": "front",
+              "posXmm": 37,
+              "posYmm": 800,
+              "diameterMm": 15,
+              "depthMm": 13
+            }
+          ]
+        },
+        {
+          "instanceId": 21,
+          "moduleId": "4b006643-d18c-4f18-8f56-3879608f0009",
+          "moduleName": "4G 400mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 10,
+          "sheetYmm": 863,
+          "lengthMm": 550,
+          "widthMm": 850,
+          "rotated": false,
+          "edgeBand": "Frente \u002B topo",
+          "holes": [
+            {
+              "kind": "minifixCam",
+              "edge": "front",
+              "posXmm": 37,
+              "posYmm": 50,
+              "diameterMm": 15,
+              "depthMm": 13
+            },
+            {
+              "kind": "minifixCam",
+              "edge": "front",
+              "posXmm": 37,
+              "posYmm": 800,
+              "diameterMm": 15,
+              "depthMm": 13
+            }
+          ]
+        },
+        {
+          "instanceId": 4,
+          "moduleId": "18c50fc2-6495-4f8b-9353-03e2355c76c2",
+          "moduleName": "2P 800mm",
+          "pieceName": "Tampo interno",
+          "sheetXmm": 563,
+          "sheetYmm": 10,
+          "lengthMm": 544,
+          "widthMm": 764,
+          "rotated": true,
+          "edgeBand": "Frente",
+          "holes": [
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 50,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            },
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 714,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            }
+          ]
+        },
+        {
+          "instanceId": 6,
+          "moduleId": "18c50fc2-6495-4f8b-9353-03e2355c76c2",
+          "moduleName": "2P 800mm",
+          "pieceName": "Prateleira",
+          "sheetXmm": 563,
+          "sheetYmm": 777,
+          "lengthMm": 524,
+          "widthMm": 760,
+          "rotated": true,
+          "edgeBand": "Frente",
+          "holes": [
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 50,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            },
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 710,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            }
+          ]
+        },
+        {
+          "instanceId": 8,
+          "moduleId": "18c50fc2-6495-4f8b-9353-03e2355c76c2",
+          "moduleName": "2P 800mm",
+          "pieceName": "Frente porta 2",
+          "sheetXmm": 1090,
+          "sheetYmm": 777,
+          "lengthMm": 396,
+          "widthMm": 842,
+          "rotated": false,
+          "edgeBand": "4 lados",
+          "holes": [
+            {
+              "kind": "hingeCup",
+              "edge": "left",
+              "posXmm": 22,
+              "posYmm": 100,
+              "diameterMm": 35,
+              "depthMm": 13
+            },
+            {
+              "kind": "hingeCup",
+              "edge": "left",
+              "posXmm": 22,
+              "posYmm": 742,
+              "diameterMm": 35,
+              "depthMm": 13
+            }
+          ]
+        },
+        {
+          "instanceId": 16,
+          "moduleId": "06e307ff-626e-4ae6-9456-e69a52fc003f",
+          "moduleName": "3P 1200mm",
+          "pieceName": "Frente porta 1",
+          "sheetXmm": 1110,
+          "sheetYmm": 10,
+          "lengthMm": 842,
+          "widthMm": 396,
+          "rotated": true,
+          "edgeBand": "4 lados",
+          "holes": [
+            {
+              "kind": "hingeCup",
+              "edge": "right",
+              "posXmm": 374,
+              "posYmm": 100,
+              "diameterMm": 35,
+              "depthMm": 13
+            },
+            {
+              "kind": "hingeCup",
+              "edge": "right",
+              "posXmm": 374,
+              "posYmm": 742,
+              "diameterMm": 35,
+              "depthMm": 13
+            }
+          ]
+        },
+        {
+          "instanceId": 17,
+          "moduleId": "06e307ff-626e-4ae6-9456-e69a52fc003f",
+          "moduleName": "3P 1200mm",
+          "pieceName": "Frente porta 2",
+          "sheetXmm": 1955,
+          "sheetYmm": 10,
+          "lengthMm": 396,
+          "widthMm": 842,
+          "rotated": false,
+          "edgeBand": "4 lados",
+          "holes": [
+            {
+              "kind": "hingeCup",
+              "edge": "left",
+              "posXmm": 22,
+              "posYmm": 100,
+              "diameterMm": 35,
+              "depthMm": 13
+            },
+            {
+              "kind": "hingeCup",
+              "edge": "left",
+              "posXmm": 22,
+              "posYmm": 742,
+              "diameterMm": 35,
+              "depthMm": 13
+            }
+          ]
+        },
+        {
+          "instanceId": 18,
+          "moduleId": "06e307ff-626e-4ae6-9456-e69a52fc003f",
+          "moduleName": "3P 1200mm",
+          "pieceName": "Frente porta 3",
+          "sheetXmm": 1489,
+          "sheetYmm": 409,
+          "lengthMm": 396,
+          "widthMm": 842,
+          "rotated": false,
+          "edgeBand": "4 lados",
+          "holes": [
+            {
+              "kind": "hingeCup",
+              "edge": "right",
+              "posXmm": 374,
+              "posYmm": 100,
+              "diameterMm": 35,
+              "depthMm": 13
+            },
+            {
+              "kind": "hingeCup",
+              "edge": "right",
+              "posXmm": 374,
+              "posYmm": 742,
+              "diameterMm": 35,
+              "depthMm": 13
+            }
+          ]
+        },
+        {
+          "instanceId": 36,
+          "moduleId": "04a88649-b62b-4a80-ad87-9c46c83a9104",
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Frente porta 1",
+          "sheetXmm": 1888,
+          "sheetYmm": 855,
+          "lengthMm": 712,
+          "widthMm": 396,
+          "rotated": true,
+          "edgeBand": "4 lados",
+          "holes": [
+            {
+              "kind": "hingeCup",
+              "edge": "right",
+              "posXmm": 374,
+              "posYmm": 100,
+              "diameterMm": 35,
+              "depthMm": 13
+            },
+            {
+              "kind": "hingeCup",
+              "edge": "right",
+              "posXmm": 374,
+              "posYmm": 612,
+              "diameterMm": 35,
+              "depthMm": 13
+            }
+          ]
+        },
+        {
+          "instanceId": 37,
+          "moduleId": "04a88649-b62b-4a80-ad87-9c46c83a9104",
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Frente porta 2",
+          "sheetXmm": 1489,
+          "sheetYmm": 1254,
+          "lengthMm": 712,
+          "widthMm": 396,
+          "rotated": true,
+          "edgeBand": "4 lados",
+          "holes": [
+            {
+              "kind": "hingeCup",
+              "edge": "left",
+              "posXmm": 22,
+              "posYmm": 100,
+              "diameterMm": 35,
+              "depthMm": 13
+            },
+            {
+              "kind": "hingeCup",
+              "edge": "left",
+              "posXmm": 22,
+              "posYmm": 612,
+              "diameterMm": 35,
+              "depthMm": 13
+            }
+          ]
+        },
+        {
+          "instanceId": 32,
+          "moduleId": "04a88649-b62b-4a80-ad87-9c46c83a9104",
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Base inferior",
+          "sheetXmm": 2354,
+          "sheetYmm": 10,
+          "lengthMm": 344,
+          "widthMm": 764,
+          "rotated": true,
+          "edgeBand": "Frente",
+          "holes": [
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 50,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            },
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 714,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            }
+          ]
+        },
+        {
+          "instanceId": 22,
+          "moduleId": "4b006643-d18c-4f18-8f56-3879608f0009",
+          "moduleName": "4G 400mm",
+          "pieceName": "Base inferior",
+          "sheetXmm": 2204,
+          "sheetYmm": 1254,
+          "lengthMm": 364,
+          "widthMm": 544,
+          "rotated": false,
+          "edgeBand": "Frente",
+          "holes": [
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 50,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            },
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 314,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            }
+          ]
+        },
+        {
+          "instanceId": 26,
+          "moduleId": "4b006643-d18c-4f18-8f56-3879608f0009",
+          "moduleName": "4G 400mm",
+          "pieceName": "Frente gaveta 2",
+          "sheetXmm": 563,
+          "sheetYmm": 1622,
+          "lengthMm": 392,
+          "widthMm": 208.5,
+          "rotated": false,
+          "edgeBand": "4 lados",
+          "holes": []
+        },
+        {
+          "instanceId": 27,
+          "moduleId": "4b006643-d18c-4f18-8f56-3879608f0009",
+          "moduleName": "4G 400mm",
+          "pieceName": "Frente gaveta 3",
+          "sheetXmm": 958,
+          "sheetYmm": 1622,
+          "lengthMm": 392,
+          "widthMm": 208.5,
+          "rotated": false,
+          "edgeBand": "4 lados",
+          "holes": []
+        },
+        {
+          "instanceId": 9,
+          "moduleId": "18c50fc2-6495-4f8b-9353-03e2355c76c2",
+          "moduleName": "2P 800mm",
+          "pieceName": "Sarrafo",
+          "sheetXmm": 2603,
+          "sheetYmm": 777,
+          "lengthMm": 65,
+          "widthMm": 764,
+          "rotated": true,
+          "holes": [
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 50,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            },
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 714,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            }
+          ]
+        },
+        {
+          "instanceId": 29,
+          "moduleId": "4b006643-d18c-4f18-8f56-3879608f0009",
+          "moduleName": "4G 400mm",
+          "pieceName": "Sarrafo",
+          "sheetXmm": 1110,
+          "sheetYmm": 409,
+          "lengthMm": 65,
+          "widthMm": 364,
+          "rotated": true,
+          "holes": [
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 50,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            },
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 314,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "materialName": "MDF Branco",
+      "thicknessMm": 18,
+      "lengthMm": 2750,
+      "widthMm": 1850,
+      "utilizationPercent": 25.411383,
+      "pieces": [
+        {
+          "instanceId": 33,
+          "moduleId": "04a88649-b62b-4a80-ad87-9c46c83a9104",
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Tampo interno",
+          "sheetXmm": 10,
+          "sheetYmm": 10,
+          "lengthMm": 344,
+          "widthMm": 764,
+          "rotated": true,
+          "edgeBand": "Frente",
+          "holes": [
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 50,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            },
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 714,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            }
+          ]
+        },
+        {
+          "instanceId": 30,
+          "moduleId": "04a88649-b62b-4a80-ad87-9c46c83a9104",
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 10,
+          "sheetYmm": 777,
+          "lengthMm": 350,
+          "widthMm": 720,
+          "rotated": false,
+          "edgeBand": "Frente \u002B topo",
+          "holes": [
+            {
+              "kind": "minifixCam",
+              "edge": "front",
+              "posXmm": 37,
+              "posYmm": 50,
+              "diameterMm": 15,
+              "depthMm": 13
+            },
+            {
+              "kind": "minifixCam",
+              "edge": "front",
+              "posXmm": 37,
+              "posYmm": 670,
+              "diameterMm": 15,
+              "depthMm": 13
+            }
+          ]
+        },
+        {
+          "instanceId": 31,
+          "moduleId": "04a88649-b62b-4a80-ad87-9c46c83a9104",
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Lateral",
+          "sheetXmm": 357,
+          "sheetYmm": 10,
+          "lengthMm": 350,
+          "widthMm": 720,
+          "rotated": false,
+          "edgeBand": "Frente \u002B topo",
+          "holes": [
+            {
+              "kind": "minifixCam",
+              "edge": "front",
+              "posXmm": 37,
+              "posYmm": 50,
+              "diameterMm": 15,
+              "depthMm": 13
+            },
+            {
+              "kind": "minifixCam",
+              "edge": "front",
+              "posXmm": 37,
+              "posYmm": 670,
+              "diameterMm": 15,
+              "depthMm": 13
+            }
+          ]
+        },
+        {
+          "instanceId": 35,
+          "moduleId": "04a88649-b62b-4a80-ad87-9c46c83a9104",
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Prateleira",
+          "sheetXmm": 10,
+          "sheetYmm": 1500,
+          "lengthMm": 760,
+          "widthMm": 324,
+          "rotated": false,
+          "edgeBand": "Frente",
+          "holes": [
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 50,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            },
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 710,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            }
+          ]
+        },
+        {
+          "instanceId": 23,
+          "moduleId": "4b006643-d18c-4f18-8f56-3879608f0009",
+          "moduleName": "4G 400mm",
+          "pieceName": "Tampo interno",
+          "sheetXmm": 363,
+          "sheetYmm": 733,
+          "lengthMm": 364,
+          "widthMm": 544,
+          "rotated": false,
+          "edgeBand": "Frente",
+          "holes": [
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 50,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            },
+            {
+              "kind": "minifixDowel",
+              "edge": "front",
+              "posXmm": 314,
+              "posYmm": 37,
+              "diameterMm": 5,
+              "depthMm": 10
+            }
+          ]
+        },
+        {
+          "instanceId": 28,
+          "moduleId": "4b006643-d18c-4f18-8f56-3879608f0009",
+          "moduleName": "4G 400mm",
+          "pieceName": "Frente gaveta 4",
+          "sheetXmm": 363,
+          "sheetYmm": 1280,
+          "lengthMm": 392,
+          "widthMm": 208.5,
+          "rotated": false,
+          "edgeBand": "4 lados",
+          "holes": []
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "materialName": "MDF Branco",
+      "thicknessMm": 6,
+      "lengthMm": 2750,
+      "widthMm": 1850,
+      "utilizationPercent": 46.943764,
+      "pieces": [
+        {
+          "instanceId": 14,
+          "moduleId": "06e307ff-626e-4ae6-9456-e69a52fc003f",
+          "moduleName": "3P 1200mm",
+          "pieceName": "Fundo",
+          "sheetXmm": 10,
+          "sheetYmm": 10,
+          "lengthMm": 814,
+          "widthMm": 1164,
+          "rotated": true,
+          "holes": []
+        },
+        {
+          "instanceId": 5,
+          "moduleId": "18c50fc2-6495-4f8b-9353-03e2355c76c2",
+          "moduleName": "2P 800mm",
+          "pieceName": "Fundo",
+          "sheetXmm": 827,
+          "sheetYmm": 10,
+          "lengthMm": 764,
+          "widthMm": 814,
+          "rotated": false,
+          "holes": []
+        },
+        {
+          "instanceId": 34,
+          "moduleId": "04a88649-b62b-4a80-ad87-9c46c83a9104",
+          "moduleName": "A\u00E9reo 2P 800mm",
+          "pieceName": "Fundo",
+          "sheetXmm": 827,
+          "sheetYmm": 827,
+          "lengthMm": 684,
+          "widthMm": 764,
+          "rotated": true,
+          "holes": []
+        },
+        {
+          "instanceId": 24,
+          "moduleId": "4b006643-d18c-4f18-8f56-3879608f0009",
+          "moduleName": "4G 400mm",
+          "pieceName": "Fundo",
+          "sheetXmm": 10,
+          "sheetYmm": 1177,
+          "lengthMm": 814,
+          "widthMm": 364,
+          "rotated": true,
+          "holes": []
+        }
+      ]
+    }
+  ]
+}

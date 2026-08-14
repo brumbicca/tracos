@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "name": "Biblioteca override demo",
+  "companyDisplayName": "Marcenaria Demo",
+  "modules": [
+    {
+      "id": "balcao-2-portas",
+      "displayName": "Balcão 2P Premium",
+      "defaultWidth": 800,
+      "defaultHeight": 850,
+      "defaultDepth": 550,
+      "doorCount": 2,
+      "drawerCount": 0
+    },
+    {
+      "id": "modulo-extra-demo",
+      "displayName": "Balcão Demo Extra",
+      "category": "cozinha",
+      "defaultWidth": 700,
+      "defaultHeight": 850,
+      "defaultDepth": 550,
+      "doorCount": 2,
+      "drawerCount": 0
+    }
+  ],
+  "modulePrices": {
+    "balcao-2-portas": 4200,
+    "modulo-extra-demo": 3100
+  }
+}

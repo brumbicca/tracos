@@ -1,0 +1,110 @@
+<Window x:Class="Tracos3DStudio.WallBandsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Editor de Faixas"
+        Width="440"
+        Height="520"
+        MinWidth="380"
+        MinHeight="420"
+        WindowStartupLocation="CenterOwner"
+        Background="#F5F5F5"
+        AutomationProperties.Name="Editor de Faixas"
+        AutomationProperties.AutomationId="WallBandsWindow">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   x:Name="WallTitleText"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,4"
+                   AutomationProperties.AutomationId="WallBandsWallTitleText"/>
+
+        <TextBlock Grid.Row="1"
+                   x:Name="WallInfoText"
+                   Margin="0,0,0,8"
+                   Foreground="#444444"
+                   AutomationProperties.AutomationId="WallBandsWallInfoText"/>
+
+        <TextBlock Grid.Row="2"
+                   x:Name="SummaryText"
+                   Margin="0,0,0,8"
+                   TextWrapping="Wrap"
+                   Foreground="#666666"
+                   FontSize="11"
+                   AutomationProperties.AutomationId="WallBandsSummaryText"/>
+
+        <ListBox Grid.Row="3"
+                 x:Name="BandsListBox"
+                 DisplayMemberPath="Label"
+                 SelectionChanged="BandsListBox_SelectionChanged"
+                 AutomationProperties.Name="Lista de faixas"
+                 AutomationProperties.AutomationId="WallBandsListBox"/>
+
+        <StackPanel Grid.Row="4" Margin="0,8,0,0">
+            <Button x:Name="AddHorizontalBandButton"
+                    Content="Definir faixa horizontal (dois cliques)"
+                    Height="28"
+                    Click="AddHorizontalBandButton_Click"
+                    AutomationProperties.AutomationId="WallBandsAddHorizontalButton"/>
+            <Button x:Name="AddVerticalBandButton"
+                    Margin="0,6,0,0"
+                    Content="Definir faixa vertical (dois cliques)"
+                    Height="28"
+                    Click="AddVerticalBandButton_Click"
+                    AutomationProperties.AutomationId="WallBandsAddVerticalButton"/>
+            <Button x:Name="EditRegionsButton"
+                    Margin="0,6,0,0"
+                    Content="Editar Regiões..."
+                    Height="28"
+                    Click="EditRegionsButton_Click"
+                    AutomationProperties.AutomationId="WallBandsEditRegionsButton"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="5" Margin="0,10,0,0">
+            <TextBlock Text="Material da faixa"/>
+            <ComboBox x:Name="MaterialCombo"
+                      Margin="0,2,0,0"
+                      Height="28"
+                      DisplayMemberPath="DisplayName"
+                      SelectionChanged="MaterialCombo_SelectionChanged"
+                      AutomationProperties.AutomationId="WallBandsMaterialCombo"/>
+        </StackPanel>
+
+        <TextBlock Grid.Row="6"
+                   x:Name="StatusText"
+                   Margin="0,8,0,0"
+                   TextWrapping="Wrap"
+                   Foreground="#666666"
+                   FontSize="11"
+                   AutomationProperties.AutomationId="WallBandsStatusText"/>
+
+        <StackPanel Grid.Row="7"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,12,0,0">
+            <Button x:Name="RemoveBandButton"
+                    Content="Remover faixa"
+                    Width="110"
+                    Height="32"
+                    Margin="0,0,8,0"
+                    Click="RemoveBandButton_Click"
+                    AutomationProperties.AutomationId="WallBandsRemoveButton"/>
+            <Button Content="Fechar"
+                    Width="88"
+                    Height="32"
+                    IsCancel="True"
+                    Click="Close_Click"
+                    AutomationProperties.AutomationId="WallBandsCloseButton"/>
+        </StackPanel>
+    </Grid>
+</Window>
