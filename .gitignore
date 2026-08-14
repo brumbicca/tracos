@@ -69,10 +69,13 @@ Desktop.ini
 credentials.json
 appsettings.*.local.json
 
-# Cursor / agent local noise (keep rules)
-.cursor/*
-!.cursor/rules/
-!.cursor/rules/**
+# Cursor / agent (não sobe)
+.cursor/
+
+# Documentação e contextos de chat (não sobem — só código)
+docs/
+contexts/
+samples/
 
 # Temp / debug / local experiments
 tmp_*
@@ -82,15 +85,14 @@ winapp-test-err.txt
 dump-*.csx
 *.rar
 *.zip
-!docs/**/*.png
 
-# Root screenshot/debug noise (canonical: docs/screenshots/)
+# Root screenshot/debug noise
 /fase-*.png
 /fase-*.tracos
 /fase-*.pdf
 /fase-*.tracos-lib
 
-# Local CNC / scratch na raiz (não sobem)
+# Local CNC / scratch na raiz
 /*.tap
 /*.pp
 /*.tool
