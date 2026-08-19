@@ -60,5 +60,27 @@ public static class FrentesPortasConfiguratorService
             settings.CozinhaDespenseiroDoorFrontGapMm = gapDesp;
     }
 
+    public static void ApplyInferioresToStructure(
+        CozinhaFrentesPortasSettings portas,
+        ModulationStructure structure)
+    {
+        structure.FrontSideGapMm = ReadChoiceMm(portas, "inferiores", "borda-lat", structure.FrontSideGapMm);
+        structure.FrontTopGapMm = ReadChoiceMm(portas, "inferiores", "borda-sup", structure.FrontTopGapMm);
+        structure.FrontBottomGapMm = ReadChoiceMm(portas, "inferiores", "borda-inf", structure.FrontBottomGapMm);
+    }
+
+    private static float ReadChoiceMm(
+        CozinhaFrentesPortasSettings portas,
+        string nodeId,
+        string fieldKey,
+        float fallback)
+    {
+        if (portas.Choice.TryGetValue(MakeKey(nodeId, fieldKey), out string? text) &&
+            float.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out float value))
+            return float.IsFinite(value) ? value : fallback;
+
+        return fallback;
+    }
+
     public static string MakeKey(string nodeId, string fieldKey) => $"{nodeId}:{fieldKey}";
 }

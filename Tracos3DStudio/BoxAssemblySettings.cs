@@ -10,6 +10,19 @@ public enum BoxBackPanelType
   Travessas
 }
 
+/// <summary>
+/// Forma geométrica do fechamento traseiro exibido no Configurador de Dimensões.
+/// Mantida separada de <see cref="BoxBackPanelType"/> para preservar projetos legados.
+/// </summary>
+public enum BoxBackPanelLayout
+{
+  Inteiro,
+  Rebaixado,
+  TravessaVertical,
+  TravessaHorizontal,
+  SemFundo
+}
+
 public static class BoxBackPanelTypeExtensions
 {
   public static string DisplayName(this BoxBackPanelType type) => type switch
@@ -31,6 +44,9 @@ public static class BoxBackPanelTypeExtensions
 /// <summary>Parâmetros de montagem de caixa por seção (V3.7f Fase 3c).</summary>
 public sealed class BoxAssemblySectionSettings
 {
+  /// <summary>Versão dos padrões específicos do canto reto aplicados ao perfil.</summary>
+  public int BlindCornerDefaultsVersion { get; set; }
+
   public BoxBackPanelType BackPanelType { get; set; } = BoxBackPanelType.EncaixadoSarrafoHorizontal;
 
   /// <summary>Recuo/ranhura do fundo encaixado (mm).</summary>
@@ -73,6 +89,7 @@ public sealed class BoxAssemblySectionSettings
 
   public BoxAssemblySectionSettings Clone() => new()
   {
+    BlindCornerDefaultsVersion = BlindCornerDefaultsVersion,
     BackPanelType = BackPanelType,
     BackRecessMm = BackRecessMm,
     SarrafoHeightMm = SarrafoHeightMm,

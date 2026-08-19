@@ -682,8 +682,30 @@ public partial class DimensionConfiguratorWindow : Window
             "Paridade Promob — montagem da caixa (tipo de fundo, fixações e cantos).");
 
         var box = _settings.CozinhaInferiorBox;
+        string? currentDeclarativeGroup = null;
         foreach (var field in node.Fields)
         {
+            if (nodeId == "canto-reto-canto")
+            {
+                string? groupTitle = field.Key switch
+                {
+                    "cr-tipo-ff" => "Frente Falsa",
+                    "cr-rffp" => "Frente Falsa Parcial",
+                    "cr-uso-dist" => "Distanciador",
+                    "cr-rec-prat" => "Prateleira",
+                    "cr-ava-por" => "Portas",
+                    _ => null
+                };
+                if (groupTitle != null)
+                    AddFieldGroupHeader(groupTitle);
+            }
+            else if (!string.IsNullOrWhiteSpace(field.Group) &&
+                     !string.Equals(currentDeclarativeGroup, field.Group, StringComparison.Ordinal))
+            {
+                currentDeclarativeGroup = field.Group;
+                AddFieldGroupHeader(currentDeclarativeGroup);
+            }
+
             if (field.Kind == BoxFieldKind.Numeric)
             {
                 float value = box.InferiorNumeric.TryGetValue(field.Key, out var v)
@@ -896,10 +918,20 @@ public partial class DimensionConfiguratorWindow : Window
         foreach (var field in node.Fields)
         {
             string storageKey = GavetasConfiguratorService.MakeKey(nodeId, field.Key);
-            string selected = gavetas.Choice.TryGetValue(storageKey, out var s)
-                ? s
-                : field.DefaultOption;
-            AddChoiceCombo($"dorgav-cho-{nodeId}::{field.Key}", field.Label, field.Options, selected);
+            if (field.Kind == BoxFieldKind.Numeric)
+            {
+                float value = gavetas.Numeric.TryGetValue(storageKey, out var v)
+                    ? v
+                    : field.DefaultValue;
+                AddField($"dorgav-num-{nodeId}::{field.Key}", field.Label, value);
+            }
+            else
+            {
+                string selected = gavetas.Choice.TryGetValue(storageKey, out var s)
+                    ? s
+                    : field.DefaultOption;
+                AddChoiceCombo($"dorgav-cho-{nodeId}::{field.Key}", field.Label, field.Options, selected);
+            }
         }
     }
 
@@ -913,13 +945,30 @@ public partial class DimensionConfiguratorWindow : Window
             "Paridade Promob — folgas, fixações laterais e fundos da caixa de gaveta.");
 
         var gavetas = _settings.CozinhaGavetas;
+        string? currentGroup = null;
         foreach (var field in node.Fields)
         {
+            if (!string.IsNullOrWhiteSpace(field.Group) &&
+                !string.Equals(currentGroup, field.Group, StringComparison.Ordinal))
+            {
+                currentGroup = field.Group;
+                AddFieldGroupHeader(currentGroup);
+            }
             string storageKey = GavetasConfiguratorService.MakeKey(nodeId, field.Key);
-            string selected = gavetas.Choice.TryGetValue(storageKey, out var s)
-                ? s
-                : field.DefaultOption;
-            AddChoiceCombo($"gav-cho-{nodeId}::{field.Key}", field.Label, field.Options, selected);
+            if (field.Kind == BoxFieldKind.Numeric)
+            {
+                float value = gavetas.Numeric.TryGetValue(storageKey, out var v)
+                    ? v
+                    : field.DefaultValue;
+                AddField($"gav-num-{nodeId}::{field.Key}", field.Label, value);
+            }
+            else
+            {
+                string selected = gavetas.Choice.TryGetValue(storageKey, out var s)
+                    ? s
+                    : field.DefaultOption;
+                AddChoiceCombo($"gav-cho-{nodeId}::{field.Key}", field.Label, field.Options, selected);
+            }
         }
     }
 
@@ -933,13 +982,30 @@ public partial class DimensionConfiguratorWindow : Window
             "Paridade Promob — folgas, fixações laterais e fundos de gavetas internas e auxiliares.");
 
         var gavetasInternas = _settings.CozinhaGavetasInternas;
+        string? currentGroup = null;
         foreach (var field in node.Fields)
         {
+            if (!string.IsNullOrWhiteSpace(field.Group) &&
+                !string.Equals(currentGroup, field.Group, StringComparison.Ordinal))
+            {
+                currentGroup = field.Group;
+                AddFieldGroupHeader(currentGroup);
+            }
             string storageKey = GavetasInternasConfiguratorService.MakeKey(nodeId, field.Key);
-            string selected = gavetasInternas.Choice.TryGetValue(storageKey, out var s)
-                ? s
-                : field.DefaultOption;
-            AddChoiceCombo($"gavint-cho-{nodeId}::{field.Key}", field.Label, field.Options, selected);
+            if (field.Kind == BoxFieldKind.Numeric)
+            {
+                float value = gavetasInternas.Numeric.TryGetValue(storageKey, out var v)
+                    ? v
+                    : field.DefaultValue;
+                AddField($"gavint-num-{nodeId}::{field.Key}", field.Label, value);
+            }
+            else
+            {
+                string selected = gavetasInternas.Choice.TryGetValue(storageKey, out var s)
+                    ? s
+                    : field.DefaultOption;
+                AddChoiceCombo($"gavint-cho-{nodeId}::{field.Key}", field.Label, field.Options, selected);
+            }
         }
     }
 
@@ -1266,9 +1332,10 @@ public partial class DimensionConfiguratorWindow : Window
         {
             if (key.StartsWith("boxinf-num-", StringComparison.Ordinal))
             {
-                if (TryParseMm(box.Text, out float v) && v >= 0f)
+                string fieldKey = key["boxinf-num-".Length..];
+                if (TryParseMm(box.Text, out float v))
                 {
-                    _settings.CozinhaInferiorBox.InferiorNumeric[key["boxinf-num-".Length..]] = v;
+                    _settings.CozinhaInferiorBox.InferiorNumeric[fieldKey] = v;
                     touchedInferior = true;
                 }
                 continue;
@@ -1276,7 +1343,7 @@ public partial class DimensionConfiguratorWindow : Window
 
             if (key.StartsWith("boxsup-num-", StringComparison.Ordinal))
             {
-                if (TryParseMm(box.Text, out float v) && v >= 0f)
+                if (TryParseMm(box.Text, out float v))
                 {
                     _settings.CozinhaSuperiorBox.SuperiorNumeric[key["boxsup-num-".Length..]] = v;
                     touchedSuperior = true;
@@ -1286,7 +1353,7 @@ public partial class DimensionConfiguratorWindow : Window
 
             if (key.StartsWith("boxdesp-num-", StringComparison.Ordinal))
             {
-                if (TryParseMm(box.Text, out float v) && v >= 0f)
+                if (TryParseMm(box.Text, out float v))
                 {
                     _settings.CozinhaDespenseiroBox.DespenseirosNumeric[key["boxdesp-num-".Length..]] = v;
                     touchedDespenseiros = true;
@@ -1296,7 +1363,7 @@ public partial class DimensionConfiguratorWindow : Window
 
             if (key.StartsWith("dorarm-num-", StringComparison.Ordinal))
             {
-                if (TryParseMm(box.Text, out float v) && v >= 0f)
+                if (TryParseMm(box.Text, out float v))
                 {
                     _settings.DormitorioArmarioBox.ArmarioNumeric[key["dorarm-num-".Length..]] = v;
                     touchedDorArm = true;
@@ -1306,9 +1373,10 @@ public partial class DimensionConfiguratorWindow : Window
 
             if (key.StartsWith("dorbanc-num-", StringComparison.Ordinal))
             {
-                if (TryParseMm(box.Text, out float v) && v >= 0f)
+                string fieldKey = key["dorbanc-num-".Length..];
+                if (TryParseMm(box.Text, out float v))
                 {
-                    _settings.DormitorioBancadaCriadoBox.InferiorNumeric[key["dorbanc-num-".Length..]] = v;
+                    _settings.DormitorioBancadaCriadoBox.InferiorNumeric[fieldKey] = v;
                     touchedDorBanc = true;
                 }
                 continue;
@@ -1316,7 +1384,7 @@ public partial class DimensionConfiguratorWindow : Window
 
             if (key.StartsWith("dorsup-num-", StringComparison.Ordinal))
             {
-                if (TryParseMm(box.Text, out float v) && v >= 0f)
+                if (TryParseMm(box.Text, out float v))
                 {
                     _settings.DormitorioSuperiorBox.SuperiorNumeric[key["dorsup-num-".Length..]] = v;
                     touchedDorSup = true;
@@ -1327,15 +1395,42 @@ public partial class DimensionConfiguratorWindow : Window
             if (key.StartsWith("dorport-num-", StringComparison.Ordinal))
             {
                 if (TryParsePortasFieldKey(key["dorport-num-".Length..], out var nodeId, out var fieldKey)
-                    && TryParseMm(box.Text, out float v) && v >= 0f)
+                    && TryParseMm(box.Text, out float v))
                     _settings.DormitorioFrentesPortas.Numeric[
                         FrentesPortasConfiguratorService.MakeKey(nodeId, fieldKey)] = v;
                 continue;
             }
 
+            if (key.StartsWith("dorgav-num-", StringComparison.Ordinal))
+            {
+                if (TryParsePortasFieldKey(key["dorgav-num-".Length..], out var nodeId, out var fieldKey)
+                    && TryParseMm(box.Text, out float v))
+                    _settings.DormitorioGavetas.Numeric[
+                        GavetasConfiguratorService.MakeKey(nodeId, fieldKey)] = v;
+                continue;
+            }
+
+            if (key.StartsWith("gav-num-", StringComparison.Ordinal))
+            {
+                if (TryParsePortasFieldKey(key["gav-num-".Length..], out var nodeId, out var fieldKey)
+                    && TryParseMm(box.Text, out float v))
+                    _settings.CozinhaGavetas.Numeric[
+                        GavetasConfiguratorService.MakeKey(nodeId, fieldKey)] = v;
+                continue;
+            }
+
+            if (key.StartsWith("gavint-num-", StringComparison.Ordinal))
+            {
+                if (TryParsePortasFieldKey(key["gavint-num-".Length..], out var nodeId, out var fieldKey)
+                    && TryParseMm(box.Text, out float v))
+                    _settings.CozinhaGavetasInternas.Numeric[
+                        GavetasInternasConfiguratorService.MakeKey(nodeId, fieldKey)] = v;
+                continue;
+            }
+
             if (key.StartsWith("ele-num-", StringComparison.Ordinal))
             {
-                if (TryParseMm(box.Text, out float v) && v >= 0f)
+                if (TryParseMm(box.Text, out float v))
                     _settings.CozinhaEletros.Numeric[key["ele-num-".Length..]] = v;
                 continue;
             }
@@ -1343,7 +1438,7 @@ public partial class DimensionConfiguratorWindow : Window
             if (key.StartsWith("portas-num-", StringComparison.Ordinal))
             {
                 if (TryParsePortasFieldKey(key["portas-num-".Length..], out var nodeId, out var fieldKey)
-                    && TryParseMm(box.Text, out float v) && v >= 0f)
+                    && TryParseMm(box.Text, out float v))
                 {
                     _settings.CozinhaFrentesPortas.Numeric[
                         FrentesPortasConfiguratorService.MakeKey(nodeId, fieldKey)] = v;
@@ -1355,7 +1450,7 @@ public partial class DimensionConfiguratorWindow : Window
             if (key.StartsWith("cava-num-", StringComparison.Ordinal))
             {
                 if (TryParsePortasFieldKey(key["cava-num-".Length..], out var nodeId, out var fieldKey)
-                    && TryParseMm(box.Text, out float v) && v >= 0f)
+                    && TryParseMm(box.Text, out float v))
                 {
                     _settings.CozinhaCava.Numeric[
                         CavaConfiguratorService.MakeKey(nodeId, fieldKey)] = v;
@@ -1363,7 +1458,7 @@ public partial class DimensionConfiguratorWindow : Window
                 continue;
             }
 
-            if (!TryParseMm(box.Text, out float value) || value <= 0f)
+            if (!TryParseMm(box.Text, out float value))
                 continue;
 
             if (key.StartsWith("chapa-", StringComparison.Ordinal))

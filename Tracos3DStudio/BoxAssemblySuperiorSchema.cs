@@ -108,7 +108,7 @@ public static class BoxAssemblySuperiorSchema
     [
         new()
         {
-            Header = "Canto L | Oblíquo | Curvo",
+            Header = "Canto L | Oblíquo",
             Nodes =
             [
                 new()
@@ -131,12 +131,13 @@ public static class BoxAssemblySuperiorSchema
                             Key = "cl-tipo-base", Label = "E — Tipo Base", Kind = BoxFieldKind.Choice,
                             Options = ["Inteira", "Recortada"], DefaultOption = "Inteira"
                         },
-                        new() { Key = "cl-folga-pa", Label = "F — Folga Interna Porta A (mm)" },
-                        new() { Key = "cl-folga-pb", Label = "G — Folga Interna Porta B (mm)" },
-                        new() { Key = "cl-abt", Label = "H — Avanço Base sobre Traseira (mm)" },
-                        new() { Key = "cl-atb", Label = "I — Avanço Traseira sobre Base (mm)" },
-                        new() { Key = "cl-aft", Label = "J — Avanço Fundo sobre Traseira (mm)" },
-                        new() { Key = "cl-prof-dist", Label = "K — Profundidade Distanciador (mm)" }
+                        new() { Key = "cl-folga-pa", Label = "F — Folga Esquerda da Porta (mm)", DefaultValue = 2f, AllowNegative = true },
+                        new() { Key = "cl-folga-pb", Label = "G — Folga Direita da Porta (mm)", DefaultValue = 2f, AllowNegative = true },
+                        new() { Key = "cl-folga-entre", Label = "H — Folga entre Portas (mm)", DefaultValue = 2f, AllowNegative = true },
+                        new() { Key = "cl-abt", Label = "I — Avanço Base sobre Traseira (mm)" },
+                        new() { Key = "cl-atb", Label = "J — Avanço Traseira sobre Base (mm)" },
+                        new() { Key = "cl-aft", Label = "K — Avanço Fundo sobre Traseira (mm)" },
+                        new() { Key = "cl-prof-dist", Label = "L — Profundidade Distanciador (mm)" }
                     ]
                 },
                 new()

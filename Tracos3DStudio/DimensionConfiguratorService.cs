@@ -105,6 +105,9 @@ public static class DimensionConfiguratorService
             if (definition.IsWallMounted)
                 return ResolveCozinhaSuperiorSlot(definition);
 
+            if (definition.Id.Contains("ilha", StringComparison.OrdinalIgnoreCase))
+                return ModuleDimensionSlot.CozinhaIlha;
+
             if (string.Equals(
                     definition.LibraryGroup,
                     ModuleLibraryHierarchy.GroupAltos,
@@ -175,6 +178,13 @@ public static class DimensionConfiguratorService
         var slot = ResolveSlot(definition);
         var (height, depth) = GetSlotDefaults(settings, slot);
 
+        // O canto oblíquo nasce quadrado, como o Canto L de referência.
+        // A profundidade padrão da cozinha continua definindo o comprimento
+        // das duas laterais; a engenharia do módulo pode alterar livremente
+        // a largura e a profundidade externas depois da inserção.
+        if (definition.ShapeKind == ModuleShapeKind.Oblique)
+            depth = definition.DefaultDepth;
+
         float width = slot == ModuleDimensionSlot.Painel
             ? settings.PainelWidthMm
             : definition.DefaultWidth;
@@ -210,6 +220,7 @@ public static class DimensionConfiguratorService
             ChapaConfiguratorService.ApplyToStructure(baseRules.Structure, definition, settings);
             ChapaConfiguratorService.ApplyToPieces(baseRules, definition, settings);
             BoxAssemblyConfiguratorService.ApplyToStructure(baseRules.Structure, definition, settings);
+            BalconyModuleBuilder.ApplyStructureRules(definition, baseRules.Structure);
             BoxAssemblyConfiguratorService.ApplyToPieces(baseRules, definition, settings);
         }
 
@@ -320,18 +331,53 @@ public static class DimensionConfiguratorService
                 FrontThicknessMm = source.Structure.FrontThicknessMm,
                 FrontGapMm = source.Structure.FrontGapMm,
                 BackPanelType = source.Structure.BackPanelType,
+                BackPanelLayout = source.Structure.BackPanelLayout,
                 BackRecessMm = source.Structure.BackRecessMm,
+                BackHeightRecessMm = source.Structure.BackHeightRecessMm,
+                BackUpperRailOffsetMm = source.Structure.BackUpperRailOffsetMm,
+                BackLowerRailOffsetMm = source.Structure.BackLowerRailOffsetMm,
+                BackSupportRailCount = source.Structure.BackSupportRailCount,
+                BackSupportRailWidthMm = source.Structure.BackSupportRailWidthMm,
+                BackAdvanceOverBaseMm = source.Structure.BackAdvanceOverBaseMm,
+                BaseAdvanceOverBackMm = source.Structure.BaseAdvanceOverBackMm,
+                BaseRecessMm = source.Structure.BaseRecessMm,
+                BackAdvanceOverLateralMm = source.Structure.BackAdvanceOverLateralMm,
+                LateralAdvanceOverBackMm = source.Structure.LateralAdvanceOverBackMm,
+                BackAdvanceOverDivisionMm = source.Structure.BackAdvanceOverDivisionMm,
                 SarrafoHeightMm = source.Structure.SarrafoHeightMm,
                 SarrafoThicknessMm = source.Structure.SarrafoThicknessMm,
                 LateralBaseOverlapMm = source.Structure.LateralBaseOverlapMm,
+                BaseAdvanceOverLateralMm = source.Structure.BaseAdvanceOverLateralMm,
+                LateralBottomRecessMm = source.Structure.LateralBottomRecessMm,
+                LateralDepthGapMm = source.Structure.LateralDepthGapMm,
+                LateralDepthAlignment = source.Structure.LateralDepthAlignment,
                 CrossRailWidthMm = source.Structure.CrossRailWidthMm,
                 SarrafoVisible = source.Structure.SarrafoVisible,
                 FrontSarrafoIsVertical = source.Structure.FrontSarrafoIsVertical,
                 BackSarrafoIsVertical = source.Structure.BackSarrafoIsVertical,
                 FrontSarrafoVisible = source.Structure.FrontSarrafoVisible,
                 BackSarrafoVisible = source.Structure.BackSarrafoVisible,
+                SarrafoWhole = source.Structure.SarrafoWhole,
+                FrontSarrafoSegmented = source.Structure.FrontSarrafoSegmented,
+                BackSarrafoSegmented = source.Structure.BackSarrafoSegmented,
+                SarrafoChamfered = source.Structure.SarrafoChamfered,
+                SarrafoAdvanceOverLateralMm = source.Structure.SarrafoAdvanceOverLateralMm,
+                SarrafoAdvanceOverBackMm = source.Structure.SarrafoAdvanceOverBackMm,
+                BackAdvanceOverSarrafoMm = source.Structure.BackAdvanceOverSarrafoMm,
+                BackSarrafoRecessMm = source.Structure.BackSarrafoRecessMm,
+                BackSarrafoLowerRecessMm = source.Structure.BackSarrafoLowerRecessMm,
+                LateralAdvanceOverFrontPanelMm = source.Structure.LateralAdvanceOverFrontPanelMm,
+                FrontPanelAdvanceOverLateralMm = source.Structure.FrontPanelAdvanceOverLateralMm,
+                DivisionFrontInsetMm = source.Structure.DivisionFrontInsetMm,
+                DivisionMovableBackInsetMm = source.Structure.DivisionMovableBackInsetMm,
+                DivisionFixedBackInsetMm = source.Structure.DivisionFixedBackInsetMm,
+                DivisionBottomRecessMm = source.Structure.DivisionBottomRecessMm,
+                DivisionSpacerWidthMm = source.Structure.DivisionSpacerWidthMm,
                 SarrafoTraseiroHeightMm = source.Structure.SarrafoTraseiroHeightMm,
                 SarrafoDianteiroRecessMm = source.Structure.SarrafoDianteiroRecessMm,
+                FrontSideGapMm = source.Structure.FrontSideGapMm,
+                FrontTopGapMm = source.Structure.FrontTopGapMm,
+                FrontBottomGapMm = source.Structure.FrontBottomGapMm,
                 FrontBays = source.Structure.FrontBays
                     .Select(b => new ModulationFrontBay
                     {
@@ -348,7 +394,17 @@ public static class DimensionConfiguratorService
                         Id = s.Id,
                         HeightFraction = s.HeightFraction,
                         DepthInsetMm = s.DepthInsetMm,
-                        WidthInsetMm = s.WidthInsetMm
+                        WidthInsetMm = s.WidthInsetMm,
+                        BackInsetMm = s.BackInsetMm,
+                        IsFixed = s.IsFixed
+                    })
+                    .ToList(),
+                Divisions = source.Structure.Divisions
+                    .Select(d => new ModulationDivisionRule
+                    {
+                        Id = d.Id,
+                        WidthFraction = d.WidthFraction,
+                        IsFixed = d.IsFixed
                     })
                     .ToList()
             },

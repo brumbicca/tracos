@@ -2,7 +2,7 @@ namespace Tracos3DStudio;
 
 /// <summary>
 /// Hierarquia Cozinhas — ordem das abas como no Promob Plus 5.60
-/// (Módulos → Cozinhas → Inferiores → Cantos | Cantos Bifold | Balcões…).
+/// (Módulos → Cozinhas → Inferiores → Cantos | Balcões…).
 /// </summary>
 public static class ModuleLibraryHierarchy
 {
@@ -18,12 +18,9 @@ public static class ModuleLibraryHierarchy
     public const string GroupDespenseiros = GroupAltos;
 
     public const string SubCantos = "Cantos";
-    public const string SubCantosBifold = "Cantos Bifold";
     public const string SubBalcoes = "Balcões";
     public const string SubEspeciais = "Especiais";
     public const string SubGaveteiros = "Gaveteiros";
-    public const string SubEletros = "p/ Eletros";
-    public const string SubPias = "Pias";
     public const string SubDiagonais = "Diagonais";
     public const string SubCantoneiras = "Cantoneiras";
     public const string SubFechamentos = "Fechamentos";
@@ -44,12 +41,9 @@ public static class ModuleLibraryHierarchy
     public static readonly string[] InferioresSubGroupOrder =
     [
         SubCantos,
-        SubCantosBifold,
         SubBalcoes,
         SubEspeciais,
         SubGaveteiros,
-        SubEletros,
-        SubPias,
         SubDiagonais,
         SubCantoneiras,
         SubFechamentos

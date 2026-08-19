@@ -139,7 +139,9 @@ public static class ModuleCatalog
     }
 
     public static IEnumerable<ModuleDefinition> GetCozinhaCatalog() =>
-        All.Where(definition => definition.Category == ModuleCategory.Cozinha);
+        All.Where(definition =>
+            definition.Category == ModuleCategory.Cozinha &&
+            definition.IsCatalogVisible);
 
     public static bool IsBuiltIn(string id) => Definitions.ContainsKey(id);
 

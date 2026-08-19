@@ -20,6 +20,12 @@ public sealed class ModuleDefinition
     /// <summary>Ordem de exibição na galeria (menor = primeiro), espelhando o Promob.</summary>
     public int CatalogOrder { get; init; }
 
+    /// <summary>
+    /// Permite manter uma definição somente para abrir projetos antigos sem
+    /// exibi-la como opção de inserção na biblioteca atual.
+    /// </summary>
+    public bool IsCatalogVisible { get; init; } = true;
+
     /// <summary>Silhueta 3D (canto L, cego, oblíquo, extrator…).</summary>
     public ModuleShapeKind ShapeKind { get; init; } = ModuleShapeKind.Standard;
 

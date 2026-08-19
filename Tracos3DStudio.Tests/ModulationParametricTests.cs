@@ -38,9 +38,27 @@ public sealed class ModulationParametricTests
         Assert.All(rects, rect => Assert.Equal(ModulationFrontType.Door, rect.Type));
 
         float doorWidth = rects[0].X2 - rects[0].X1;
-        Assert.Equal(292f, doorWidth, 1);
-        Assert.Equal(6f, rects[0].X1, 1);
+        Assert.Equal(296f, doorWidth, 1);
+        Assert.Equal(2f, rects[0].X1, 1);
         Assert.Equal(298f, rects[0].X2, 1);
+    }
+
+    [Fact]
+    public void ModulationFrontLayout_UsaBordasExternasIndependentesDaFolgaEntrePortas()
+    {
+        var rules = ModulationRulesPresets.CreateStandardBox(doorCount: 2, drawerCount: 0);
+        rules.Structure.FrontGapMm = 6f;
+        rules.Structure.FrontSideGapMm = 3f;
+        rules.Structure.FrontBottomGapMm = 5f;
+        rules.Structure.FrontTopGapMm = 7f;
+
+        var rects = ModulationFrontLayout.Layout(600f, 850f, rules.Structure);
+
+        Assert.Equal(3f, rects[0].X1, 1);
+        Assert.Equal(5f, rects[0].Y1, 1);
+        Assert.Equal(843f, rects[0].Y2, 1);
+        Assert.Equal(6f, rects[1].X1 - rects[0].X2, 1);
+        Assert.Equal(597f, rects[1].X2, 1);
     }
 
     [Fact]
@@ -69,6 +87,28 @@ public sealed class ModulationParametricTests
 
         Assert.Equal(550f, min.Z, 1);
         Assert.Equal(568f, max.Z, 1);
+    }
+
+    [Fact]
+    public void ModuleMeshBuilder_ModuloReto_BaseAcompanhaProfundidadeDaLateral()
+    {
+        var rules = ModulationRulesPresets.CreateStandardBox(doorCount: 2, drawerCount: 0);
+        rules.Structure.BackRecessMm = 20f;
+        rules.Structure.BackThicknessMm = 6f;
+        rules.Structure.LateralDepthGapMm = 10f;
+        rules.Structure.LateralDepthAlignment = LateralDepthAlignment.Back;
+        rules.Structure.BaseRecessMm = 5f;
+        var definition = CreateDefinition(rules);
+        var module = CreateModule(definition, width: 800f, depth: 550f);
+        module.RebuildMesh(definition);
+
+        Assert.True(ModulePartDimensionService.TryComputeLocalBounds(
+            module, "Lateral esq.", out var lateralMin, out var lateralMax));
+        Assert.True(ModulePartDimensionService.TryComputeLocalBounds(
+            module, "Base inferior", out var baseMin, out var baseMax));
+
+        Assert.Equal(lateralMin.Z, baseMin.Z, 3);
+        Assert.Equal(lateralMax.Z, baseMax.Z, 3);
     }
 
     [Fact]

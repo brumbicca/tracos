@@ -23,7 +23,7 @@ public sealed class FloorSurfaceData
 {
     public string? DefaultMaterialId { get; set; }
 
-    public bool ShowGrid { get; set; } = true;
+    public bool ShowGrid { get; set; } = false;
 
     public List<FloorZoneData> Zones { get; set; } = new();
 }
@@ -368,7 +368,11 @@ public sealed class ModuleInstanceData
 
     public bool IsLocked { get; set; } = false;
 
+    public bool IsMirrored { get; set; }
+
     public Dictionary<string, PartDimensionOverrideData>? PartOverrides { get; set; }
+
+    public List<string>? HiddenPartLabels { get; set; }
 
     /// <summary>Canto L — Medida A (profundidade asa direita / Promob).</summary>
     public float? CornerMedidaA { get; set; }
@@ -384,6 +388,29 @@ public sealed class ModuleInstanceData
 
     /// <summary>Canto Reto — Utilização do distanciador (UseSpacer).</summary>
     public bool? BlindCornerUseSpacer { get; set; }
+
+    /// <summary>Canto Oblíquo — uma ou duas portas.</summary>
+    public int? ObliqueDoorCount { get; set; }
+
+    /// <summary>Canto Oblíquo 1P — dobradiças no lado esquerdo.</summary>
+    public bool? ObliqueHingesOnLeft { get; set; }
+
+    public float? EndSmallSideDepth { get; set; }
+
+    public float? EndFrontStraightWidth { get; set; }
+
+    public int? EndDoorCount { get; set; }
+
+    /// <summary>Modelo de corrediça escolhido para as gavetas do módulo.</summary>
+    public DrawerSlideType? DrawerSlideType { get; set; }
+
+    public float? SpecialColumnWidth { get; set; }
+
+    public float? SpecialColumnDepth { get; set; }
+
+    public float? SpecialColumnLeftOffset { get; set; }
+
+    public bool? SpecialColumnShelfNotched { get; set; }
 }
 
 public sealed class PartDimensionOverrideData

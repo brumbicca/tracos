@@ -337,6 +337,9 @@ public static class ViewportRenderer
         {
             var face = FindFaceForTriangle(mesh, i);
 
+            if (face != null && !module.IsPartVisible(face.Label))
+                continue;
+
             // Raio X: omite o preenchimento das frentes (portas/gavetas) para revelar
             // o interior da caixa (fundo, sarrafo, prateleiras). O contorno permanece.
             if (xRay && face?.Kind == FaceKind.ModuleFront)
@@ -346,7 +349,7 @@ public static class ViewportRenderer
             bool partSelected = groupOpen &&
                 !string.IsNullOrEmpty(selectedPartLabel) &&
                 face != null &&
-                face.Label == selectedPartLabel;
+                DrawerPartNaming.MatchesSelection(face.Label, selectedPartLabel);
 
             var color = partSelected
                 ? new Vector4(1f, 0.62f, 0.18f, 1f)
@@ -399,12 +402,15 @@ public static class ViewportRenderer
 
         foreach (var face in mesh.Faces)
         {
+            if (!module.IsPartVisible(face.Label))
+                continue;
+
             if (face.Vertices is not { Length: >= 2 })
                 continue;
 
             bool partSelected = groupOpen &&
                 !string.IsNullOrEmpty(selectedPartLabel) &&
-                face.Label == selectedPartLabel;
+                DrawerPartNaming.MatchesSelection(face.Label, selectedPartLabel);
 
             RenderEngine.LineLoop(
                 face.Vertices,
@@ -424,7 +430,8 @@ public static class ViewportRenderer
 
             foreach (var face in mesh.Faces)
             {
-                if (face.Label == selectedPartLabel && face.Vertices is { Length: >= 2 })
+                if (DrawerPartNaming.MatchesSelection(face.Label, selectedPartLabel) &&
+                    face.Vertices is { Length: >= 2 })
                     RenderEngine.LineLoop(face.Vertices, new Vector4(0.95f, 0.55f, 0.08f, 1f));
             }
 
@@ -500,16 +507,11 @@ public static class ViewportRenderer
         if (selected)
             return new Vector4(0.45f, 0.62f, 0.95f, 1f);
 
-        return kind switch
-        {
-            FaceKind.ModuleFront => new Vector4(frontR, frontG, frontB, 1f),
-            FaceKind.ModuleTop => new Vector4(
-                Math.Min(frontR + 0.06f, 1f),
-                Math.Min(frontG + 0.06f, 1f),
-                Math.Min(frontB + 0.06f, 1f),
-                1f),
-            _ => new Vector4(frontR * 0.9f, frontG * 0.9f, frontB * 0.9f, 1f)
-        };
+        // A cor pertence ao material do módulo, não ao tipo de peça. Em
+        // especial, uma inserção nova deve nascer inteiramente em MDF branco:
+        // laterais, fundo, portas, prateleiras e sarrafos recebem a mesma cor
+        // até que o usuário escolha outro material.
+        return new Vector4(frontR, frontG, frontB, 1f);
     }
 
     public static void DrawModuleInsertionCotas(

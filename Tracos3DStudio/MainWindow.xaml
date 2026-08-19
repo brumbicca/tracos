@@ -20,9 +20,9 @@
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="170"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="280"/>
+            <ColumnDefinition x:Name="LibraryColumn" Width="250" MinWidth="160" MaxWidth="600"/>
+            <ColumnDefinition Width="*" MinWidth="400"/>
+            <ColumnDefinition x:Name="PropertiesColumn" Width="280" MinWidth="220" MaxWidth="650"/>
         </Grid.ColumnDefinitions>
 
         <Border Grid.Row="0" Grid.ColumnSpan="3" Background="#E0E0E0" BorderBrush="#C8C8C8" BorderThickness="0,0,0,1">
@@ -559,6 +559,21 @@
             </DockPanel>
         </Border>
 
+        <GridSplitter Grid.Row="3"
+                      Grid.Column="0"
+                      Width="6"
+                      HorizontalAlignment="Right"
+                      VerticalAlignment="Stretch"
+                      ResizeDirection="Columns"
+                      ResizeBehavior="CurrentAndNext"
+                      ShowsPreview="False"
+                      Background="#C8C8C8"
+                      Cursor="SizeWE"
+                      Panel.ZIndex="20"
+                      ToolTip="Arraste para ajustar a largura das bibliotecas"
+                      AutomationProperties.Name="Ajustar largura das bibliotecas"
+                      AutomationProperties.AutomationId="LibraryWidthSplitter"/>
+
         <Border Grid.Row="3" Grid.Column="1" Background="#3A3A3A">
             <Grid x:Name="ViewportHost"
                   Background="#3A3A3A"
@@ -599,6 +614,21 @@
                          AutomationProperties.AutomationId="MeasureBox"/>
             </Grid>
         </Border>
+
+        <GridSplitter Grid.Row="3"
+                      Grid.Column="2"
+                      Width="6"
+                      HorizontalAlignment="Left"
+                      VerticalAlignment="Stretch"
+                      ResizeDirection="Columns"
+                      ResizeBehavior="PreviousAndCurrent"
+                      ShowsPreview="False"
+                      Background="#C8C8C8"
+                      Cursor="SizeWE"
+                      Panel.ZIndex="20"
+                      ToolTip="Arraste para ajustar a largura das propriedades"
+                      AutomationProperties.Name="Ajustar largura das propriedades"
+                      AutomationProperties.AutomationId="PropertiesWidthSplitter"/>
 
         <Border x:Name="RightPropertiesBorder" Grid.Row="3" Grid.Column="2" Background="#F7F7F7" BorderBrush="#C8C8C8" BorderThickness="1,0,0,0">
             <DockPanel>
@@ -1241,21 +1271,76 @@
                                              AutomationProperties.Name="Espessura ou posição na parede"
                                              AutomationProperties.AutomationId="PropertyDepthBox"/>
                                     <StackPanel x:Name="PropertyCornerMeasuresPanel" Visibility="Collapsed" Margin="0,6,0,0">
-                                        <TextBlock Text="Medida A (mm)"
+                                        <TextBlock x:Name="PropertyCornerMeasureALabel" Text="Medida A (mm)"
                                                    ToolTip="Profundidade da asa A (Promob Avançado)"/>
                                         <TextBox x:Name="PropertyCornerMeasureABox"
                                                  Margin="0,2,0,0"
                                                  PreviewKeyDown="PropertyPanelBox_PreviewKeyDown"
                                                  AutomationProperties.Name="Medida A profundidade asa"
                                                  AutomationProperties.AutomationId="PropertyCornerMeasureABox"/>
-                                        <TextBlock Text="Medida B (mm)"
-                                                   Margin="0,6,0,0"
-                                                   ToolTip="Profundidade da asa B (Promob Avançado)"/>
-                                        <TextBox x:Name="PropertyCornerMeasureBBox"
+                                        <StackPanel x:Name="PropertyCornerMeasureBPanel">
+                                            <TextBlock x:Name="PropertyCornerMeasureBLabel" Text="Medida B (mm)"
+                                                       Margin="0,6,0,0"
+                                                       ToolTip="Profundidade da asa B (Promob Avançado)"/>
+                                            <TextBox x:Name="PropertyCornerMeasureBBox"
+                                                     Margin="0,2,0,0"
+                                                     PreviewKeyDown="PropertyPanelBox_PreviewKeyDown"
+                                                     AutomationProperties.Name="Medida B profundidade asa"
+                                                     AutomationProperties.AutomationId="PropertyCornerMeasureBBox"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <StackPanel x:Name="PropertyObliquePanel" Visibility="Collapsed" Margin="0,8,0,0">
+                                        <TextBlock Text="Quantidade de portas"/>
+                                        <ComboBox x:Name="PropertyObliqueDoorCountCombo"
+                                                  Margin="0,2,0,0"
+                                                  SelectedIndex="0"
+                                                  SelectionChanged="PropertyObliqueDoorCountCombo_SelectionChanged"
+                                                  AutomationProperties.Name="Quantidade de portas do canto oblíquo"
+                                                  AutomationProperties.AutomationId="PropertyObliqueDoorCountCombo">
+                                            <ComboBoxItem Content="1 porta"/>
+                                            <ComboBoxItem Content="2 portas"/>
+                                        </ComboBox>
+                                        <StackPanel x:Name="PropertyObliqueHingeSidePanel" Margin="0,6,0,0">
+                                            <TextBlock Text="Lado de abertura"/>
+                                            <ComboBox x:Name="PropertyObliqueHingeSideCombo"
+                                                      Margin="0,2,0,0"
+                                                      SelectedIndex="0"
+                                                      SelectionChanged="PropertyObliqueHingeSideCombo_SelectionChanged"
+                                                      AutomationProperties.Name="Lado de abertura do canto oblíquo"
+                                                      AutomationProperties.AutomationId="PropertyObliqueHingeSideCombo">
+                                                <ComboBoxItem Content="Esquerda"/>
+                                                <ComboBoxItem Content="Direita"/>
+                                            </ComboBox>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <StackPanel x:Name="PropertySpecialColumnPanel" Visibility="Collapsed" Margin="0,8,0,0">
+                                        <TextBlock x:Name="PropertySpecialColumnPositionText"
+                                                   FontWeight="SemiBold" Text="Recorte para coluna"/>
+                                        <TextBlock Text="Largura da coluna (mm)" Margin="0,6,0,0"/>
+                                        <TextBox x:Name="PropertySpecialColumnWidthBox"
                                                  Margin="0,2,0,0"
                                                  PreviewKeyDown="PropertyPanelBox_PreviewKeyDown"
-                                                 AutomationProperties.Name="Medida B profundidade asa"
-                                                 AutomationProperties.AutomationId="PropertyCornerMeasureBBox"/>
+                                                 AutomationProperties.AutomationId="PropertySpecialColumnWidthBox"/>
+                                        <TextBlock Text="Profundidade da coluna (mm)" Margin="0,6,0,0"/>
+                                        <TextBox x:Name="PropertySpecialColumnDepthBox"
+                                                 Margin="0,2,0,0"
+                                                 PreviewKeyDown="PropertyPanelBox_PreviewKeyDown"
+                                                 AutomationProperties.AutomationId="PropertySpecialColumnDepthBox"/>
+                                        <StackPanel x:Name="PropertySpecialColumnOffsetPanel" Margin="0,6,0,0">
+                                            <TextBlock Text="Posição a partir da esquerda (mm)"/>
+                                            <TextBox x:Name="PropertySpecialColumnOffsetBox"
+                                                     Margin="0,2,0,0"
+                                                     PreviewKeyDown="PropertyPanelBox_PreviewKeyDown"
+                                                     AutomationProperties.AutomationId="PropertySpecialColumnOffsetBox"/>
+                                        </StackPanel>
+                                        <TextBlock Text="Prateleiras" Margin="0,6,0,0"/>
+                                        <ComboBox x:Name="PropertySpecialColumnShelfCombo"
+                                                  Margin="0,2,0,0"
+                                                  SelectionChanged="PropertySpecialColumnShelfCombo_SelectionChanged"
+                                                  AutomationProperties.AutomationId="PropertySpecialColumnShelfCombo">
+                                            <ComboBoxItem Content="Recortadas na coluna"/>
+                                            <ComboBoxItem Content="Alinhadas após a coluna"/>
+                                        </ComboBox>
                                     </StackPanel>
                                     <TextBlock x:Name="PropertyHintText"
                                                Margin="0,8,0,0"
@@ -1391,6 +1476,23 @@
                                 </StackPanel>
                             </Expander>
                             <Expander Header="Multiplicação" Margin="0,8,0,0"/>
+                            <Expander x:Name="ModelsExpander" Header="Modelos" Margin="0,8,0,0" Visibility="Collapsed" IsExpanded="True">
+                                <StackPanel x:Name="PropertyDrawerHardwarePanel">
+                                    <TextBlock Text="Tipo de corrediça"/>
+                                    <ComboBox x:Name="PropertyDrawerSlideTypeCombo"
+                                              Margin="0,2,0,0"
+                                              SelectionChanged="PropertyDrawerSlideTypeCombo_SelectionChanged"
+                                              AutomationProperties.AutomationId="PropertyDrawerSlideTypeCombo">
+                                        <ComboBoxItem x:Name="PropertyTelescopicSlideItem" Content="Telescópica"/>
+                                        <ComboBoxItem x:Name="PropertyConcealedSlideItem" Content="Invisível"/>
+                                    </ComboBox>
+                                    <TextBlock x:Name="PropertyDrawerSlideHintText"
+                                               Margin="0,6,0,0"
+                                               Foreground="#666666"
+                                               FontSize="11"
+                                               TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Expander>
                             <Expander Header="Ferragens" Margin="0,8,0,0"/>
                         </StackPanel>
 

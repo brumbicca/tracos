@@ -23,6 +23,12 @@ public enum ModuleShapeKind
     /// <summary>Canto oblíquo / diagonal de frente.</summary>
     Oblique,
 
+    /// <summary>Canto gaveteiro com frente diagonal e travessas próprias.</summary>
+    CornerDrawer,
+
+    /// <summary>Canto fechado com frente curva.</summary>
+    CornerCurved,
+
     /// <summary>Frente curva (balcão/gaveteiro curvo).</summary>
     CurvedFront,
 

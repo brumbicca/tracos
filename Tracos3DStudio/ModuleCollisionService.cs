@@ -29,17 +29,20 @@ public static class ModuleCollisionService
         Guid? ignoreModuleId = null,
         Guid? candidateWallId = null,
         float distanceAlongWall = 0f,
-        ModuleDefinition? candidateDefinition = null)
+        ModuleDefinition? candidateDefinition = null,
+        DimensionConfiguratorSettings? dimensionSettings = null)
     {
         foreach (var module in modules)
         {
             if (ignoreModuleId.HasValue && ignoreModuleId.Value == module.Id)
                 continue;
 
-            if (!ShouldCollidePair(candidateWallId, module))
+            bool useGeometryEnvelope = UsesCornerGeometryEnvelope(candidateDefinition) || UsesCornerGeometryEnvelope(module);
+
+            if (!ShouldCollidePair(candidateWallId, candidateDefinition, module))
                 continue;
 
-            if (TryWallFaceCollision(
+            if (!useGeometryEnvelope && TryWallFaceCollision(
                     candidateWallId,
                     candidateDefinition,
                     distanceAlongWall,
@@ -49,11 +52,12 @@ public static class ModuleCollisionService
                     module))
                 return true;
 
-            if (candidateWallId.HasValue && module.AttachedWallId.HasValue)
+            if (!useGeometryEnvelope && candidateWallId.HasValue && module.AttachedWallId.HasValue)
                 continue;
 
-            var candidateBounds = ModulePlacementService.ComputeBounds(
-                position, width, height, depth, rotationYDegrees);
+            var candidateBounds = ComputeCandidateBounds(
+                position, width, height, depth, rotationYDegrees,
+                candidateDefinition, dimensionSettings);
 
             if (IntersectsBounds(candidateBounds, module.GetBounds()))
                 return true;
@@ -68,10 +72,12 @@ public static class ModuleCollisionService
 
         foreach (var module in modules)
         {
+            bool useGeometryEnvelope = UsesCornerGeometryEnvelope(candidate) || UsesCornerGeometryEnvelope(module);
+
             if (!ShouldCollidePair(candidate, module))
                 continue;
 
-            if (TryWallFaceCollision(
+            if (!useGeometryEnvelope && TryWallFaceCollision(
                     candidate.AttachedWallId,
                     candidateDefinition,
                     candidate.DistanceAlongWall,
@@ -81,7 +87,7 @@ public static class ModuleCollisionService
                     module))
                 return true;
 
-            if (candidate.AttachedWallId.HasValue && module.AttachedWallId.HasValue)
+            if (!useGeometryEnvelope && candidate.AttachedWallId.HasValue && module.AttachedWallId.HasValue)
                 continue;
 
             if (IntersectsBounds(candidate.GetBounds(), module.GetBounds()))
@@ -105,11 +111,13 @@ public static class ModuleCollisionService
                     continue;
 
                 var definitionB = ModuleCatalog.GetRequired(modules[j].DefinitionId);
+                bool useGeometryEnvelope = UsesCornerGeometryEnvelope(definitionA) || UsesCornerGeometryEnvelope(definitionB);
 
-                if (modules[i].AttachedWallId.HasValue &&
-                    modules[j].AttachedWallId.HasValue &&
-                    modules[i].AttachedWallId.Value == modules[j].AttachedWallId.Value &&
-                    ModuleWallFaceService.SameMountBand(definitionA, definitionB))
+                if (modules[i].AttachedWallId is Guid wallA &&
+                    modules[j].AttachedWallId is Guid wallB &&
+                    wallA == wallB &&
+                    ModuleWallFaceService.SameMountBand(definitionA, definitionB) &&
+                    !useGeometryEnvelope)
                 {
                     if (!ModuleWallFaceService.OverlapsOnWallFace(
                             ModuleWallFaceService.GetWallFaceRectangle(modules[i]),
@@ -166,17 +174,77 @@ public static class ModuleCollisionService
 
         if (a.AttachedWallId.HasValue && b.AttachedWallId.HasValue &&
             a.AttachedWallId.Value != b.AttachedWallId.Value)
-            return false;
+            return UsesCornerGeometryEnvelope(a) || UsesCornerGeometryEnvelope(b);
 
         return true;
     }
 
-    private static bool ShouldCollidePair(Guid? candidateWallId, ModuleInstance other)
+    private static bool ShouldCollidePair(
+        Guid? candidateWallId,
+        ModuleDefinition? candidateDefinition,
+        ModuleInstance other)
     {
         if (candidateWallId.HasValue && other.AttachedWallId.HasValue &&
             candidateWallId.Value != other.AttachedWallId.Value)
-            return false;
+            return UsesCornerGeometryEnvelope(candidateDefinition) || UsesCornerGeometryEnvelope(other);
 
         return true;
+    }
+
+    private static bool IsBlindCorner(ModuleInstance module) =>
+        IsBlindCorner(ModuleCatalog.GetRequired(module.DefinitionId));
+
+    private static bool IsBlindCorner(ModuleDefinition? definition) =>
+        definition?.ShapeKind is ModuleShapeKind.BlindCornerLeft or ModuleShapeKind.BlindCornerRight;
+
+    private static bool UsesCornerGeometryEnvelope(ModuleInstance module) =>
+        UsesCornerGeometryEnvelope(ModuleCatalog.GetRequired(module.DefinitionId));
+
+    private static bool UsesCornerGeometryEnvelope(ModuleDefinition? definition) =>
+        IsBlindCorner(definition) || definition?.ShapeKind == ModuleShapeKind.Oblique;
+
+    private static (Vector3 Min, Vector3 Max) ComputeCandidateBounds(
+        Vector3 position,
+        float width,
+        float height,
+        float depth,
+        float rotationYDegrees,
+        ModuleDefinition? definition,
+        DimensionConfiguratorSettings? settings)
+    {
+        var nominal = ModulePlacementService.ComputeBounds(
+            position, width, height, depth, rotationYDegrees);
+        if (!UsesCornerGeometryEnvelope(definition))
+            return nominal;
+
+        settings ??= DimensionConfiguratorSettings.CreateDefault();
+        BoxAssemblyConfiguratorService.EnsureBoxInitialized(settings);
+        var numeric = settings.CozinhaInferiorBox.InferiorNumeric;
+        string sideKey = definition!.ShapeKind == ModuleShapeKind.Oblique ? "cl-afa-lat" : "cr-afa-lat";
+        string backKey = definition.ShapeKind == ModuleShapeKind.Oblique ? "cl-afa-tra" : "cr-afa-tra";
+        float side = numeric.TryGetValue(sideKey, out float sideValue) && float.IsFinite(sideValue)
+            ? sideValue
+            : 0f;
+        float back = numeric.TryGetValue(backKey, out float backValue) && float.IsFinite(backValue)
+            ? backValue
+            : 0f;
+        float envelopeX = definition.ShapeKind switch
+        {
+            ModuleShapeKind.BlindCornerLeft => MathF.Min(0f, side),
+            ModuleShapeKind.BlindCornerRight => MathF.Max(0f, -side),
+            _ => MathF.Min(0f, side)
+        };
+        float envelopeZ = MathF.Min(0f, back);
+
+        if (MathF.Abs(envelopeX) < 0.001f && MathF.Abs(envelopeZ) < 0.001f)
+            return nominal;
+
+        Vector3 shiftedOrigin = ModulePlacementService.TransformLocalPoint(
+            new Vector3(envelopeX, 0f, envelopeZ), position, rotationYDegrees);
+        var shifted = ModulePlacementService.ComputeBounds(
+            shiftedOrigin, width, height, depth, rotationYDegrees);
+        return (
+            Vector3.ComponentMin(nominal.Min, shifted.Min),
+            Vector3.ComponentMax(nominal.Max, shifted.Max));
     }
 }

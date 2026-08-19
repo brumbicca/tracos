@@ -143,11 +143,12 @@ public class FloorZoneServiceTests
 public class FloorMaterialCatalogTests
 {
     [Fact]
-    public void GetDefault_RetornaPorcelanatoBranco()
+    public void GetDefault_RetornaAcabamentoSolidoClaro()
     {
         var material = FloorMaterialCatalog.GetDefault();
         Assert.Equal(FloorMaterialCatalog.DefaultMaterialId, material.Id);
-        Assert.Equal(FloorMaterialPattern.Tile, material.Pattern);
+        Assert.Equal(FloorMaterialPattern.Solid, material.Pattern);
+        Assert.Equal("#F0F0E0", material.ColorHex);
     }
 }
 

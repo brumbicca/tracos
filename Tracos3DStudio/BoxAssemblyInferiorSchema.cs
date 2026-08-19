@@ -16,6 +16,8 @@ public sealed class BoxFieldDef
     public string? Group { get; init; }
     public BoxFieldKind Kind { get; init; } = BoxFieldKind.Numeric;
     public float DefaultValue { get; init; }
+    /// <summary>Permite valores assinados quando a medida representa avanço/recuo paramétrico.</summary>
+    public bool AllowNegative { get; init; }
     public string[] Options { get; init; } = [];
     public string DefaultOption { get; init; } = "";
 }
@@ -76,7 +78,7 @@ public static class BoxAssemblyInferiorSchema
                 new()
                 {
                     Key = "fundo-trav-sust", Label = "G — Travessas de Sustentação", Kind = BoxFieldKind.Choice,
-                    Options = SimNao, DefaultOption = "Não"
+                    Options = ["Não", "1", "2"], DefaultOption = "Não"
                 },
                 new() { Key = "fundo-dim-trav-sust", Label = "H — Dimensão Travessas (sustentação) (mm)" }
             ]
@@ -117,7 +119,14 @@ public static class BoxAssemblyInferiorSchema
             Header = "Lateral",
             Fields =
             [
-                new() { Key = "lat-rebaixo", Label = "A — Rebaixo de Lateral (mm)" }
+                new() { Key = "lat-rebaixo", Label = "A — Rebaixo de Lateral (mm)" },
+                new() { Key = "lat-folga", Label = "B — Folga Lateral (mm)" },
+                new()
+                {
+                    Key = "lat-alinhamento", Label = "C — Alinhamento Lateral",
+                    Kind = BoxFieldKind.Choice,
+                    Options = ["Traseira", "Frente", "Centro"], DefaultOption = "Traseira"
+                }
             ]
         },
         new()
@@ -204,8 +213,10 @@ public static class BoxAssemblyInferiorSchema
             Fields =
             [
                 new() { Key = "div-recuo-fro", Label = "A — Recuo Frontal Divisória (mm)" },
-                new() { Key = "div-rebaixo", Label = "B — Rebaixo Divisória (mm)" },
-                new() { Key = "div-dim-dist", Label = "C — Dimensão Distanciador (mm)" }
+                new() { Key = "div-recuo-tra-mov", Label = "B — Recuo Traseiro Divisória Móvel (mm)" },
+                new() { Key = "div-recuo-tra-fix", Label = "C — Recuo Traseiro Divisória Fixa (mm)" },
+                new() { Key = "div-rebaixo", Label = "D — Rebaixo Divisória (mm)" },
+                new() { Key = "div-dim-dist", Label = "E — Dimensão Distanciador (mm)" }
             ]
         },
         new()
@@ -214,8 +225,10 @@ public static class BoxAssemblyInferiorSchema
             Header = "Prateleira",
             Fields =
             [
-                new() { Key = "prat-recuo", Label = "A — Recuo Prateleira (mm)", DefaultValue = 20f },
-                new() { Key = "prat-folga", Label = "B — Folga Lateral (mm)", DefaultValue = 4f }
+                new() { Key = "prat-recuo", Label = "A — Recuo Frontal Prateleira (mm)", DefaultValue = 20f },
+                new() { Key = "prat-recuo-tra-mov", Label = "B — Recuo Traseiro Prateleira Móvel (mm)" },
+                new() { Key = "prat-recuo-tra-fix", Label = "C — Recuo Traseiro Prateleira Fixa (mm)" },
+                new() { Key = "prat-folga", Label = "D — Folga Lateral (mm)", DefaultValue = 4f }
             ]
         }
     ];
@@ -224,7 +237,7 @@ public static class BoxAssemblyInferiorSchema
     [
         new()
         {
-            Header = "Canto L | Oblíquo | Curvo",
+            Header = "Canto L | Oblíquo",
             Nodes =
             [
                 new()
@@ -244,20 +257,26 @@ public static class BoxAssemblyInferiorSchema
                         new() { Key = "cl-aftv", Label = "D — Avanço Fundo sobre Travessa (mm)", DefaultValue = 8f },
                         new()
                         {
-                            Key = "cl-tipo-tampo", Label = "E — Tipo Tampo", Kind = BoxFieldKind.Choice,
-                            Options = ["Inteiro", "Recortado"], DefaultOption = "Inteiro"
+                            Key = "cl-tipo-tampo", Label = "E — Tipo Prateleira", Kind = BoxFieldKind.Choice,
+                            Options = ["Única", "Bipartida"], DefaultOption = "Única"
                         },
                         new()
                         {
                             Key = "cl-tipo-base", Label = "F — Tipo Base", Kind = BoxFieldKind.Choice,
-                            Options = ["Inteira", "Recortada"], DefaultOption = "Inteira"
+                            Options = ["Única", "Bipartida"], DefaultOption = "Única"
                         },
-                        new() { Key = "cl-folga-pa", Label = "G — Folga Interna Porta A (mm)", DefaultValue = 2f },
-                        new() { Key = "cl-folga-pb", Label = "H — Folga Interna Porta B (mm)", DefaultValue = 2f },
-                        new() { Key = "cl-abt", Label = "I — Avanço Base sobre Traseira (mm)" },
-                        new() { Key = "cl-atb", Label = "J — Avanço Traseira sobre Base (mm)" },
-                        new() { Key = "cl-aft", Label = "K — Avanço Fundo sobre Traseira (mm)" },
-                        new() { Key = "cl-prof-dist", Label = "L — Profundidade Distanciador (mm)" }
+                        new() { Key = "cl-folga-pa", Label = "G — Folga Esquerda da Porta (mm)", Group = "Portas — Canto Oblíquo", DefaultValue = 2f, AllowNegative = true },
+                        new() { Key = "cl-folga-pb", Label = "H — Folga Direita da Porta (mm)", Group = "Portas — Canto Oblíquo", DefaultValue = 2f, AllowNegative = true },
+                        new() { Key = "cl-folga-entre", Label = "I — Folga entre Portas (mm)", Group = "Portas — Canto Oblíquo", DefaultValue = 2f, AllowNegative = true },
+                        new() { Key = "cl2-folga-pa", Label = "J — Folga Interna Porta A (mm)", Group = "Portas — Canto L 2P", DefaultValue = 5f, AllowNegative = true },
+                        new() { Key = "cl2-folga-pb", Label = "K — Folga Interna Porta B (mm)", Group = "Portas — Canto L 2P", DefaultValue = 5f, AllowNegative = true },
+                        new() { Key = "cl3-folga-pa", Label = "L — Folga Interna Porta A (mm)", Group = "Portas — Canto L 3P", DefaultValue = 5f, AllowNegative = true },
+                        new() { Key = "cl3-folga-pb", Label = "M — Folga Interna Porta B (mm)", Group = "Portas — Canto L 3P", DefaultValue = 5f, AllowNegative = true },
+                        new() { Key = "cl3-folga-entre", Label = "N — Folga entre as duas folhas (mm)", Group = "Portas — Canto L 3P", DefaultValue = 2f, AllowNegative = true },
+                        new() { Key = "cl-abt", Label = "O — Avanço Base sobre Traseira (mm)", Group = "Montagem" },
+                        new() { Key = "cl-atb", Label = "P — Avanço Traseira sobre Base (mm)", Group = "Montagem" },
+                        new() { Key = "cl-aft", Label = "Q — Avanço Fundo sobre Traseira (mm)", Group = "Montagem" },
+                        new() { Key = "cl-prof-dist", Label = "R — Profundidade Distanciador (mm)", Group = "Montagem" }
                     ]
                 },
                 new()
@@ -288,23 +307,23 @@ public static class BoxAssemblyInferiorSchema
                             Key = "cr-tipo-ff", Label = "A — Tipo Frente Falsa", Kind = BoxFieldKind.Choice,
                             Options = ["Inteira", "Parcial Dupla"], DefaultOption = "Inteira"
                         },
-                        new() { Key = "cr-affb", Label = "B — Avanço Frente Falsa sobre Base (mm)", DefaultValue = 0f },
-                        new() { Key = "cr-affs", Label = "C — Avanço Frente Falsa sobre Sarrafo (mm)", DefaultValue = 0f },
-                        new() { Key = "cr-affl", Label = "D — Avanço Frente Falsa sobre Lateral (mm)", DefaultValue = 0f },
-                        new() { Key = "cr-affffp", Label = "E — Avanço Frente Falsa sobre Frente Falsa Parcial (mm)", DefaultValue = 0f },
+                        new() { Key = "cr-affb", Label = "B — Avanço Frente Falsa sobre Base (mm)", DefaultValue = 18f, AllowNegative = true },
+                        new() { Key = "cr-affs", Label = "C — Avanço Frente Falsa sobre Sarrafo (mm)", DefaultValue = 18f, AllowNegative = true },
+                        new() { Key = "cr-affl", Label = "D — Avanço Frente Falsa sobre Lateral (mm)", DefaultValue = 18f, AllowNegative = true },
+                        new() { Key = "cr-affffp", Label = "E — Avanço Frente Falsa sobre Frente Falsa Parcial (mm)", DefaultValue = 0f, AllowNegative = true },
                         new() { Key = "cr-rff", Label = "F — Recuo Frente Falsa (mm)", DefaultValue = 0f },
                         new() { Key = "cr-rffp", Label = "G — Recuo Frente Falsa Parcial (mm)", DefaultValue = 0f },
                         new() { Key = "cr-dim-ffp", Label = "H — Dimensão Frente Falsa Parcial (mm)", DefaultValue = 0f },
                         new()
                         {
                             Key = "cr-uso-dist", Label = "I — Utilização do Distanciador", Kind = BoxFieldKind.Choice,
-                            Options = SimNao, DefaultOption = "Não"
+                            Options = ["Usar", "Não usar"], DefaultOption = "Usar"
                         },
-                        new() { Key = "cr-affd", Label = "J — Avanço Frente Falsa Inteira sobre Distanciador (mm)", DefaultValue = 0f },
-                        new() { Key = "cr-adff", Label = "K — Avanço Distanciador sobre Frente Falsa (mm)", DefaultValue = 0f },
-                        new() { Key = "cr-adp", Label = "L — Avanço Distanciador sobre Prateleira (mm)", DefaultValue = 0f },
+                        new() { Key = "cr-affd", Label = "J — Avanço Frente Falsa Inteira sobre Distanciador (mm)", DefaultValue = -12f, AllowNegative = true },
+                        new() { Key = "cr-adff", Label = "K — Avanço Distanciador sobre Frente Falsa (mm)", DefaultValue = 0f, AllowNegative = true },
+                        new() { Key = "cr-adp", Label = "L — Avanço Distanciador sobre Prateleira (mm)", DefaultValue = 0f, AllowNegative = true },
                         new() { Key = "cr-rec-prat", Label = "M — Recuo Prateleira (mm)", DefaultValue = 0f },
-                        new() { Key = "cr-ava-por", Label = "N — Avanço Porta sobre Frente Falsa / Parcial (mm)", DefaultValue = 0f }
+                        new() { Key = "cr-ava-por", Label = "N — Avanço Porta sobre Frente Falsa / Parcial (mm)", DefaultValue = 27f, AllowNegative = true }
                     ]
                 },
                 new()
@@ -320,22 +339,34 @@ public static class BoxAssemblyInferiorSchema
                             // Frontal = faixa no plano da porta.
                             Options = ["Lateral", "Frontal"], DefaultOption = "Lateral"
                         },
-                        new() { Key = "crf-recuo-fro", Label = "B — Recuo Fechamento Frontal (mm)", DefaultValue = 0f },
+                        new()
+                        {
+                            Key = "crf-recuo-fro",
+                            Label = "B — Distância Lateral do Fechamento Frontal (mm)",
+                            DefaultValue = 80f, AllowNegative = true
+                        },
                         new() { Key = "crf-dim-fro", Label = "C — Dimensão Fechamento Frontal (mm)", DefaultValue = 30f },
                         new()
                         {
-                            Key = "crf-sup", Label = "D — Fechamento Superior", Kind = BoxFieldKind.Choice,
-                            Options = SimNao, DefaultOption = "Não"
+                            Key = "crf-pos-lat",
+                            Label = "D — Avanço do Fechamento Frontal (mm)",
+                            DefaultValue = 18f,
+                            AllowNegative = true
                         },
                         new()
                         {
-                            Key = "crf-inf", Label = "E — Fechamento Inferior", Kind = BoxFieldKind.Choice,
-                            Options = SimNao, DefaultOption = "Não"
+                            Key = "crf-sup", Label = "E — Fechamento Superior", Kind = BoxFieldKind.Choice,
+                            Options = ["Usar", "Não usar"], DefaultOption = "Não usar"
                         },
                         new()
                         {
-                            Key = "crf-tra", Label = "F — Fechamento Traseiro", Kind = BoxFieldKind.Choice,
-                            Options = SimNao, DefaultOption = "Não"
+                            Key = "crf-inf", Label = "F — Fechamento Inferior", Kind = BoxFieldKind.Choice,
+                            Options = ["Usar", "Não usar"], DefaultOption = "Não usar"
+                        },
+                        new()
+                        {
+                            Key = "crf-tra", Label = "G — Fechamento Traseiro", Kind = BoxFieldKind.Choice,
+                            Options = ["Usar", "Não usar"], DefaultOption = "Não usar"
                         }
                     ]
                 },
@@ -348,7 +379,7 @@ public static class BoxAssemblyInferiorSchema
                         new()
                         {
                             Key = "crs-tipo-fro", Label = "A — Tipo Sarrafo Frontal", Kind = BoxFieldKind.Choice,
-                            Options = ["Parcial", "Sem sarrafo", "Inteiro"], DefaultOption = "Parcial"
+                            Options = ["Total", "Parcial", "Sem sarrafo"], DefaultOption = "Total"
                         }
                     ]
                 },
@@ -358,36 +389,8 @@ public static class BoxAssemblyInferiorSchema
                     Header = "Afastamento Parede",
                     Fields =
                     [
-                        new() { Key = "cr-afa-lat", Label = "A — Afastamento Lateral (mm)" },
+                        new() { Key = "cr-afa-lat", Label = "A — Afastamento Lateral (mm)", DefaultValue = 30f },
                         new() { Key = "cr-afa-tra", Label = "B — Afastamento Traseiro (mm)" }
-                    ]
-                }
-            ]
-        },
-        new()
-        {
-            Header = "Canto Gaveteiro",
-            Nodes =
-            [
-                new()
-                {
-                    Id = "canto-gav-canto",
-                    Header = "Canto",
-                    Fields =
-                    [
-                        new() { Key = "cg-dim-trav-fro", Label = "A — Dimensão Travessas Frontais (mm)" },
-                        new() { Key = "cg-larg-sar-sust", Label = "B — Largura Sarrafos de Sustentação (mm)" },
-                        new() { Key = "cg-larg-trav-fun", Label = "C — Largura Travessas Fundo (mm)" },
-                        new() { Key = "cg-prof-trav-fun", Label = "D — Profundidade Travessas Fundo (mm)" }
-                    ]
-                },
-                new()
-                {
-                    Id = "canto-gav-afastamento",
-                    Header = "Afastamento Parede",
-                    Fields =
-                    [
-                        new() { Key = "cg-afa", Label = "A — Afastamento Lateral/Traseiro (mm)" }
                     ]
                 }
             ]
@@ -406,4 +409,12 @@ public static class BoxAssemblyInferiorSchema
 
     public static BoxNodeDef? FindNode(string id) =>
         AllNodes().FirstOrDefault(n => n.Id == id);
+
+    public static BoxFieldDef? FindField(string key) =>
+        AllNodes().SelectMany(n => n.Fields).FirstOrDefault(f => f.Key == key);
+
+    // Valores numéricos são assinados por regra global. A propriedade
+    // AllowNegative permanece no contrato somente para compatibilidade com
+    // catálogos já gravados; ela não restringe mais a edição.
+    public static bool AllowsNegative(string key) => FindField(key)?.Kind == BoxFieldKind.Numeric;
 }

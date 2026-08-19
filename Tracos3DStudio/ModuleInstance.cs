@@ -2,6 +2,12 @@ using OpenTK.Mathematics;
 
 namespace Tracos3DStudio;
 
+public enum DrawerSlideType
+{
+    Telescopic,
+    Concealed
+}
+
 /// <summary>
 /// Instância de módulo posicionada no projeto.
 /// </summary>
@@ -36,10 +42,22 @@ public sealed class ModuleInstance
     public bool IsLocked { get; set; } = false;
 
     /// <summary>
+    /// Espelha toda a engenharia no eixo horizontal local. É uma propriedade da
+    /// instância (atalho I), portanto não exige SKUs duplicados no catálogo.
+    /// </summary>
+    public bool IsMirrored { get; set; }
+
+    /// <summary>
     /// Ajustes de dimensão por peça (chave = <see cref="SelectableFace.Label"/>),
     /// aplicados sobre a carcaça paramétrica ao reconstruir o mesh.
     /// </summary>
     public Dictionary<string, PartDimensionOverride> PartOverrides { get; } = new();
+
+    /// <summary>Peças ocultadas no ambiente; continuam pertencendo à engenharia do módulo.</summary>
+    public HashSet<string> HiddenPartLabels { get; } = new(StringComparer.Ordinal);
+
+    public bool IsPartVisible(string? label) =>
+        string.IsNullOrEmpty(label) || !HiddenPartLabels.Contains(label);
 
     /// <summary>Parâmetros do Canto L (null nos demais módulos).</summary>
     public CornerLParams? CornerL { get; set; }
@@ -47,7 +65,29 @@ public sealed class ModuleInstance
     /// <summary>Parâmetros do Canto Reto (null nos demais módulos).</summary>
     public BlindCornerParams? BlindCorner { get; set; }
 
+    /// <summary>Quantidade de folhas do canto oblíquo, escolhida por instância.</summary>
+    public int ObliqueDoorCount { get; set; } = 1;
+
+    /// <summary>Lado das dobradiças quando o canto oblíquo usa uma porta.</summary>
+    public bool ObliqueHingesOnLeft { get; set; } = true;
+
+    /// <summary>Medidas e quantidade de portas dos terminais Diagonal/Chanfrado.</summary>
+    public EndTerminalParams? EndTerminal { get; set; }
+
+    /// <summary>Perfil de folga/ferragem usado pelas caixas de gaveta desta instância.</summary>
+    public DrawerSlideType DrawerSlideType { get; set; } = DrawerSlideType.Telescopic;
+
+    /// <summary>Recorte para coluna dos módulos especiais (null nos demais módulos).</summary>
+    public SpecialColumnParams? SpecialColumn { get; set; }
+
     public MeshData Mesh { get; } = new();
+
+    /// <summary>
+    /// Deslocamento paramétrico da caixaria em relação à origem de inserção.
+    /// Usado pelo canto reto para manter seleção e colisão alinhadas ao afastamento.
+    /// É recalculado a cada reconstrução e não faz parte do arquivo do projeto.
+    /// </summary>
+    internal Vector3 GeometryEnvelopeLocalOffset { get; set; }
 
     /// <summary>
     /// Engenharia usada na última reconstrução da malha (evita perder sarrafo/chapas ao
@@ -60,15 +100,25 @@ public sealed class ModuleInstance
         Width = definition.DefaultWidth;
         Height = definition.DefaultHeight;
         Depth = definition.DefaultDepth;
+        if (definition.ShapeKind == ModuleShapeKind.Oblique)
+            ObliqueDoorCount = Math.Clamp(definition.DoorCount, 1, 2);
 
-        if (definition.ShapeKind is ModuleShapeKind.CornerLLeft or ModuleShapeKind.CornerLRight)
+        EndTerminal = definition.ShapeKind is ModuleShapeKind.EndDiagonal or ModuleShapeKind.EndChamfer
+            ? EndTerminalParams.FromDefinition(definition)
+            : null;
+
+        SpecialColumn = definition.ShapeKind == ModuleShapeKind.ColumnDoors
+            ? SpecialColumnParams.FromDefinition(definition)
+            : null;
+
+        if (IsCornerLDefinition(definition))
         {
             CornerL = CornerLParams.FromModuleDefaults(
                 definition.DefaultWidth,
                 definition.DefaultDepth,
                 definition.DefaultHeight,
                 panelMm: 18f,
-                leftHand: definition.ShapeKind == ModuleShapeKind.CornerLLeft);
+                leftHand: IsCornerLLeftHand(definition));
             BlindCorner = null;
         }
         else if (definition.ShapeKind is ModuleShapeKind.BlindCornerLeft or ModuleShapeKind.BlindCornerRight)
@@ -110,10 +160,9 @@ public sealed class ModuleInstance
             Depth = ModuleDimensionClamp.ClampForFreeEdit(depth, settings.MaxDepthMm);
         }
 
-        if (CornerL != null ||
-            definition.ShapeKind is ModuleShapeKind.CornerLLeft or ModuleShapeKind.CornerLRight)
+        if (CornerL != null || IsCornerLDefinition(definition))
         {
-            bool leftHand = definition.ShapeKind == ModuleShapeKind.CornerLLeft;
+            bool leftHand = IsCornerLLeftHand(definition);
             if (CornerL == null)
             {
                 float armDepth = syncCornerArmDepthFromDepth ? Depth : definition.DefaultDepth;
@@ -139,8 +188,29 @@ public sealed class ModuleInstance
                 BlindCorner.SyncFromConfigurator(dimensionSettings);
         }
 
+
+        if (definition.ShapeKind == ModuleShapeKind.ColumnDoors)
+        {
+            SpecialColumn ??= SpecialColumnParams.FromDefinition(definition);
+            SpecialColumn.ClampToModule(Width, Depth);
+        }
+
+        if (definition.ShapeKind is ModuleShapeKind.EndDiagonal or ModuleShapeKind.EndChamfer)
+        {
+            EndTerminal ??= EndTerminalParams.FromDefinition(definition);
+            EndTerminal.ClampToModule(Width, Depth, definition.ShapeKind == ModuleShapeKind.EndChamfer);
+        }
+
         RebuildMesh(definition, dimensionSettings);
     }
+
+    private static bool IsCornerLDefinition(ModuleDefinition definition) =>
+        definition.ShapeKind is ModuleShapeKind.CornerLLeft or ModuleShapeKind.CornerLRight ||
+        definition.Id.StartsWith("canto-bifold-l-", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsCornerLLeftHand(ModuleDefinition definition) =>
+        definition.ShapeKind == ModuleShapeKind.CornerLLeft ||
+        definition.Id.Contains("-esq-", StringComparison.OrdinalIgnoreCase);
 
     public void RebuildMesh(ModuleDefinition definition)
     {
@@ -151,8 +221,69 @@ public sealed class ModuleInstance
     {
         var effective = ResolveDimensionSettings(dimensionSettings);
         Mesh.Clear();
+        GeometryEnvelopeLocalOffset = Vector3.Zero;
         ModuleMeshBuilder.Build(this, definition, effective);
+        if (IsMirrored)
+            MirrorMeshAcrossLocalWidth();
     }
+
+    private void MirrorMeshAcrossLocalWidth()
+    {
+        Vector3 ReflectPoint(Vector3 world)
+        {
+            Vector3 local = ModulePlacementService.InverseTransformPoint(
+                world, Position, RotationYDegrees);
+            local.X = Width - local.X;
+            return ModulePlacementService.TransformLocalPoint(
+                local, Position, RotationYDegrees);
+        }
+
+        Vector3 ReflectNormal(Vector3 worldNormal)
+        {
+            Vector3 local = ModulePlacementService.InverseTransformPoint(
+                Position + worldNormal, Position, RotationYDegrees);
+            local.X = -local.X;
+            Vector3 world = ModulePlacementService.TransformLocalPoint(
+                local, Vector3.Zero, RotationYDegrees);
+            return world.LengthSquared > 0f ? Vector3.Normalize(world) : world;
+        }
+
+        for (int i = 0; i < Mesh.Vertices.Count; i++)
+            Mesh.Vertices[i] = ReflectPoint(Mesh.Vertices[i]);
+        for (int i = 0; i < Mesh.Normals.Count; i++)
+            Mesh.Normals[i] = ReflectNormal(Mesh.Normals[i]);
+
+        // A reflexão troca a orientação dos triângulos; inverter B/C conserva
+        // as normais externas e o back-face culling correto.
+        for (int i = 0; i + 2 < Mesh.Indices.Count; i += 3)
+            (Mesh.Indices[i + 1], Mesh.Indices[i + 2]) =
+                (Mesh.Indices[i + 2], Mesh.Indices[i + 1]);
+
+        for (int i = 0; i < Mesh.Faces.Count; i++)
+        {
+            var face = Mesh.Faces[i];
+            Vector3[] vertices = face.Vertices.Select(ReflectPoint).Reverse().ToArray();
+            Mesh.Faces[i] = new SelectableFace
+            {
+                OwnerId = face.OwnerId,
+                Kind = face.Kind,
+                Label = MirrorPartLabel(face.Label),
+                TriangleStartIndex = face.TriangleStartIndex,
+                TriangleCount = face.TriangleCount,
+                Vertices = vertices,
+                Normal = ReflectNormal(face.Normal)
+            };
+        }
+    }
+
+    private static string MirrorPartLabel(string label) =>
+        label
+            .Replace("esquerda", "__lado__", StringComparison.OrdinalIgnoreCase)
+            .Replace("direita", "esquerda", StringComparison.OrdinalIgnoreCase)
+            .Replace("__lado__", "direita", StringComparison.OrdinalIgnoreCase)
+            .Replace("esq.", "__lado_abrev__", StringComparison.OrdinalIgnoreCase)
+            .Replace("dir.", "esq.", StringComparison.OrdinalIgnoreCase)
+            .Replace("__lado_abrev__", "dir.", StringComparison.OrdinalIgnoreCase);
 
     private DimensionConfiguratorSettings ResolveDimensionSettings(DimensionConfiguratorSettings? dimensionSettings)
     {
@@ -177,8 +308,24 @@ public sealed class ModuleInstance
         RebuildMesh(definition, dimensionSettings);
     }
 
-    public (Vector3 Min, Vector3 Max) GetBounds() =>
-        ModulePlacementService.ComputeBounds(Position, Width, Height, Depth, RotationYDegrees);
+    public (Vector3 Min, Vector3 Max) GetBounds()
+    {
+        var nominal = ModulePlacementService.ComputeBounds(
+            Position, Width, Height, Depth, RotationYDegrees);
+        Vector3 envelopeOrigin = ModulePlacementService.TransformLocalPoint(
+            GeometryEnvelopeLocalOffset,
+            Position,
+            RotationYDegrees);
+        var shifted = ModulePlacementService.ComputeBounds(
+            envelopeOrigin, Width, Height, Depth, RotationYDegrees);
+
+        // O afastamento do canto é espaço reservado: a seleção/colisão deve
+        // abranger tanto a origem nominal quanto a caixaria deslocada. Apenas
+        // deslocar o envelope corrigia um lado, mas retirava a colisão do outro.
+        return (
+            Vector3.ComponentMin(nominal.Min, shifted.Min),
+            Vector3.ComponentMax(nominal.Max, shifted.Max));
+    }
 }
 
 /// <summary>

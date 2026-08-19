@@ -20,6 +20,9 @@ public static class ModulePartPickService
 
         foreach (var face in module.Mesh.Faces)
         {
+            if (!module.IsPartVisible(face.Label))
+                continue;
+
             var v = face.Vertices;
             bool hit = false;
             float t = float.MaxValue;

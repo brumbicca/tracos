@@ -6,6 +6,33 @@ namespace Tracos3DStudio.Tests;
 public class RoomTests
 {
     [Fact]
+    public void AmbienteNovo_PisoIniciaSolidoSemGradeEAjustadoAosExtremosDasParedes()
+    {
+        var draft = new WallDraft
+        {
+            Thickness = 150f,
+            Height = 2600f
+        };
+        draft.Start(new Vector2(0f, 5000f));
+        draft.ConfirmPoint(new Vector2(0f, 0f));
+        draft.ConfirmPoint(new Vector2(5000f, 0f));
+
+        var room = new Room();
+        room.SetWalls(draft.BuildWalls());
+        room.SeedFloorFromBounds();
+
+        Assert.NotNull(room.Floor);
+        Assert.False(room.ShowFloorGrid);
+        Assert.Equal(FloorMaterialCatalog.DefaultMaterialId, room.Floor!.DefaultMaterialId);
+        Assert.Equal(FloorMaterialPattern.Solid, FloorMaterialCatalog.GetDefault().Pattern);
+        Assert.True(room.TryGetFloorBounds(out var min, out var max));
+        Assert.InRange(min.X, -1f, 1f);
+        Assert.InRange(min.Y, -1f, 1f);
+        Assert.InRange(max.X, 4999f, 5001f);
+        Assert.InRange(max.Y, 4999f, 5001f);
+    }
+
+    [Fact]
     public void SetWalls_AmbienteFechado_GeraPisoAutomatico()
     {
         var walls = new List<WallSegment>

@@ -38,19 +38,19 @@ public static class CornerLModuleBuilder
         float fundoT = structure?.BackThicknessMm > 0f ? structure.BackThicknessMm : 6f;
         float backRecess = 0f;
         if (structure != null && structure.BackPanelType != BoxBackPanelType.Pregado)
-            backRecess = MathF.Max(0f, structure.BackRecessMm);
+            backRecess = structure.BackRecessMm;
 
-        var canto = ResolveCantoLOptions(dimensionSettings);
+        var canto = ResolveCantoLOptions(dimensionSettings, definition.DoorCount);
         // Folgas internas A/B do configurador (mantém média em FolgaPortas para compat).
         p.FolgaPortas = MathF.Max(0.5f, (canto.FolgaPortaA + canto.FolgaPortaB) * 0.5f);
 
         float sFro = structure?.SarrafoHeightMm > 0f ? structure.SarrafoHeightMm : p.AlturaSarrafo;
         float sTra = structure?.SarrafoTraseiroHeightMm > 0f ? structure.SarrafoTraseiroHeightMm : sFro;
         float sarT = structure?.SarrafoThicknessMm > 0f ? structure.SarrafoThicknessMm : p.EspessuraMdf;
-        float recuoFro = structure != null ? MathF.Max(0f, structure.SarrafoDianteiroRecessMm) : 0f;
+        float recuoFro = structure?.SarrafoDianteiroRecessMm ?? 0f;
         bool showSarrafos = structure == null || structure.SarrafoVisible;
-        bool showFro = showSarrafos;
-        bool showTra = showSarrafos;
+        bool showFro = showSarrafos && (structure == null || structure.FrontSarrafoVisible);
+        bool showTra = showSarrafos && (structure == null || structure.BackSarrafoVisible);
         bool froVert = structure?.FrontSarrafoIsVertical == true;
         bool traVert = structure?.BackSarrafoIsVertical == true;
 
@@ -64,10 +64,10 @@ public static class CornerLModuleBuilder
         var id = instance.Id;
 
         fundoT = Math.Clamp(fundoT, 3f, MathF.Min(t, MathF.Min(pe, pd) * 0.4f));
-        backRecess = Math.Clamp(backRecess, 0f, MathF.Min(pe, pd) * 0.35f);
+        backRecess = Math.Clamp(backRecess, -MathF.Min(pe, pd) * 0.35f, MathF.Min(pe, pd) * 0.35f);
         float largTrav = Math.Clamp(canto.LarguraTravMm, 20f, MathF.Min(pe, pd) * 0.85f);
         float profTrav = Math.Clamp(canto.ProfundidadeTravMm, 20f, MathF.Min(pe, pd) * 0.85f);
-        float aftv = Math.Clamp(canto.AvancoFundoSobreTravMm, 0f, MathF.Min(largTrav, profTrav) * 0.9f);
+        float aftv = Math.Clamp(canto.AvancoFundoSobreTravMm, -MathF.Min(largTrav, profTrav) * 0.9f, MathF.Min(largTrav, profTrav) * 0.9f);
         bool useTravessas = canto.Tipo is CantoLTipo.Travessas or CantoLTipo.TravessasInvertidas;
         bool invertidas = canto.Tipo == CantoLTipo.TravessasInvertidas;
 
@@ -84,38 +84,69 @@ public static class CornerLModuleBuilder
         sFro = Math.Clamp(sFro, 10f, MathF.Min(MathF.Min(pe, pd) * 0.55f, h * 0.5f));
         sTra = Math.Clamp(sTra, 10f, MathF.Min(MathF.Min(pe, pd) * 0.55f, h * 0.5f));
         sarT = Math.Clamp(sarT, 6f, MathF.Min(t, 50f));
-        recuoFro = Math.Clamp(recuoFro, 0f, MathF.Min(pe, pd) * 0.25f);
+        recuoFro = Math.Clamp(recuoFro, -MathF.Min(pe, pd) * 0.25f, MathF.Min(pe, pd) * 0.25f);
 
         instance.Width = cd;
         instance.Depth = ce;
         instance.Height = h;
 
+        float sideOffset = p.IsLeftHand ? -canto.WallSideOffsetMm : canto.WallSideOffsetMm;
+        instance.GeometryEnvelopeLocalOffset = new Vector3(sideOffset, 0f, canto.WallBackOffsetMm);
         Vector3 World(Vector3 local) =>
-            ModulePlacementService.TransformLocalPoint(local, instance.Position, instance.RotationYDegrees);
+            ModulePlacementService.TransformLocalPoint(
+                local + new Vector3(sideOffset, 0f, canto.WallBackOffsetMm),
+                instance.Position, instance.RotationYDegrees);
 
         _ = BuildLContour(cd, ce, pd, pe);
 
+        float lateralBaseY = structure == null ? 0f
+            : MathF.Abs(structure.LateralBaseOverlapMm) >= MathF.Abs(structure.LateralBottomRecessMm)
+                ? structure.LateralBaseOverlapMm
+                : structure.LateralBottomRecessMm;
+        float lateralGap = structure == null ? 0f : Math.Clamp(
+            structure.LateralDepthGapMm, -MathF.Min(pe, pd) * 0.5f, MathF.Max(0f, MathF.Min(pe, pd) - 10f));
+        var lateralAlignment = structure?.LateralDepthAlignment ?? LateralDepthAlignment.Back;
+        float rightZ0 = lateralAlignment switch
+        {
+            LateralDepthAlignment.Back => lateralGap,
+            LateralDepthAlignment.Center => lateralGap * 0.5f,
+            _ => 0f
+        };
+        float rightZ1 = lateralAlignment switch
+        {
+            LateralDepthAlignment.Front => pd - lateralGap,
+            LateralDepthAlignment.Center => pd - lateralGap * 0.5f,
+            _ => pd
+        };
+        float leftX0 = rightZ0;
+        float leftX1 = lateralAlignment switch
+        {
+            LateralDepthAlignment.Front => pe - lateralGap,
+            LateralDepthAlignment.Center => pe - lateralGap * 0.5f,
+            _ => pe
+        };
+
         AddBox(instance, World, id,
-            new Vector3(cd - t, 0f, 0f),
-            new Vector3(cd, h, pd),
+            new Vector3(cd - t, lateralBaseY, rightZ0),
+            new Vector3(cd, h, rightZ1),
             FaceKind.ModuleRight, "Lateral dir.");
         AddBox(instance, World, id,
-            new Vector3(0f, 0f, ce - t),
-            new Vector3(pe, h, ce),
+            new Vector3(leftX0, lateralBaseY, ce - t),
+            new Vector3(leftX1, h, ce),
             FaceKind.ModuleLeft, "Lateral esq.");
 
         // Mesmos campos do configurador Inferior (Fixação Fundo-Lateral / Base-Fundo).
         float afl = structure != null
-            ? Math.Clamp(structure.BackAdvanceOverLateralMm, 0f, t)
+            ? Math.Clamp(structure.BackAdvanceOverLateralMm, -t, t)
             : 0f;
         float alf = structure != null
-            ? Math.Clamp(structure.LateralAdvanceOverBackMm, 0f, t)
+            ? Math.Clamp(structure.LateralAdvanceOverBackMm, -t, t)
             : 0f;
         float afb = structure != null
-            ? Math.Clamp(structure.BackAdvanceOverBaseMm, 0f, t)
+            ? Math.Clamp(structure.BackAdvanceOverBaseMm, -t, t)
             : 0f;
         float abf = structure != null
-            ? Math.Clamp(structure.BaseAdvanceOverBackMm, 0f, fundoT)
+            ? Math.Clamp(structure.BaseAdvanceOverBackMm, -fundoT, fundoT)
             : 0f;
 
         AddCornerBackAssembly(
@@ -123,11 +154,13 @@ public static class CornerLModuleBuilder
             useTravessas, invertidas,
             travOrigin, backRecess, fundoT, largTrav, profTrav, aftv,
             afl, alf, afb,
+            canto.AvancoFundoSobreTraseiraMm,
             cd, ce, t, h);
 
         // Base L: avanço sobre o fundo (abf) encurta o vão interno no canto.
         // Tipo Base Inteira = peça L contínua; Recortada = bipartida (com emenda).
-        float baseInnerStart = MathF.Max(0f, innerStart - abf);
+        float baseInnerStart = MathF.Max(0f,
+            innerStart - abf - canto.AvancoBaseSobreTraseiraMm + canto.AvancoTraseiraSobreBaseMm);
         var baseContour = BuildInternalLContour(cd, ce, pd, pe, t, baseInnerStart);
         ExtrudeInternalL(
             instance, World, id, baseContour, y0: 0f, y1: t,
@@ -141,7 +174,27 @@ public static class CornerLModuleBuilder
         // Tipo Tampo Inteiro = prateleira L contínua (Promob: peça única).
         ExtrudeInternalL(
             instance, World, id, shelf, y0: shelfY, y1: shelfY + t,
-            FaceKind.ModuleTop, "Prateleira L", wholePiece: canto.TampoInteiro);
+            FaceKind.ModuleTop, "Prateleira L", wholePiece: canto.PrateleiraInteira);
+
+        if (canto.SpacerDepthMm > 0f)
+        {
+            float spacerDepth = Math.Clamp(canto.SpacerDepthMm, t, MathF.Min(pe, pd) * 0.6f);
+            AddBox(instance, World, id,
+                new Vector3(pe - t, t, pd - spacerDepth),
+                new Vector3(pe, h - t, pd),
+                FaceKind.ModuleRight, "Distanciador canto L A");
+            AddBox(instance, World, id,
+                new Vector3(pe - spacerDepth, t, pd - t),
+                new Vector3(pe, h - t, pd),
+                FaceKind.ModuleBack, "Distanciador canto L B");
+        }
+
+        if (structure?.SarrafoWhole == true && structure.SarrafoVisible)
+        {
+            var wholeSarrafo = BuildInternalLContour(cd, ce, pd, pe, t, innerStart);
+            ExtrudeInternalL(instance, World, id, wholeSarrafo,
+                y0: h - sarT, y1: h, FaceKind.ModuleTop, "Sarrafo inteiro L", wholePiece: true);
+        }
 
         AddSarrafos(
             instance, World, id, p.IsLeftHand,
@@ -153,9 +206,9 @@ public static class CornerLModuleBuilder
         float ft = Math.Clamp(frontThickness, 12f, 30f);
         AddCornerDoors(
             instance, World, id,
-            doorCount, definition.ShapeKind,
+            doorCount, definition.ShapeKind, p.IsLeftHand,
             ce, cd, pe, pd, h, ft,
-            canto.FolgaPortaA, canto.FolgaPortaB,
+            canto.FolgaPortaA, canto.FolgaPortaB, canto.FolgaEntrePortas,
             canto.BordaLateralMm, canto.BordaInferiorMm, canto.BordaSuperiorMm);
 
         instance.CornerL = p;
@@ -181,6 +234,7 @@ public static class CornerLModuleBuilder
         float afl,
         float alf,
         float afb,
+        float avancoFundoSobreTraseira,
         float cd,
         float ce,
         float t,
@@ -193,7 +247,9 @@ public static class CornerLModuleBuilder
 
         if (!useTravessas)
         {
-            float fundoFront = fundoRecess + fundoT;
+            float fundoFront = MathF.Max(
+                fundoRecess,
+                fundoRecess + fundoT - MathF.Max(0f, avancoFundoSobreTraseira));
             AddBox(instance, toWorld, id,
                 new Vector3(fundoFront, y0, fundoRecess),
                 new Vector3(latEndDir, h, fundoFront),
@@ -249,7 +305,9 @@ public static class CornerLModuleBuilder
             FaceKind.ModuleBack, "Fundo esq.");
     }
 
-    private static CantoLOptions ResolveCantoLOptions(DimensionConfiguratorSettings? settings)
+    private static CantoLOptions ResolveCantoLOptions(
+        DimensionConfiguratorSettings? settings,
+        int doorCount)
     {
         var opts = new CantoLOptions
         {
@@ -259,6 +317,7 @@ public static class CornerLModuleBuilder
             AvancoFundoSobreTravMm = 8f,
             FolgaPortaA = 2f,
             FolgaPortaB = 2f,
+            FolgaEntrePortas = 2f,
             BordaLateralMm = 4f,
             BordaInferiorMm = 4f,
             BordaSuperiorMm = 4f
@@ -283,18 +342,47 @@ public static class CornerLModuleBuilder
             opts.LarguraTravMm = larg;
         if (box.InferiorNumeric.TryGetValue("cl-prof-trav", out var pf) && pf > 0f)
             opts.ProfundidadeTravMm = pf;
-        if (box.InferiorNumeric.TryGetValue("cl-aftv", out var aft) && aft >= 0f)
+        if (box.InferiorNumeric.TryGetValue("cl-aftv", out var aft) && float.IsFinite(aft))
             opts.AvancoFundoSobreTravMm = aft;
-        if (box.InferiorNumeric.TryGetValue("cl-folga-pa", out var fa) && fa >= 0f)
+        if (box.InferiorNumeric.TryGetValue("cl-folga-pa", out var fa) && float.IsFinite(fa))
             opts.FolgaPortaA = fa;
-        if (box.InferiorNumeric.TryGetValue("cl-folga-pb", out var fb) && fb >= 0f)
+        if (box.InferiorNumeric.TryGetValue("cl-folga-pb", out var fb) && float.IsFinite(fb))
             opts.FolgaPortaB = fb;
+        if (box.InferiorNumeric.TryGetValue("cl-folga-entre", out var fe) && float.IsFinite(fe))
+            opts.FolgaEntrePortas = fe;
 
-        // Promob: Tipo Base / Tipo Tampo (prateleira) — única vs bipartida.
+        // Regras independentes: L 2P e L 3P não compartilham as folgas
+        // internas. Os campos legados acima continuam como fallback.
+        string doorPrefix = doorCount >= 3 ? "cl3" : "cl2";
+        if (box.InferiorNumeric.TryGetValue($"{doorPrefix}-folga-pa", out var dedicatedA) &&
+            float.IsFinite(dedicatedA))
+            opts.FolgaPortaA = dedicatedA;
+        if (box.InferiorNumeric.TryGetValue($"{doorPrefix}-folga-pb", out var dedicatedB) &&
+            float.IsFinite(dedicatedB))
+            opts.FolgaPortaB = dedicatedB;
+        if (doorCount >= 3 &&
+            box.InferiorNumeric.TryGetValue("cl3-folga-entre", out var dedicatedBetween) &&
+            float.IsFinite(dedicatedBetween))
+            opts.FolgaEntrePortas = dedicatedBetween;
+
+        // Promob: Base / Prateleira do Canto L — única vs bipartida.
         if (box.InferiorChoice.TryGetValue("cl-tipo-base", out var tipoBase))
-            opts.BaseInteira = !string.Equals(tipoBase, "Recortada", StringComparison.OrdinalIgnoreCase);
+            opts.BaseInteira = !IsBipartida(tipoBase);
         if (box.InferiorChoice.TryGetValue("cl-tipo-tampo", out var tipoTampo))
-            opts.TampoInteiro = !string.Equals(tipoTampo, "Recortado", StringComparison.OrdinalIgnoreCase);
+            opts.PrateleiraInteira = !IsBipartida(tipoTampo);
+
+        if (box.InferiorNumeric.TryGetValue("cl-abt", out var abt) && float.IsFinite(abt))
+            opts.AvancoBaseSobreTraseiraMm = abt;
+        if (box.InferiorNumeric.TryGetValue("cl-atb", out var atb) && float.IsFinite(atb))
+            opts.AvancoTraseiraSobreBaseMm = atb;
+        if (box.InferiorNumeric.TryGetValue("cl-aft", out var aftBack) && float.IsFinite(aftBack))
+            opts.AvancoFundoSobreTraseiraMm = aftBack;
+        if (box.InferiorNumeric.TryGetValue("cl-prof-dist", out var spacer) && spacer >= 0f)
+            opts.SpacerDepthMm = spacer;
+        if (box.InferiorNumeric.TryGetValue("cl-afa-lat", out var wallSide) && float.IsFinite(wallSide))
+            opts.WallSideOffsetMm = wallSide;
+        if (box.InferiorNumeric.TryGetValue("cl-afa-tra", out var wallBack) && float.IsFinite(wallBack))
+            opts.WallBackOffsetMm = wallBack;
 
         // Frentes | Portas → Inferiores (borda lateral / inferior / superior).
         var portas = settings.CozinhaFrentesPortas;
@@ -304,6 +392,10 @@ public static class CornerLModuleBuilder
 
         return opts;
     }
+
+    private static bool IsBipartida(string? value) =>
+        value?.Contains("Bipart", StringComparison.OrdinalIgnoreCase) == true ||
+        value?.Contains("Recort", StringComparison.OrdinalIgnoreCase) == true;
 
     private static float ReadChoiceMm(
         CozinhaFrentesPortasSettings portas,
@@ -315,7 +407,7 @@ public static class CornerLModuleBuilder
         if (portas.Choice.TryGetValue(key, out var text) &&
             float.TryParse(text, System.Globalization.NumberStyles.Float,
                 System.Globalization.CultureInfo.InvariantCulture, out float value))
-            return MathF.Max(0f, value);
+            return value;
 
         return fallback;
     }
@@ -330,51 +422,95 @@ public static class CornerLModuleBuilder
         Guid id,
         int doorCount,
         ModuleShapeKind shapeKind,
+        bool leftHand,
         float ce, float cd, float pe, float pd,
         float h, float ft,
-        float folgaA, float folgaB,
+        float folgaA, float folgaB, float folgaEntre,
         float bordaLat, float bordaInf, float bordaSup)
     {
-        folgaA = Math.Clamp(folgaA, 0f, 20f);
-        folgaB = Math.Clamp(folgaB, 0f, 20f);
-        bordaLat = Math.Clamp(bordaLat, 0f, 20f);
-        bordaInf = Math.Clamp(bordaInf, 0f, 30f);
-        bordaSup = Math.Clamp(bordaSup, 0f, 30f);
+        folgaA = Math.Clamp(folgaA, -20f, 20f);
+        folgaB = Math.Clamp(folgaB, -20f, 20f);
+        folgaEntre = Math.Clamp(folgaEntre, -20f, 20f);
+        bordaLat = Math.Clamp(bordaLat, -20f, 20f);
+        bordaInf = Math.Clamp(bordaInf, -30f, 30f);
+        bordaSup = Math.Clamp(bordaSup, -30f, 30f);
 
         float y0 = bordaInf;
         float y1 = h - bordaSup;
         if (y1 <= y0 + 20f)
             return;
 
-        bool twoDoors = doorCount >= 2;
-        bool leftOnly = !twoDoors && shapeKind == ModuleShapeKind.CornerLLeft;
-        bool rightOnly = !twoDoors && !leftOnly;
+        bool multipleDoors = doorCount >= 2;
+        bool threeDoors = doorCount >= 3;
+        bool leftOnly = !multipleDoors && shapeKind == ModuleShapeKind.CornerLLeft;
+        bool rightOnly = !multipleDoors && !leftOnly;
+
+        int rightPanels = threeDoors && !leftHand ? 2 : 1;
+        int leftPanels = threeDoors && leftHand ? 2 : 1;
 
         // Porta do lado A (asa direita): fora da caixa em +Z (z = pd … pd+ft).
-        if (twoDoors || rightOnly)
+        if (multipleDoors || rightOnly)
         {
-            float x0 = pe + folgaA;
+            // L Esq.: a porta direita é a folha da frente e parte da caixa.
+            // L Dir.: a porta direita fica atrás da esquerda e desconta sua espessura.
+            float rightFrontReference = leftHand ? 0f : ft;
+            float x0 = pe + rightFrontReference + folgaA;
             float x1 = cd - bordaLat;
             if (x1 > x0 + 10f)
             {
-                AddBox(instance, toWorld, id,
-                    new Vector3(x0, y0, pd),
-                    new Vector3(x1, y1, pd + ft),
-                    FaceKind.ModuleFront, "Porta dir.");
+                if (rightPanels == 1)
+                {
+                    AddBox(instance, toWorld, id,
+                        new Vector3(x0, y0, pd),
+                        new Vector3(x1, y1, pd + ft),
+                        FaceKind.ModuleFront, "Porta dir.");
+                }
+                else
+                {
+                    float middle = (x0 + x1) * 0.5f;
+                    float halfGap = folgaEntre * 0.5f;
+                    AddBox(instance, toWorld, id,
+                        new Vector3(x0, y0, pd),
+                        new Vector3(middle - halfGap, y1, pd + ft),
+                        FaceKind.ModuleFront, "Porta dir. 1");
+                    AddBox(instance, toWorld, id,
+                        new Vector3(middle + halfGap, y0, pd),
+                        new Vector3(x1, y1, pd + ft),
+                        FaceKind.ModuleFront, "Porta dir. 2");
+                }
             }
         }
 
         // Porta do lado B (asa esquerda): fora da caixa em +X (x = pe … pe+ft).
-        if (twoDoors || leftOnly)
+        if (multipleDoors || leftOnly)
         {
-            float z0 = pd + folgaB;
+            // Espelho da regra acima: no L Dir. a esquerda parte da caixa;
+            // no L Esq. ela fica atrás da porta direita.
+            float leftFrontReference = leftHand ? ft : 0f;
+            float z0 = pd + leftFrontReference + folgaB;
             float z1 = ce - bordaLat;
             if (z1 > z0 + 10f)
             {
-                AddBox(instance, toWorld, id,
-                    new Vector3(pe, y0, z0),
-                    new Vector3(pe + ft, y1, z1),
-                    FaceKind.ModuleFront, "Porta esq.");
+                if (leftPanels == 1)
+                {
+                    AddBox(instance, toWorld, id,
+                        new Vector3(pe, y0, z0),
+                        new Vector3(pe + ft, y1, z1),
+                        FaceKind.ModuleFront, "Porta esq.");
+                }
+                else
+                {
+                    float middle = (z0 + z1) * 0.5f;
+                    float halfGap = folgaEntre * 0.5f;
+                    AddBox(instance, toWorld, id,
+                        new Vector3(pe, y0, z0),
+                        new Vector3(pe + ft, y1, middle - halfGap),
+                        FaceKind.ModuleFront, "Porta esq. 1");
+                    AddBox(instance, toWorld, id,
+                        new Vector3(pe, y0, middle + halfGap),
+                        new Vector3(pe + ft, y1, z1),
+                        FaceKind.ModuleFront, "Porta esq. 2");
+                }
             }
         }
     }
@@ -757,10 +893,17 @@ public static class CornerLModuleBuilder
         public float AvancoFundoSobreTravMm { get; set; }
         public float FolgaPortaA { get; set; }
         public float FolgaPortaB { get; set; }
+        public float FolgaEntrePortas { get; set; }
         public float BordaLateralMm { get; set; }
         public float BordaInferiorMm { get; set; }
         public float BordaSuperiorMm { get; set; }
         public bool BaseInteira { get; set; } = true;
-        public bool TampoInteiro { get; set; } = true;
+        public bool PrateleiraInteira { get; set; } = true;
+        public float AvancoBaseSobreTraseiraMm { get; set; }
+        public float AvancoTraseiraSobreBaseMm { get; set; }
+        public float AvancoFundoSobreTraseiraMm { get; set; }
+        public float SpacerDepthMm { get; set; }
+        public float WallSideOffsetMm { get; set; }
+        public float WallBackOffsetMm { get; set; }
     }
 }

@@ -2,11 +2,21 @@ namespace Tracos3DStudio;
 
 public static class FloorMaterialCatalog
 {
-    public const string DefaultMaterialId = "porcelanato-branco";
+    public const string DefaultMaterialId = "ambiente-solido-claro";
 
     private static readonly Dictionary<string, FloorMaterialDefinition> Definitions =
         new(StringComparer.OrdinalIgnoreCase)
         {
+            ["ambiente-solido-claro"] = new FloorMaterialDefinition
+            {
+                Id = "ambiente-solido-claro",
+                DisplayName = "Cor sólida clara",
+                // Mesma cor da face clara padrão das paredes (0,94 / 0,94 / 0,88).
+                ColorHex = "#F0F0E0",
+                AccentColorHex = "#F0F0E0",
+                Pattern = FloorMaterialPattern.Solid,
+                PricePerSquareMeter = 0m
+            },
             ["porcelanato-branco"] = new FloorMaterialDefinition
             {
                 Id = "porcelanato-branco",

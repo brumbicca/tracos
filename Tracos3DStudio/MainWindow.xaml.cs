@@ -3292,6 +3292,101 @@ public partial class MainWindow : Window
         e.Handled = true;
     }
 
+    private void PropertyObliqueDoorCountCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_syncingPropertyPanel || !_selectedModuleId.HasValue)
+            return;
+
+        var module = _project.FindModule(_selectedModuleId.Value);
+        if (module == null || !SceneModuleVisibilityService.IsEditable(module))
+            return;
+
+        var definition = ModuleCatalog.GetRequired(module.DefinitionId);
+        bool isOblique = definition.ShapeKind == ModuleShapeKind.Oblique;
+        bool isEndTerminal = definition.ShapeKind is ModuleShapeKind.EndDiagonal or ModuleShapeKind.EndChamfer;
+        if (!isOblique && !isEndTerminal)
+            return;
+
+        if (isOblique)
+            module.ObliqueDoorCount = Math.Clamp(PropertyObliqueDoorCountCombo.SelectedIndex + 1, 1, 2);
+        else
+        {
+            module.EndTerminal ??= EndTerminalParams.FromDefinition(definition);
+            module.EndTerminal.DoorCount = Math.Clamp(PropertyObliqueDoorCountCombo.SelectedIndex + 1, 1, 2);
+            module.EndTerminal.ClampToModule(module.Width, module.Depth,
+                definition.ShapeKind == ModuleShapeKind.EndChamfer);
+        }
+        module.RebuildMesh(definition, DimensionConfiguratorService.GetSettings(_project));
+        MarkProjectDirty();
+        RefreshCollisionState();
+        UpdateModulePropertyPanel(module, definition);
+        RefreshSceneModuleList();
+        Viewport.InvalidateVisual();
+    }
+
+    private void PropertyObliqueHingeSideCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_syncingPropertyPanel || !_selectedModuleId.HasValue)
+            return;
+
+        var module = _project.FindModule(_selectedModuleId.Value);
+        if (module == null || !SceneModuleVisibilityService.IsEditable(module))
+            return;
+
+        var definition = ModuleCatalog.GetRequired(module.DefinitionId);
+        if (definition.ShapeKind != ModuleShapeKind.Oblique)
+            return;
+
+        module.ObliqueHingesOnLeft = PropertyObliqueHingeSideCombo.SelectedIndex <= 0;
+        module.RebuildMesh(definition, DimensionConfiguratorService.GetSettings(_project));
+        MarkProjectDirty();
+        UpdateModulePropertyPanel(module, definition);
+        Viewport.InvalidateVisual();
+    }
+
+    private void PropertyDrawerSlideTypeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_syncingPropertyPanel || !_selectedModuleId.HasValue)
+            return;
+
+        var module = _project.FindModule(_selectedModuleId.Value);
+        if (module == null || !SceneModuleVisibilityService.IsEditable(module))
+            return;
+
+        var definition = ModuleCatalog.GetRequired(module.DefinitionId);
+        if (definition.DrawerCount <= 0 ||
+            !string.Equals(definition.LibrarySubGroup, ModuleLibraryHierarchy.SubGaveteiros,
+                StringComparison.OrdinalIgnoreCase))
+            return;
+
+        module.DrawerSlideType = PropertyDrawerSlideTypeCombo.SelectedIndex == 1
+            ? DrawerSlideType.Concealed
+            : DrawerSlideType.Telescopic;
+        module.RebuildMesh(definition, DimensionConfiguratorService.GetSettings(_project));
+        MarkProjectDirty();
+        RefreshCollisionState();
+        UpdateModulePropertyPanel(module, definition);
+        Viewport.InvalidateVisual();
+    }
+
+    private void PropertySpecialColumnShelfCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_syncingPropertyPanel || !_selectedModuleId.HasValue)
+            return;
+
+        var module = _project.FindModule(_selectedModuleId.Value);
+        if (module?.SpecialColumn == null || !SceneModuleVisibilityService.IsEditable(module))
+            return;
+
+        var definition = ModuleCatalog.GetRequired(module.DefinitionId);
+        module.SpecialColumn.ShelfNotched = PropertySpecialColumnShelfCombo.SelectedIndex <= 0;
+        module.RebuildMesh(definition, DimensionConfiguratorService.GetSettings(_project));
+        MarkProjectDirty();
+        RefreshCollisionState();
+        UpdateModulePropertyPanel(module, definition);
+        Viewport.InvalidateVisual();
+    }
+
     private void PartDeltaBox_PreviewKeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key != Key.Enter)
@@ -3413,7 +3508,7 @@ public partial class MainWindow : Window
         }
 
         // Afastamento Piso
-        if (PropertyPanelInput.TryParseMm(WallFloorOffsetBox.Text, out float fo) && fo >= 0)
+        if (PropertyPanelInput.TryParseMm(WallFloorOffsetBox.Text, out float fo))
         {
             if (applyToGroup)
                 foreach (var w in _project.Room.Walls) w.FloorOffset = fo;
@@ -3425,13 +3520,13 @@ public partial class MainWindow : Window
         // Cotas: face individual
         if (!applyToGroup)
         {
-            if (PropertyPanelInput.TryParseMm(WallCotaAnteriorBox.Text, out float ca) && ca >= 0)
+            if (PropertyPanelInput.TryParseMm(WallCotaAnteriorBox.Text, out float ca))
             { wall.CotaAnterior = ca; changed = true; }
-            if (PropertyPanelInput.TryParseMm(WallCotaPosteriorBox.Text, out float cp) && cp >= 0)
+            if (PropertyPanelInput.TryParseMm(WallCotaPosteriorBox.Text, out float cp))
             { wall.CotaPosterior = cp; changed = true; }
-            if (PropertyPanelInput.TryParseMm(WallCotaInferiorBox.Text, out float ci) && ci >= 0)
+            if (PropertyPanelInput.TryParseMm(WallCotaInferiorBox.Text, out float ci))
             { wall.CotaInferior = ci; changed = true; }
-            if (PropertyPanelInput.TryParseMm(WallCotaSuperiorBox.Text, out float cs) && cs >= 0)
+            if (PropertyPanelInput.TryParseMm(WallCotaSuperiorBox.Text, out float cs))
             { wall.CotaSuperior = cs; changed = true; }
         }
 
@@ -6470,7 +6565,8 @@ public partial class MainWindow : Window
             _project.Modules,
             candidateWallId: _previewModuleWallId,
             distanceAlongWall: _previewModuleDistanceAlong,
-            candidateDefinition: ModuleCatalog.GetRequired(_moduleInsertDefinitionId!));
+            candidateDefinition: ModuleCatalog.GetRequired(_moduleInsertDefinitionId!),
+            dimensionSettings: DimensionConfiguratorService.GetSettings(_project));
     }
 
     private void UpdateStatusBarViewContext()
@@ -6495,6 +6591,32 @@ public partial class MainWindow : Window
         {
             TryCloseProjectTab(_projectTabs.ActiveIndex);
             e.Handled = true;
+            return;
+        }
+
+        // Promob: Ctrl+O reexibe todos os módulos e peças ocultados no ambiente.
+        if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.O)
+        {
+            RevealAllHiddenSceneItems();
+            e.Handled = true;
+            return;
+        }
+
+        // Promob: O oculta a peça aberta/selecionada; sem peça aberta, oculta o módulo.
+        // Não interceptar a letra quando o usuário estiver digitando em um campo.
+        if (Keyboard.Modifiers == ModifierKeys.None && e.Key == Key.O && !IsTextEntryFocused())
+        {
+            if (HideSelectedSceneItem())
+                e.Handled = true;
+            return;
+        }
+
+        // Promob: I espelha o(s) módulo(s) selecionado(s). A engenharia é a
+        // mesma instância paramétrica; não são necessários SKUs Esq./Dir.
+        if (Keyboard.Modifiers == ModifierKeys.None && e.Key == Key.I && !IsTextEntryFocused())
+        {
+            if (MirrorSelectedModules())
+                e.Handled = true;
             return;
         }
 
@@ -6552,6 +6674,21 @@ public partial class MainWindow : Window
             // Grupo de módulo aberto: Esc fecha a edição por peça (volta ao módulo inteiro).
             if (_openModuleGroupId != null)
             {
+                if (!string.IsNullOrEmpty(_selectedPartLabel) &&
+                    !DrawerPartNaming.IsAssemblySelection(_selectedPartLabel) &&
+                    DrawerPartNaming.TryGetAssembly(_selectedPartLabel, out string drawerAssembly))
+                {
+                    _selectedPartLabel = drawerAssembly;
+                    _selectedPartHandle = null;
+                    var drawerModule = _project.FindModule(_openModuleGroupId.Value);
+                    if (drawerModule != null)
+                        UpdatePartSelectionStatus(drawerModule);
+                    Viewport.InvalidateVisual();
+                    SetStatusBarOverrides(hint: $"{drawerAssembly} selecionada — dois cliques entram nas peças.");
+                    e.Handled = true;
+                    return;
+                }
+
                 _openModuleGroupId = null;
                 _selectedPartLabel = null;
                 _selectedPartHandle = null;
@@ -6776,6 +6913,100 @@ public partial class MainWindow : Window
 
             e.Handled = true;
         }
+    }
+
+    private static bool IsTextEntryFocused() =>
+        Keyboard.FocusedElement is System.Windows.Controls.TextBox or
+            System.Windows.Controls.ComboBox or
+            System.Windows.Controls.ComboBoxItem;
+
+    private bool MirrorSelectedModules()
+    {
+        var ids = _selectedModuleIds.Count > 0
+            ? _selectedModuleIds.ToList()
+            : _selectedModuleId.HasValue
+                ? [_selectedModuleId.Value]
+                : [];
+        var settings = DimensionConfiguratorService.GetSettings(_project);
+        int mirrored = 0;
+
+        foreach (Guid id in ids)
+        {
+            var module = _project.FindModule(id);
+            if (module == null || !SceneModuleVisibilityService.IsEditable(module))
+                continue;
+
+            module.IsMirrored = !module.IsMirrored;
+            module.RebuildMesh(ModuleCatalog.GetRequired(module.DefinitionId), settings);
+            mirrored++;
+        }
+
+        if (mirrored == 0)
+            return false;
+
+        MarkProjectDirty();
+        Viewport.InvalidateVisual();
+        SetStatusBarOverrides(hint: mirrored == 1
+            ? "Módulo espelhado. Pressione I novamente para inverter."
+            : $"{mirrored} módulos espelhados.");
+        return true;
+    }
+
+    private bool HideSelectedSceneItem()
+    {
+        if (_openModuleGroupId.HasValue && !string.IsNullOrEmpty(_selectedPartLabel))
+        {
+            var module = _project.FindModule(_openModuleGroupId.Value);
+            if (module == null || !SceneOcclusionService.HidePart(module, _selectedPartLabel))
+                return false;
+
+            string hiddenLabel = _selectedPartLabel;
+            _selectedPartLabel = null;
+            _selectedPartHandle = null;
+            HighlightActivePartDeltaBox(null);
+            MarkProjectDirty();
+            UpdateModulePropertyPanel(module, ModuleCatalog.GetRequired(module.DefinitionId));
+            Viewport.InvalidateVisual();
+            SetStatusBarOverrides(hint: DrawerPartNaming.IsAssemblySelection(hiddenLabel)
+                ? $"{hiddenLabel} inteira ocultada. Ctrl+O reexibe todos os ocultos."
+                : $"Peça “{hiddenLabel}” ocultada. Ctrl+O reexibe todos os ocultos.");
+            return true;
+        }
+
+        var ids = _selectedModuleIds.Count > 0
+            ? _selectedModuleIds.ToList()
+            : _selectedModuleId.HasValue
+                ? [_selectedModuleId.Value]
+                : [];
+        var modules = ids.Select(id => _project.FindModule(id)).OfType<ModuleInstance>().ToList();
+        int hidden = SceneOcclusionService.HideModules(modules);
+        if (hidden == 0)
+            return false;
+
+        MarkProjectDirty();
+        ClearSelection();
+        RefreshSceneModuleList();
+        Viewport.InvalidateVisual();
+        SetStatusBarOverrides(hint: hidden == 1
+            ? "Módulo ocultado. Ctrl+O reexibe todos os ocultos."
+            : $"{hidden} módulos ocultados. Ctrl+O reexibe todos os ocultos.");
+        return true;
+    }
+
+    private void RevealAllHiddenSceneItems()
+    {
+        RevealHiddenResult result = SceneOcclusionService.RevealAll(_project);
+        if (!result.Changed)
+        {
+            SetStatusBarOverrides(hint: "Não existem módulos ou peças ocultados.");
+            return;
+        }
+
+        MarkProjectDirty();
+        RefreshSceneModuleList();
+        Viewport.InvalidateVisual();
+        SetStatusBarOverrides(hint:
+            $"Reexibidos: {result.Modules} módulo(s) e {result.Parts} peça(s).");
     }
 
     private void ToggleWallOrientation()
@@ -7552,6 +7783,12 @@ public partial class MainWindow : Window
 
         bool isCornerL = module.CornerL != null ||
             definition.ShapeKind is ModuleShapeKind.CornerLLeft or ModuleShapeKind.CornerLRight;
+        bool isOblique = definition.ShapeKind == ModuleShapeKind.Oblique;
+        bool isEndTerminal = definition.ShapeKind is ModuleShapeKind.EndDiagonal or ModuleShapeKind.EndChamfer;
+        bool isSpecialColumn = definition.ShapeKind == ModuleShapeKind.ColumnDoors && module.SpecialColumn != null;
+        bool isDrawerModule = definition.DrawerCount > 0 &&
+            string.Equals(definition.LibrarySubGroup, ModuleLibraryHierarchy.SubGaveteiros,
+                StringComparison.OrdinalIgnoreCase);
         if (isCornerL && module.CornerL != null)
         {
             PropertyLengthLabel.Text = "Largura A (mm)";
@@ -7577,10 +7814,83 @@ public partial class MainWindow : Window
             PropertyCornerMeasureBBox.Text = "";
         }
 
+        if (isEndTerminal)
+        {
+            module.EndTerminal ??= EndTerminalParams.FromDefinition(definition);
+            module.EndTerminal.ClampToModule(module.Width, module.Depth,
+                definition.ShapeKind == ModuleShapeKind.EndChamfer);
+            PropertyCornerMeasuresPanel.Visibility = Visibility.Visible;
+            PropertyCornerMeasureALabel.Text = "Medida A — profundidade da lateral menor (mm)";
+            PropertyCornerMeasureABox.Text = module.EndTerminal.SmallSideDepthMm
+                .ToString("0", CultureInfo.InvariantCulture);
+            bool showB = definition.ShapeKind == ModuleShapeKind.EndChamfer;
+            PropertyCornerMeasureBPanel.Visibility = showB ? Visibility.Visible : Visibility.Collapsed;
+            PropertyCornerMeasureBLabel.Text = "Medida B — frente reta até o encontro das travessas (mm)";
+            PropertyCornerMeasureBBox.Text = showB
+                ? module.EndTerminal.FrontStraightWidthMm.ToString("0", CultureInfo.InvariantCulture)
+                : "";
+        }
+        else
+        {
+            PropertyCornerMeasureALabel.Text = "Medida A (mm)";
+            PropertyCornerMeasureBLabel.Text = "Medida B (mm)";
+            PropertyCornerMeasureBPanel.Visibility = isCornerL ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        PropertyObliquePanel.Visibility = isOblique || isEndTerminal ? Visibility.Visible : Visibility.Collapsed;
+        PropertyObliqueDoorCountCombo.SelectedIndex = isEndTerminal
+            ? Math.Clamp(module.EndTerminal?.DoorCount ?? 1, 1, 2) - 1
+            : Math.Clamp(module.ObliqueDoorCount, 1, 2) - 1;
+        PropertyObliqueHingeSideCombo.SelectedIndex = module.ObliqueHingesOnLeft ? 0 : 1;
+        PropertyObliqueHingeSidePanel.Visibility = isOblique && module.ObliqueDoorCount == 1
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+
+        PropertySpecialColumnPanel.Visibility = isSpecialColumn ? Visibility.Visible : Visibility.Collapsed;
+        if (isSpecialColumn && module.SpecialColumn != null)
+        {
+            PropertySpecialColumnPositionText.Text = module.SpecialColumn.Position switch
+            {
+                SpecialColumnPosition.Left => "Recorte para coluna — esquerda",
+                SpecialColumnPosition.Right => "Recorte para coluna — direita",
+                _ => "Recorte para coluna — central"
+            };
+            PropertySpecialColumnWidthBox.Text = module.SpecialColumn.WidthMm.ToString("0", CultureInfo.InvariantCulture);
+            PropertySpecialColumnDepthBox.Text = module.SpecialColumn.DepthMm.ToString("0", CultureInfo.InvariantCulture);
+            PropertySpecialColumnOffsetBox.Text = module.SpecialColumn.LeftOffsetMm.ToString("0", CultureInfo.InvariantCulture);
+            PropertySpecialColumnOffsetPanel.Visibility = module.SpecialColumn.Position == SpecialColumnPosition.Center
+                ? Visibility.Visible : Visibility.Collapsed;
+            PropertySpecialColumnShelfCombo.SelectedIndex = module.SpecialColumn.ShelfNotched ? 0 : 1;
+        }
+
         var dimSettings = DimensionConfiguratorService.GetSettings(_project);
+        ModelsExpander.Visibility = isDrawerModule ? Visibility.Visible : Visibility.Collapsed;
+        PropertyDrawerSlideTypeCombo.SelectedIndex = module.DrawerSlideType == DrawerSlideType.Concealed ? 1 : 0;
+        if (isDrawerModule)
+        {
+            GavetasConfiguratorService.EnsureInitialized(dimSettings);
+            string telKey = GavetasConfiguratorService.MakeKey("folgas", "folg-cor-tel");
+            string invKey = GavetasConfiguratorService.MakeKey("folgas", "folg-cor-inv");
+            float telGap = dimSettings.CozinhaGavetas.Numeric.GetValueOrDefault(telKey, 13.5f);
+            float invGap = dimSettings.CozinhaGavetas.Numeric.GetValueOrDefault(invKey, 5f);
+            PropertyTelescopicSlideItem.Content = $"Telescópica — folga {telGap:0.##} mm";
+            PropertyConcealedSlideItem.Content = $"Invisível — folga {invGap:0.##} mm";
+            PropertyDrawerSlideHintText.Text = module.DrawerSlideType == DrawerSlideType.Concealed
+                ? "Usando A2 — Folga Corrediça Invisível do Configurador de Dimensões."
+                : "Usando A1 — Folga Corrediça Telescópica do Configurador de Dimensões.";
+        }
+
         PropertyHintText.Text = isCornerL
             ? "Canto L: Largura A/B = comprimentos das asas; Medida A/B = profundidades (Promob). Enter confirma cada campo."
-            : $"Dimensões livres até {dimSettings.MaxWidthMm:0} × {dimSettings.MaxHeightMm:0} × {dimSettings.MaxDepthMm:0} mm. Enter confirma.";
+            : isOblique
+                ? "Canto oblíquo: largura e profundidade correspondem às Medidas A/B. Escolha uma ou duas portas."
+                : isEndTerminal
+                    ? definition.ShapeKind == ModuleShapeKind.EndChamfer
+                        ? "Chanfrado: A é a profundidade da lateral menor; B é a frente reta até o encontro angular das travessas. I espelha também a identificação das peças."
+                        : "Diagonal: A é a profundidade da lateral menor. I espelha também a identificação das peças."
+                : isSpecialColumn
+                    ? "Especial para coluna: informe largura e profundidade do recorte. Na coluna central, informe também sua posição a partir da esquerda. Enter confirma."
+                : $"Dimensões livres até {dimSettings.MaxWidthMm:0} × {dimSettings.MaxHeightMm:0} × {dimSettings.MaxDepthMm:0} mm. Enter confirma.";
 
         var material = MaterialCatalog.TryGet(module.MaterialId, out var mat) && mat != null
             ? mat
@@ -7610,6 +7920,13 @@ public partial class MainWindow : Window
         PropertyDepthBox.IsEnabled = editable;
         PropertyCornerMeasureABox.IsEnabled = editable;
         PropertyCornerMeasureBBox.IsEnabled = editable;
+        PropertyObliqueDoorCountCombo.IsEnabled = editable;
+        PropertyObliqueHingeSideCombo.IsEnabled = editable;
+        PropertySpecialColumnWidthBox.IsEnabled = editable;
+        PropertySpecialColumnDepthBox.IsEnabled = editable;
+        PropertySpecialColumnOffsetBox.IsEnabled = editable;
+        PropertySpecialColumnShelfCombo.IsEnabled = editable;
+        PropertyDrawerSlideTypeCombo.IsEnabled = editable;
         PropertyMaterialCombo.IsEnabled = editable;
         ModuleLayerCombo.IsEnabled = editable;
         RotateModule90Button.IsEnabled = editable;
@@ -7772,6 +8089,7 @@ public partial class MainWindow : Window
         var definition = ModuleCatalog.GetRequired(module.DefinitionId);
         bool isCornerL = module.CornerL != null ||
             definition.ShapeKind is ModuleShapeKind.CornerLLeft or ModuleShapeKind.CornerLRight;
+        bool isEndTerminal = definition.ShapeKind is ModuleShapeKind.EndDiagonal or ModuleShapeKind.EndChamfer;
 
         float? cornerMedidaA = null;
         float? cornerMedidaB = null;
@@ -7791,6 +8109,52 @@ public partial class MainWindow : Window
             cornerMedidaB = medidaB;
             cornerLarguraA = width;
             cornerLarguraB = depth;
+        }
+
+        float? endSmallSideDepth = null;
+        float? endFrontStraightWidth = null;
+        if (isEndTerminal)
+        {
+            if (!PropertyPanelInput.TryParseMm(PropertyCornerMeasureABox.Text, out float medidaA) || medidaA <= 0f)
+            {
+                PropertyHintText.Text = "A profundidade da lateral menor (Medida A) deve ser maior que zero.";
+                return;
+            }
+            endSmallSideDepth = medidaA;
+            if (definition.ShapeKind == ModuleShapeKind.EndChamfer)
+            {
+                if (!PropertyPanelInput.TryParseMm(PropertyCornerMeasureBBox.Text, out float medidaB) || medidaB < 0f)
+                {
+                    PropertyHintText.Text = "A frente reta (Medida B) deve ser zero ou maior.";
+                    return;
+                }
+                endFrontStraightWidth = medidaB;
+            }
+        }
+
+        float? specialColumnWidth = null;
+        float? specialColumnDepth = null;
+        float? specialColumnOffset = null;
+        if (module.SpecialColumn != null)
+        {
+            if (!PropertyPanelInput.TryParseMm(PropertySpecialColumnWidthBox.Text, out float columnWidth) ||
+                !PropertyPanelInput.TryParseMm(PropertySpecialColumnDepthBox.Text, out float columnDepth) ||
+                columnWidth <= 0f || columnDepth <= 0f)
+            {
+                PropertyHintText.Text = "Largura e profundidade da coluna devem ser maiores que zero.";
+                return;
+            }
+
+            float offset = module.SpecialColumn.LeftOffsetMm;
+            if (module.SpecialColumn.Position == SpecialColumnPosition.Center &&
+                (!PropertyPanelInput.TryParseMm(PropertySpecialColumnOffsetBox.Text, out offset) || offset < 0f))
+            {
+                PropertyHintText.Text = "A posição da coluna central deve ser zero ou maior.";
+                return;
+            }
+            specialColumnWidth = columnWidth;
+            specialColumnDepth = columnDepth;
+            specialColumnOffset = offset;
         }
 
         float? preserveAnterior = null;
@@ -7818,6 +8182,27 @@ public partial class MainWindow : Window
             cornerMedidaB,
             cornerLarguraA,
             cornerLarguraB);
+
+        if (isEndTerminal && endSmallSideDepth.HasValue)
+        {
+            module.EndTerminal ??= EndTerminalParams.FromDefinition(definition);
+            module.EndTerminal.SmallSideDepthMm = endSmallSideDepth.Value;
+            if (endFrontStraightWidth.HasValue)
+                module.EndTerminal.FrontStraightWidthMm = endFrontStraightWidth.Value;
+            module.EndTerminal.ClampToModule(module.Width, module.Depth,
+                definition.ShapeKind == ModuleShapeKind.EndChamfer);
+            module.RebuildMesh(definition, DimensionConfiguratorService.GetSettings(_project));
+        }
+
+        if (module.SpecialColumn != null && specialColumnWidth.HasValue && specialColumnDepth.HasValue)
+        {
+            module.SpecialColumn.WidthMm = specialColumnWidth.Value;
+            module.SpecialColumn.DepthMm = specialColumnDepth.Value;
+            if (specialColumnOffset.HasValue)
+                module.SpecialColumn.LeftOffsetMm = specialColumnOffset.Value;
+            module.SpecialColumn.ClampToModule(module.Width, module.Depth);
+            module.RebuildMesh(definition, DimensionConfiguratorService.GetSettings(_project));
+        }
 
         if (preserveAnterior.HasValue && attachedWall != null)
         {
@@ -8150,7 +8535,8 @@ public partial class MainWindow : Window
             ignoreModuleId: module.Id,
             candidateWallId: placement.WallId ?? _moduleWallDragWallId,
             distanceAlongWall: placement.DistanceAlongWall,
-            candidateDefinition: definition);
+            candidateDefinition: definition,
+            dimensionSettings: DimensionConfiguratorService.GetSettings(_project));
     }
 
     private void TryBeginModuleWallDragFromPending(double mouseX, double mouseY)
@@ -8503,13 +8889,23 @@ public partial class MainWindow : Window
             picked == null)
             return false;
 
+        bool sameOpenModule = _openModuleGroupId == picked.Id;
+        string? previousSelection = sameOpenModule ? _selectedPartLabel : null;
         SelectModule(picked);
         _openModuleGroupId = picked.Id;
         _selectedPartHandle = null;
 
-        _selectedPartLabel = ModulePartPickService.TryPickPart(origin, direction, picked, out string label, out _)
-            ? label
-            : null;
+        if (!ModulePartPickService.TryPickPart(origin, direction, picked, out string label, out _))
+            _selectedPartLabel = null;
+        else if (sameOpenModule && DrawerPartNaming.IsAssemblySelection(previousSelection) &&
+                 DrawerPartNaming.BelongsToAssembly(label, previousSelection))
+            // Segundo duplo-clique: entra nas peças da gaveta já selecionada.
+            _selectedPartLabel = label;
+        else if (DrawerPartNaming.TryGetAssembly(label, out string assembly))
+            // Primeiro duplo-clique: seleciona a gaveta inteira.
+            _selectedPartLabel = assembly;
+        else
+            _selectedPartLabel = label;
 
         UpdatePartSelectionStatus(picked);
         return true;
@@ -8518,7 +8914,8 @@ public partial class MainWindow : Window
     /// <summary>Clique numa seta de dimensão da peça: destaca e passa a ser o ponto de referência.</summary>
     private bool TryPickPartHandleInOpenGroup(double mouseX, double mouseY)
     {
-        if (_openModuleGroupId == null || string.IsNullOrEmpty(_selectedPartLabel))
+        if (_openModuleGroupId == null || string.IsNullOrEmpty(_selectedPartLabel) ||
+            DrawerPartNaming.IsAssemblySelection(_selectedPartLabel))
             return false;
 
         var module = _project.FindModule(_openModuleGroupId.Value);
@@ -8639,6 +9036,20 @@ public partial class MainWindow : Window
         if (!ModulePartPickService.TryPickPart(origin, direction, module, out string label, out _))
             return false;
 
+        if (DrawerPartNaming.IsAssemblySelection(_selectedPartLabel))
+        {
+            // Um clique troca a gaveta selecionada, mas não perfura o conjunto.
+            if (DrawerPartNaming.TryGetAssembly(label, out string clickedAssembly))
+                _selectedPartLabel = clickedAssembly;
+            UpdatePartSelectionStatus(module);
+            Viewport.InvalidateVisual();
+            return true;
+        }
+
+        if (DrawerPartNaming.TryGetAssembly(_selectedPartLabel, out string openAssembly) &&
+            !DrawerPartNaming.BelongsToAssembly(label, openAssembly))
+            return true;
+
         _selectedModuleId = module.Id;
         _selectedModuleIds.Clear();
         _selectedModuleIds.Add(module.Id);
@@ -8658,13 +9069,21 @@ public partial class MainWindow : Window
             Title = $"Tra?os 3D - {definition.DisplayName} | Grupo aberto | Clique numa pe?a | Esc fecha";
             SetStatusBarOverrides(hint: "Grupo aberto — clique numa peça para selecioná-la.");
         }
+        else if (DrawerPartNaming.IsAssemblySelection(_selectedPartLabel))
+        {
+            Title = $"Tra?os 3D - {definition.DisplayName} \u2192 {_selectedPartLabel} | Gaveta selecionada | Dois cliques entram nas peças";
+            SetStatusBarOverrides(hint: $"{_selectedPartLabel} inteira — dois cliques entram nas peças; O oculta o conjunto.");
+        }
         else
         {
             Title = $"Tra?os 3D - {definition.DisplayName} \u2192 {_selectedPartLabel} | Pe?a selecionada | Esc fecha grupo";
             SetStatusBarOverrides(hint: $"Peça: {_selectedPartLabel}");
         }
 
-        UpdatePartPropertyPanel(module);
+        if (DrawerPartNaming.IsAssemblySelection(_selectedPartLabel))
+            UpdateModulePropertyPanel(module, definition);
+        else
+            UpdatePartPropertyPanel(module);
     }
 
     /// <summary>
@@ -10675,7 +11094,8 @@ public partial class MainWindow : Window
                 _camera.XRayEnabled && _camera.ViewMode == CameraViewMode.Perspective);
 
             // Setas de dimensão da peça selecionada.
-            if (_openModuleGroupId != null && !string.IsNullOrEmpty(_selectedPartLabel))
+            if (_openModuleGroupId != null && !string.IsNullOrEmpty(_selectedPartLabel) &&
+                !DrawerPartNaming.IsAssemblySelection(_selectedPartLabel))
             {
                 var handleModule = _project.FindModule(_openModuleGroupId.Value);
                 if (handleModule != null)
@@ -10836,19 +11256,20 @@ public partial class MainWindow : Window
 
     private void DrawAutomaticWallDimensionsForScene()
     {
-        IReadOnlyList<WallSegment> wallsForDims;
-
-        if (_wallMode)
+        // As medidas finais já ficam disponíveis nas propriedades da parede.
+        // Mantemos as cotas automáticas somente durante a construção, quando são
+        // necessárias para orientar o próximo segmento. Cotas manuais continuam.
+        if (!_wallMode)
         {
-            wallsForDims = WallAutomaticDimensionService.BuildDraftWallsIncludingPreview(
+            _activeWallDimensions = Array.Empty<WallAutomaticDimension>();
+            return;
+        }
+
+        IReadOnlyList<WallSegment> wallsForDims =
+            WallAutomaticDimensionService.BuildDraftWallsIncludingPreview(
                 _wallDraft,
                 _previewPoint,
                 _hasPreview && _hasLastPoint);
-        }
-        else
-        {
-            wallsForDims = _project.Room.Walls;
-        }
 
         _activeWallDimensions = wallsForDims.Count > 0
             ? WallAutomaticDimensionService.BuildForWalls(wallsForDims)

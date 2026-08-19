@@ -77,6 +77,21 @@ public sealed class DimensionConfiguratorServiceTests
     }
 
     [Fact]
+    public void ResolveInsertionDimensions_CantoObliquo_NasceQuadrado800x800()
+    {
+        var definition = ModuleCatalog.GetRequired("canto-obliquo-1p-900");
+        var settings = DimensionConfiguratorSettings.CreateDefault();
+        settings.CozinhaInferiorHeightMm = 850f;
+        settings.CozinhaInferiorDepthMm = 550f;
+
+        var (width, height, depth) = DimensionConfiguratorService.ResolveInsertionDimensions(definition, settings);
+
+        Assert.Equal(800f, width, 1);
+        Assert.Equal(850f, height, 1);
+        Assert.Equal(800f, depth, 1);
+    }
+
+    [Fact]
     public void ResolveInsertionDimensions_AereoMedio_UsaSuperiorMedio()
     {
         var definition = ModuleCatalog.GetRequired("aereo");
@@ -400,6 +415,44 @@ public sealed class DimensionConfiguratorServiceTests
         Assert.Equal(50f, rules.Structure.CrossRailWidthMm, 1);
     }
 
+    [Theory]
+    [InlineData("Inteiro", BoxBackPanelLayout.Inteiro)]
+    [InlineData("Rebaixado", BoxBackPanelLayout.Rebaixado)]
+    [InlineData("Trav Vertical", BoxBackPanelLayout.TravessaVertical)]
+    [InlineData("Trav Horizontal", BoxBackPanelLayout.TravessaHorizontal)]
+    [InlineData("Sem fundo", BoxBackPanelLayout.SemFundo)]
+    public void CreateEffectiveRules_TipoFundo_MapeiaLayoutConstrutivo(
+        string tipo,
+        BoxBackPanelLayout expected)
+    {
+        var definition = ModuleCatalog.GetRequired("balcao-2-portas");
+        var settings = DimensionConfiguratorSettings.CreateDefault();
+        settings.CozinhaInferiorBox.InferiorChoice["fundo-tipo"] = tipo;
+
+        var rules = DimensionConfiguratorService.CreateEffectiveRules(definition, settings)!;
+
+        Assert.Equal(expected, rules.Structure.BackPanelLayout);
+    }
+
+    [Fact]
+    public void CreateEffectiveRules_Inferior_MapeiaFolgasExternasDasFrentes()
+    {
+        var definition = ModuleCatalog.GetRequired("balcao-2-portas");
+        var settings = DimensionConfiguratorSettings.CreateDefault();
+        settings.CozinhaFrentesPortas.Choice[
+            FrentesPortasConfiguratorService.MakeKey("inferiores", "borda-lat")] = "3";
+        settings.CozinhaFrentesPortas.Choice[
+            FrentesPortasConfiguratorService.MakeKey("inferiores", "borda-sup")] = "5";
+        settings.CozinhaFrentesPortas.Choice[
+            FrentesPortasConfiguratorService.MakeKey("inferiores", "borda-inf")] = "7";
+
+        var rules = DimensionConfiguratorService.CreateEffectiveRules(definition, settings)!;
+
+        Assert.Equal(3f, rules.Structure.FrontSideGapMm, 1);
+        Assert.Equal(5f, rules.Structure.FrontTopGapMm, 1);
+        Assert.Equal(7f, rules.Structure.FrontBottomGapMm, 1);
+    }
+
     [Fact]
     public void CreateEffectiveRules_SarTipoSemSarrafo_OcultaSarrafo()
     {
@@ -615,5 +668,45 @@ public sealed class DimensionConfiguratorServiceTests
         int sarrafosAfter = module.Mesh.Faces.Count(f => f.Label.Contains("Sarrafo", StringComparison.Ordinal));
         Assert.Equal(sarrafosBefore, sarrafosAfter);
         Assert.True(sarrafosAfter >= 2);
+    }
+
+    [Fact]
+    public void Configurador_NumericosAssinados_PreservaRecuosEAvancosNegativos()
+    {
+        var definition = ModuleCatalog.GetRequired("balcao-2-portas");
+        var settings = DimensionConfiguratorSettings.CreateDefault();
+        BoxAssemblyConfiguratorService.EnsureBoxInitialized(settings);
+        var box = settings.CozinhaInferiorBox;
+
+        box.InferiorNumeric["fundo-recuo"] = -12f;
+        box.InferiorNumeric["sar-recuo-fro"] = -25f;
+        box.InferiorNumeric["prat-recuo"] = -30f;
+        BoxAssemblyConfiguratorService.SyncInferiorToLegacy(box);
+
+        var rules = DimensionConfiguratorService.CreateEffectiveRules(definition, settings);
+
+        Assert.NotNull(rules);
+        Assert.Equal(-12f, rules!.Structure.BackRecessMm, 1);
+        Assert.Equal(-25f, rules.Structure.SarrafoDianteiroRecessMm, 1);
+        Assert.All(rules.Structure.Shelves, shelf => Assert.Equal(-30f, shelf.DepthInsetMm, 1));
+        Assert.True(BoxAssemblyInferiorSchema.AllowsNegative("fundo-recuo"));
+        Assert.True(BoxAssemblyInferiorSchema.AllowsNegative("sar-recuo-fro"));
+    }
+
+    [Fact]
+    public void FrentesPortas_ValoresNegativos_ExpandemLayoutParaForaDaCaixa()
+    {
+        var portas = new CozinhaFrentesPortasSettings();
+        FrentesPortasConfiguratorService.EnsureInitialized(portas, 4f);
+        portas.Choice[FrentesPortasConfiguratorService.MakeKey("inferiores", "borda-lat")] = "-18";
+        portas.Choice[FrentesPortasConfiguratorService.MakeKey("inferiores", "borda-inf")] = "-10";
+
+        var structure = ModulationRulesPresets.CreateStandardBox(2, 0).Structure;
+        FrentesPortasConfiguratorService.ApplyInferioresToStructure(portas, structure);
+        var fronts = ModulationFrontLayout.Layout(800f, 850f, structure);
+
+        Assert.NotEmpty(fronts);
+        Assert.Equal(-18f, fronts[0].X1, 1);
+        Assert.Equal(-10f, fronts[0].Y1, 1);
     }
 }

@@ -18,8 +18,8 @@ public class Room
 
     public bool ShowAutomaticCeiling { get; set; } = false;
 
-    /// <summary>Grade sobre o piso. Futuro: configs de material/visibilidade.</summary>
-    public bool ShowFloorGrid { get; set; } = true;
+    /// <summary>Grade sobre o piso. Desligada por padrão para o ambiente iniciar limpo.</summary>
+    public bool ShowFloorGrid { get; set; } = false;
 
     public bool IsClosed { get; private set; }
 

@@ -52,8 +52,6 @@ public sealed class CornerLModuleBuilderTests
         Assert.Contains("Prateleira L", labels);
         Assert.Contains("Lateral esq.", labels);
         Assert.Contains("Lateral dir.", labels);
-        Assert.Contains("Sarrafo traseiro dir.", labels);
-        Assert.Contains("Sarrafo traseiro esq.", labels);
         Assert.Contains("Sarrafo dianteiro dir.", labels);
         Assert.Contains("Sarrafo dianteiro esq.", labels);
         Assert.Contains("Fundo dir.", labels);
@@ -204,6 +202,7 @@ public sealed class CornerLModuleBuilderTests
         settings.CozinhaInferiorBox.InferiorNumeric["cl-larg-trav"] = 88f;
         settings.CozinhaInferiorBox.InferiorNumeric["cl-prof-trav"] = 88f;
         settings.CozinhaInferiorBox.InferiorNumeric["cl-aftv"] = 8f;
+        settings.CozinhaInferiorBox.InferiorChoice["sar-tipo"] = "Ambos";
 
         var (w, h, d) = DimensionConfiguratorService.ResolveInsertionDimensions(definition, settings);
         var instance = ModuleCatalog.CreateInstance("canto-l-2p-dir-950", Vector3.Zero);
@@ -272,8 +271,8 @@ public sealed class CornerLModuleBuilderTests
     {
         var definition = ModuleCatalog.GetRequired(catalogId);
         var settings = DimensionConfiguratorSettings.CreateDefault();
-        settings.CozinhaInferiorBox.InferiorNumeric["cl-folga-pa"] = 3f;
-        settings.CozinhaInferiorBox.InferiorNumeric["cl-folga-pb"] = 5f;
+        settings.CozinhaInferiorBox.InferiorNumeric["cl2-folga-pa"] = 3f;
+        settings.CozinhaInferiorBox.InferiorNumeric["cl2-folga-pb"] = 5f;
         settings.CozinhaFrentesPortas.Choice[
             FrentesPortasConfiguratorService.MakeKey("inferiores", "borda-lat")] = "4";
         settings.CozinhaFrentesPortas.Choice[
@@ -306,10 +305,13 @@ public sealed class CornerLModuleBuilderTests
         // Folga interna A/B no canto.
         float minXDir = portaDir.SelectMany(f => f.Vertices).Min(v => v.X);
         float minZEsq = portaEsq.SelectMany(f => f.Vertices).Min(v => v.Z);
-        Assert.True(MathF.Abs(minXDir - (pe + 3f)) < 1.5f,
-            $"Folga A na porta dir. (minX={minXDir}, esperado≈{pe + 3f})");
-        Assert.True(MathF.Abs(minZEsq - (pd + 5f)) < 1.5f,
-            $"Folga B na porta esq. (minZ={minZEsq}, esperado≈{pd + 5f})");
+        bool leftHand = catalogId.Contains("-esq-", StringComparison.OrdinalIgnoreCase);
+        float expectedRight = pe + (leftHand ? 0f : definition.FrontThickness) + 3f;
+        float expectedLeft = pd + (leftHand ? definition.FrontThickness : 0f) + 5f;
+        Assert.True(MathF.Abs(minXDir - expectedRight) < 1.5f,
+            $"Folga A na porta dir. (minX={minXDir})");
+        Assert.True(MathF.Abs(minZEsq - expectedLeft) < 1.5f,
+            $"Folga B na porta esq. (minZ={minZEsq})");
     }
 
     [Fact]
@@ -317,8 +319,8 @@ public sealed class CornerLModuleBuilderTests
     {
         var definition = ModuleCatalog.GetRequired("canto-l-2p-dir-950");
         var settings = DimensionConfiguratorSettings.CreateDefault();
-        settings.CozinhaInferiorBox.InferiorChoice["cl-tipo-base"] = "Inteira";
-        settings.CozinhaInferiorBox.InferiorChoice["cl-tipo-tampo"] = "Inteiro";
+        settings.CozinhaInferiorBox.InferiorChoice["cl-tipo-base"] = "Única";
+        settings.CozinhaInferiorBox.InferiorChoice["cl-tipo-tampo"] = "Única";
 
         var (w, h, d) = DimensionConfiguratorService.ResolveInsertionDimensions(definition, settings);
         var instance = ModuleCatalog.CreateInstance("canto-l-2p-dir-950", Vector3.Zero);
@@ -335,8 +337,8 @@ public sealed class CornerLModuleBuilderTests
     {
         var definition = ModuleCatalog.GetRequired("canto-l-2p-dir-950");
         var settings = DimensionConfiguratorSettings.CreateDefault();
-        settings.CozinhaInferiorBox.InferiorChoice["cl-tipo-base"] = "Recortada";
-        settings.CozinhaInferiorBox.InferiorChoice["cl-tipo-tampo"] = "Recortado";
+        settings.CozinhaInferiorBox.InferiorChoice["cl-tipo-base"] = "Bipartida";
+        settings.CozinhaInferiorBox.InferiorChoice["cl-tipo-tampo"] = "Bipartida";
 
         var (w, h, d) = DimensionConfiguratorService.ResolveInsertionDimensions(definition, settings);
         var instance = ModuleCatalog.CreateInstance("canto-l-2p-dir-950", Vector3.Zero);
@@ -347,6 +349,29 @@ public sealed class CornerLModuleBuilderTests
         Assert.DoesNotContain(FacesOf(instance, "Prateleira L"), f => f.Vertices.Length == 6);
         Assert.True(FacesOf(instance, "Base L").Count() >= 12,
             "Recortada deve gerar duas caixas (12 faces) com emenda.");
+    }
+
+    [Fact]
+    public void CantoSemTravessas_AplicaAvancosEntreBaseTraseiraEFundo()
+    {
+        var definition = ModuleCatalog.GetRequired("canto-l-2p-dir-950");
+        var settings = DimensionConfiguratorSettings.CreateDefault();
+        settings.CozinhaInferiorBox.InferiorChoice["cl-tipo"] = "Sem travessas";
+        settings.CozinhaInferiorBox.InferiorNumeric["fundo-recuo"] = 8f;
+        settings.CozinhaInferiorBox.InferiorNumeric["cl-abt"] = 10f;
+        settings.CozinhaInferiorBox.InferiorNumeric["cl-atb"] = 3f;
+        settings.CozinhaInferiorBox.InferiorNumeric["cl-aft"] = 4f;
+
+        var instance = ModuleCatalog.CreateInstance(definition.Id, Vector3.Zero);
+        instance.SetDimensions(950f, 850f, 550f, definition, settings, respectCatalogLimits: false);
+
+        float baseMinX = FacesOf(instance, "Base L").SelectMany(f => f.Vertices).Min(v => v.X);
+        float fundoMinX = FacesOf(instance, "Fundo dir.").SelectMany(f => f.Vertices).Min(v => v.X);
+
+        // Face interna do fundo: 8 + 6 = 14; base avança 10 e traseira avança 3 => 7.
+        Assert.True(MathF.Abs(baseMinX - 7f) < 1.5f, $"baseMinX={baseMinX}, esperado≈7");
+        // Fundo avança 4 mm sobre a traseira: 8 + 6 - 4 = 10.
+        Assert.True(MathF.Abs(fundoMinX - 10f) < 1.5f, $"fundoMinX={fundoMinX}, esperado≈10");
     }
 
     [Fact]

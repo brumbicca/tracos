@@ -12,6 +12,12 @@ public static class ModuleMeshShapes
         ModuleDefinition definition,
         DimensionConfiguratorSettings? dimensionSettings)
     {
+        if (BalconyModuleBuilder.TryBuild(instance, definition, dimensionSettings))
+            return true;
+
+        if (DrawerModuleBuilder.TryBuild(instance, definition, dimensionSettings))
+            return true;
+
         return definition.ShapeKind switch
         {
             ModuleShapeKind.Standard => false,
@@ -20,16 +26,18 @@ public static class ModuleMeshShapes
             ModuleShapeKind.BlindCornerRight => CallBlind(instance, definition, left: false, dimensionSettings),
             ModuleShapeKind.CornerLLeft => CallL(instance, definition, left: true, dimensionSettings),
             ModuleShapeKind.CornerLRight => CallL(instance, definition, left: false, dimensionSettings),
-            ModuleShapeKind.Oblique => CallOblique(instance, definition),
+            ModuleShapeKind.Oblique => CallOblique(instance, definition, dimensionSettings),
+            ModuleShapeKind.CornerDrawer => CallCornerDrawer(instance, definition, dimensionSettings),
+            ModuleShapeKind.CornerCurved => CallCornerCurved(instance, definition, dimensionSettings),
             ModuleShapeKind.CurvedFront => BuildCurvedFront(instance, definition, dimensionSettings),
             ModuleShapeKind.Bifold => BuildBifold(instance, definition, dimensionSettings),
-            ModuleShapeKind.ColumnDoors => BuildColumnDoors(instance, definition, dimensionSettings),
+            ModuleShapeKind.ColumnDoors => SpecialColumnModuleBuilder.Build(instance, definition, dimensionSettings),
             ModuleShapeKind.PullOutNarrow => BuildPullOutNarrow(instance, definition, dimensionSettings),
             ModuleShapeKind.WineRack => BuildWineRack(instance, definition, dimensionSettings),
             ModuleShapeKind.ApplianceBay => BuildApplianceBay(instance, definition, dimensionSettings),
-            ModuleShapeKind.EndDiagonal => BuildEndCut(instance, definition, dimensionSettings, EndCut.Diagonal),
+            ModuleShapeKind.EndDiagonal => EndTerminalModuleBuilder.Build(instance, definition, dimensionSettings),
             ModuleShapeKind.EndCurved => BuildEndCut(instance, definition, dimensionSettings, EndCut.Curved),
-            ModuleShapeKind.EndChamfer => BuildEndCut(instance, definition, dimensionSettings, EndCut.Chamfer),
+            ModuleShapeKind.EndChamfer => EndTerminalModuleBuilder.Build(instance, definition, dimensionSettings),
             ModuleShapeKind.EndZ => BuildEndCut(instance, definition, dimensionSettings, EndCut.Z),
             ModuleShapeKind.OpenCornerShelves => BuildOpenShelves(instance, definition, dimensionSettings),
             _ => false
@@ -81,9 +89,30 @@ public static class ModuleMeshShapes
         return true;
     }
 
-    private static bool CallOblique(ModuleInstance instance, ModuleDefinition definition)
+    private static bool CallOblique(
+        ModuleInstance instance,
+        ModuleDefinition definition,
+        DimensionConfiguratorSettings? dimensionSettings)
     {
-        ModuleCornerMeshBuilder.BuildOblique(instance, definition);
+        ModuleCornerMeshBuilder.BuildOblique(instance, definition, dimensionSettings);
+        return true;
+    }
+
+    private static bool CallCornerDrawer(
+        ModuleInstance instance,
+        ModuleDefinition definition,
+        DimensionConfiguratorSettings? dimensionSettings)
+    {
+        ModuleCornerMeshBuilder.BuildCornerDrawer(instance, definition, dimensionSettings);
+        return true;
+    }
+
+    private static bool CallCornerCurved(
+        ModuleInstance instance,
+        ModuleDefinition definition,
+        DimensionConfiguratorSettings? dimensionSettings)
+    {
+        ModuleCornerMeshBuilder.BuildCurvedCorner(instance, definition, dimensionSettings);
         return true;
     }
 
@@ -124,8 +153,7 @@ public static class ModuleMeshShapes
         ModuleDefinition definition,
         DimensionConfiguratorSettings? settings)
     {
-        if (definition.LibrarySubGroup.Equals(
-                ModuleLibraryHierarchy.SubCantosBifold, StringComparison.OrdinalIgnoreCase))
+        if (definition.Id.StartsWith("canto-bifold-l-", StringComparison.OrdinalIgnoreCase))
         {
             bool left = definition.Id.Contains("esq", StringComparison.OrdinalIgnoreCase);
             return CallL(instance, definition, left, settings);
@@ -151,33 +179,6 @@ public static class ModuleMeshShapes
             ShapeKind = ModuleShapeKind.Standard
         };
         ModuleMeshBuilder.BuildBoxWithFront(instance, bifold, settings);
-        return true;
-    }
-
-    private static bool BuildColumnDoors(
-        ModuleInstance instance,
-        ModuleDefinition definition,
-        DimensionConfiguratorSettings? settings)
-    {
-        ModuleMeshBuilder.BuildBoxWithFront(instance, definition, settings);
-
-        float w = instance.Width;
-        float h = instance.Height;
-        float d = instance.Depth;
-        float ft = definition.FrontThickness;
-        float col = MathF.Min(80f, w * 0.12f);
-        var id = instance.Id;
-        Vector3 ToWorld(Vector3 local) =>
-            ModulePlacementService.TransformLocalPoint(local, instance.Position, instance.RotationYDegrees);
-
-        float cx = definition.DisplayName.Contains("Esq", StringComparison.OrdinalIgnoreCase) ? col * 0.5f
-            : definition.DisplayName.Contains("Dir", StringComparison.OrdinalIgnoreCase) ? w - col * 0.5f
-            : w * 0.5f;
-
-        AddBox(instance, ToWorld, id,
-            new Vector3(cx - col * 0.5f, 0f, d + ft),
-            new Vector3(cx + col * 0.5f, h, d + ft + col),
-            FaceKind.ModuleFront);
         return true;
     }
 
@@ -251,16 +252,22 @@ public static class ModuleMeshShapes
         float h = instance.Height;
         float d = instance.Depth;
         var id = instance.Id;
+        var effective = DimensionConfiguratorService.CreateEffectiveRules(definition, settings);
+        var structure = effective?.Structure;
         Vector3 ToWorld(Vector3 local) =>
             ModulePlacementService.TransformLocalPoint(local, instance.Position, instance.RotationYDegrees);
 
         // Quadro do nicho (vazio visual na frente)
         float margin = 40f;
+        float lateralOverFront = structure?.LateralAdvanceOverFrontPanelMm ?? 0f;
+        float frontOverLateral = structure?.FrontPanelAdvanceOverLateralMm ?? 0f;
+        float panelX0 = Math.Clamp(margin + lateralOverFront - frontOverLateral, 0f, w * 0.45f);
+        float panelX1 = Math.Clamp(w - margin - lateralOverFront + frontOverLateral, w * 0.55f, w);
         float bayH = definition.DrawerCount > 0 ? h * 0.55f : h * 0.75f;
         float y0 = definition.DrawerCount > 0 ? h * 0.35f : h * 0.12f;
         AddBox(instance, ToWorld, id,
-            new Vector3(margin, y0, d - 8f),
-            new Vector3(w - margin, y0 + bayH, d + 4f),
+            new Vector3(panelX0, y0, d - 8f),
+            new Vector3(panelX1, y0 + bayH, d + 4f),
             FaceKind.ModuleBack);
         return true;
     }

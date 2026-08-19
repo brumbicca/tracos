@@ -90,7 +90,9 @@ public static class PropertyPanelInput
         float? medidaB,
         DimensionConfiguratorSettings? dimensionSettings = null)
     {
-        bool leftHand = definition.ShapeKind == ModuleShapeKind.CornerLLeft;
+        bool leftHand = module.CornerL?.IsLeftHand ??
+                        (definition.ShapeKind == ModuleShapeKind.CornerLLeft ||
+                         definition.Id.Contains("-esq-", StringComparison.OrdinalIgnoreCase));
         var settings = dimensionSettings ?? DimensionConfiguratorSettings.CreateDefault();
 
         module.Height = ModuleDimensionClamp.ClampForFreeEdit(height, settings.MaxHeightMm);

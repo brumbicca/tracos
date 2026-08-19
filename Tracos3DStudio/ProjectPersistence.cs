@@ -151,11 +151,25 @@ public static class ProjectPersistence
                 InstanceDisplayName = module.InstanceDisplayName,
                 IsVisible = module.IsVisible,
                 IsLocked = module.IsLocked,
+                IsMirrored = module.IsMirrored,
                 CornerMedidaA = module.CornerL?.ProfundidadeDireita,
                 CornerMedidaB = module.CornerL?.ProfundidadeEsquerda,
                 CornerLarguraA = module.CornerL?.ComprimentoDireito,
                 CornerLarguraB = module.CornerL?.ComprimentoEsquerdo,
                 BlindCornerUseSpacer = module.BlindCorner?.UseSpacer,
+                ObliqueDoorCount = module.ObliqueDoorCount,
+                ObliqueHingesOnLeft = module.ObliqueHingesOnLeft,
+                EndSmallSideDepth = module.EndTerminal?.SmallSideDepthMm,
+                EndFrontStraightWidth = module.EndTerminal?.FrontStraightWidthMm,
+                EndDoorCount = module.EndTerminal?.DoorCount,
+                DrawerSlideType = module.DrawerSlideType,
+                SpecialColumnWidth = module.SpecialColumn?.WidthMm,
+                SpecialColumnDepth = module.SpecialColumn?.DepthMm,
+                SpecialColumnLeftOffset = module.SpecialColumn?.LeftOffsetMm,
+                SpecialColumnShelfNotched = module.SpecialColumn?.ShelfNotched,
+                HiddenPartLabels = module.HiddenPartLabels.Count == 0
+                    ? null
+                    : module.HiddenPartLabels.OrderBy(label => label, StringComparer.Ordinal).ToList(),
                 PartOverrides = module.PartOverrides.Count == 0
                     ? null
                     : module.PartOverrides.ToDictionary(
@@ -380,13 +394,35 @@ public static class ProjectPersistence
 
         foreach (var moduleData in document.Modules)
         {
-            if (!ModuleCatalog.TryGet(moduleData.DefinitionId, out var definition) || definition == null)
+            int? legacyObliqueDoorCount = null;
+            string definitionId = moduleData.DefinitionId;
+            if (definitionId.Equals("canto-l-esq-950", StringComparison.OrdinalIgnoreCase))
+            {
+                definitionId = "canto-l-2p-esq-950";
+            }
+            else if (definitionId.Equals("canto-l-dir-950", StringComparison.OrdinalIgnoreCase))
+            {
+                definitionId = "canto-l-2p-dir-950";
+            }
+            else if (definitionId.Equals("canto-obliquo-2p-900", StringComparison.OrdinalIgnoreCase))
+            {
+                definitionId = "canto-obliquo-1p-900";
+                legacyObliqueDoorCount = 2;
+            }
+            else if (definitionId.Equals("canto-obliquo-1p-ajust-900", StringComparison.OrdinalIgnoreCase) ||
+                     definitionId.Equals("canto-curvo-1p-900", StringComparison.OrdinalIgnoreCase))
+            {
+                definitionId = "canto-obliquo-1p-900";
+                legacyObliqueDoorCount = 1;
+            }
+
+            if (!ModuleCatalog.TryGet(definitionId, out var definition) || definition == null)
                 throw new InvalidDataException($"Módulo '{moduleData.DefinitionId}' não existe na biblioteca.");
 
             var instance = new ModuleInstance
             {
                 Id = moduleData.Id == Guid.Empty ? Guid.NewGuid() : moduleData.Id,
-                DefinitionId = moduleData.DefinitionId,
+                DefinitionId = definitionId,
                 Position = new Vector3(moduleData.PositionX, moduleData.PositionY, moduleData.PositionZ),
                 RotationYDegrees = moduleData.RotationYDegrees,
                 MaterialId = string.IsNullOrWhiteSpace(moduleData.MaterialId)
@@ -401,7 +437,16 @@ public static class ProjectPersistence
                     ? null
                     : moduleData.InstanceDisplayName.Trim(),
                 IsVisible = moduleData.IsVisible,
-                IsLocked = moduleData.IsLocked
+                IsLocked = moduleData.IsLocked,
+                IsMirrored = moduleData.IsMirrored,
+                ObliqueDoorCount = Math.Clamp(
+                    moduleData.ObliqueDoorCount ?? legacyObliqueDoorCount ?? definition.DoorCount,
+                    1,
+                    2),
+                ObliqueHingesOnLeft = moduleData.ObliqueHingesOnLeft ?? true,
+                DrawerSlideType = moduleData.DrawerSlideType is DrawerSlideType.Concealed
+                    ? DrawerSlideType.Concealed
+                    : DrawerSlideType.Telescopic
             };
 
             if (moduleData.PartOverrides != null)
@@ -426,8 +471,15 @@ public static class ProjectPersistence
                 }
             }
 
+            if (moduleData.HiddenPartLabels != null)
+            {
+                foreach (string label in moduleData.HiddenPartLabels.Where(label => !string.IsNullOrWhiteSpace(label)))
+                    instance.HiddenPartLabels.Add(label);
+            }
+
             var dimSettings = DimensionConfiguratorService.GetSettings(project);
-            bool isCornerL = definition.ShapeKind is ModuleShapeKind.CornerLLeft or ModuleShapeKind.CornerLRight;
+            bool isCornerL = definition.ShapeKind is ModuleShapeKind.CornerLLeft or ModuleShapeKind.CornerLRight ||
+                             definition.Id.StartsWith("canto-bifold-l-", StringComparison.OrdinalIgnoreCase);
             // Envelope no arquivo; Medida A/B separadas (não usar Depth do envelope como Pe/Pd).
             instance.SetDimensions(
                 moduleData.Width,
@@ -463,6 +515,34 @@ public static class ProjectPersistence
                 instance.BlindCorner ??= BlindCornerParams.FromConfigurator(dimSettings);
                 if (moduleData.BlindCornerUseSpacer.HasValue)
                     instance.BlindCorner.UseSpacer = moduleData.BlindCornerUseSpacer.Value;
+                instance.RebuildMesh(definition, dimSettings);
+            }
+
+            if (definition.ShapeKind is ModuleShapeKind.EndDiagonal or ModuleShapeKind.EndChamfer)
+            {
+                instance.EndTerminal ??= EndTerminalParams.FromDefinition(definition);
+                if (moduleData.EndSmallSideDepth is > 0f)
+                    instance.EndTerminal.SmallSideDepthMm = moduleData.EndSmallSideDepth.Value;
+                if (moduleData.EndFrontStraightWidth is >= 0f)
+                    instance.EndTerminal.FrontStraightWidthMm = moduleData.EndFrontStraightWidth.Value;
+                if (moduleData.EndDoorCount.HasValue)
+                    instance.EndTerminal.DoorCount = Math.Clamp(moduleData.EndDoorCount.Value, 1, 2);
+                instance.EndTerminal.ClampToModule(instance.Width, instance.Depth,
+                    definition.ShapeKind == ModuleShapeKind.EndChamfer);
+                instance.RebuildMesh(definition, dimSettings);
+            }
+
+            if (definition.ShapeKind == ModuleShapeKind.ColumnDoors && instance.SpecialColumn != null)
+            {
+                if (moduleData.SpecialColumnWidth is > 0f)
+                    instance.SpecialColumn.WidthMm = moduleData.SpecialColumnWidth.Value;
+                if (moduleData.SpecialColumnDepth is > 0f)
+                    instance.SpecialColumn.DepthMm = moduleData.SpecialColumnDepth.Value;
+                if (moduleData.SpecialColumnLeftOffset is >= 0f)
+                    instance.SpecialColumn.LeftOffsetMm = moduleData.SpecialColumnLeftOffset.Value;
+                if (moduleData.SpecialColumnShelfNotched.HasValue)
+                    instance.SpecialColumn.ShelfNotched = moduleData.SpecialColumnShelfNotched.Value;
+                instance.SpecialColumn.ClampToModule(instance.Width, instance.Depth);
                 instance.RebuildMesh(definition, dimSettings);
             }
 

@@ -6,16 +6,13 @@ namespace Tracos3DStudio;
 /// </summary>
 public static class CozinhaGavetasSchema
 {
-    private static readonly string[] FolgaMmOptions =
-        Enumerable.Range(0, 31).Select(i => i.ToString()).ToArray();
-
-    private static BoxFieldDef Choice(string key, string label, string defaultOption = "0") => new()
+    private static BoxFieldDef Num(string key, string label, float defaultValue = 0f) => new()
     {
         Key = key,
         Label = label,
-        Kind = BoxFieldKind.Choice,
-        Options = FolgaMmOptions,
-        DefaultOption = defaultOption
+        Kind = BoxFieldKind.Numeric,
+        DefaultValue = defaultValue,
+        AllowNegative = true
     };
 
     public static readonly BoxNodeDef[] DirectNodes =
@@ -26,20 +23,35 @@ public static class CozinhaGavetasSchema
             Header = "Folgas",
             Fields =
             [
-                Choice("folg-cor", "A — Folga Corrediça", "4"),
-                Choice("folg-fundo", "B — Folga até Fundo da Caixa", "0"),
-                Choice("folg-sup-cf", "C — Folga Superior Contra-Frente", "0"),
-                Choice("folg-sup-lat", "D — Folga Superior Lateral", "0"),
-                Choice("folg-sup-pos", "E — Folga Superior Posterior", "0"),
-                Choice("folg-inf-cf", "F — Folga Inferior Contra-Frente", "0"),
-                Choice("folg-inf-lat", "G — Folga Inferior Lateral", "0"),
-                Choice("folg-inf-pos", "H — Folga Inferior Posterior", "0"),
-                Choice("fgav-sup-cf", "I — Folga Superior Contra-Frente", "0"),
-                Choice("fgav-sup-lat", "J — Folga Superior Lateral", "0"),
-                Choice("fgav-sup-pos", "K — Folga Superior Posterior", "0"),
-                Choice("fgav-inf-cf", "L — Folga Inferior Contra-Frente", "0"),
-                Choice("fgav-inf-lat", "M — Folga Inferior Lateral", "0"),
-                Choice("fgav-inf-pos", "N — Folga Inferior Posterior", "0")
+                Num("folg-cor-tel", "A1 — Folga Corrediça Telescópica", 13.5f, "Gavetas Externas"),
+                Num("folg-cor-inv", "A2 — Folga Corrediça Invisível", 5f, "Gavetas Externas"),
+                Num("folg-fundo", "B — Folga até Fundo da Caixa", 40f, "Gavetas Externas"),
+                Num("folg-sup-cf", "C — Folga Superior Contra-Frente", 30f, "Gavetas"),
+                Num("folg-sup-lat", "D — Folga Superior Lateral", 27f, "Gavetas"),
+                Num("folg-sup-pos", "E — Folga Superior Posterior", 30f, "Gavetas"),
+                Num("folg-inf-cf", "F — Folga Inferior Contra-Frente", 22f, "Gavetas"),
+                Num("folg-inf-lat", "G — Folga Inferior Lateral", 22f, "Gavetas"),
+                Num("folg-inf-pos", "H — Folga Inferior Posterior", 22f, "Gavetas"),
+                Num("fgav-sup-cf", "I — Folga Superior Contra-Frente", 43f, "Gavetão"),
+                Num("fgav-sup-lat", "J — Folga Superior Lateral", 40f, "Gavetão"),
+                Num("fgav-sup-pos", "K — Folga Superior Posterior", 42f, "Gavetão"),
+                Num("fgav-inf-cf", "L — Folga Inferior Contra-Frente", 22f, "Gavetão"),
+                Num("fgav-inf-lat", "M — Folga Inferior Lateral", 22f, "Gavetão"),
+                Num("fgav-inf-pos", "N — Folga Inferior Posterior", 22f, "Gavetão"),
+                Num("pl-inf-sup-cf", "I — Recuo Superior Contra-Frente", 3f, "Gaveta Inferior | Porta-Latas MDF"),
+                Num("pl-inf-sup-lat-dir", "J — Recuo Superior Lateral Direita", 0f, "Gaveta Inferior | Porta-Latas MDF"),
+                Num("pl-inf-sup-lat-esq", "K — Recuo Superior Lateral Esquerda", 0f, "Gaveta Inferior | Porta-Latas MDF"),
+                Num("pl-inf-sup-pos", "L — Recuo Superior Posterior", 3f, "Gaveta Inferior | Porta-Latas MDF"),
+                Num("pl-inf-inf-cf", "M — Recuo Inferior Contra-Frente", 0f, "Gaveta Inferior | Porta-Latas MDF"),
+                Num("pl-inf-inf-lat", "N — Recuo Inferior Lateral", 0f, "Gaveta Inferior | Porta-Latas MDF"),
+                Num("pl-inf-inf-pos", "O — Recuo Inferior Posterior", 0f, "Gaveta Inferior | Porta-Latas MDF"),
+                Num("pl-sup-sup-cf", "I — Recuo Superior Contra-Frente", 3f, "Gaveta Superior | Porta-Latas MDF"),
+                Num("pl-sup-sup-lat-dir", "J — Recuo Superior Lateral Direita", 0f, "Gaveta Superior | Porta-Latas MDF"),
+                Num("pl-sup-sup-lat-esq", "K — Recuo Superior Lateral Esquerda", 0f, "Gaveta Superior | Porta-Latas MDF"),
+                Num("pl-sup-sup-pos", "L — Recuo Superior Posterior", 3f, "Gaveta Superior | Porta-Latas MDF"),
+                Num("pl-sup-inf-cf", "M — Recuo Inferior Contra-Frente", 0f, "Gaveta Superior | Porta-Latas MDF"),
+                Num("pl-sup-inf-lat", "N — Recuo Inferior Lateral", 0f, "Gaveta Superior | Porta-Latas MDF"),
+                Num("pl-sup-inf-pos", "O — Recuo Inferior Posterior", 0f, "Gaveta Superior | Porta-Latas MDF")
             ]
         },
         new()
@@ -48,8 +60,8 @@ public static class CozinhaGavetasSchema
             Header = "Fixação Lateral - Contra Frente",
             Fields =
             [
-                Choice("av-lat-cf", "A — Avanço Lateral sobre Contra Frente"),
-                Choice("av-cf-lat", "B — Avanço Contra Frente sobre Lateral")
+                Num("av-lat-cf", "A — Avanço Lateral sobre Contra Frente"),
+                Num("av-cf-lat", "B — Avanço Contra Frente sobre Lateral")
             ]
         },
         new()
@@ -58,8 +70,8 @@ public static class CozinhaGavetasSchema
             Header = "Fixação Lateral - Posterior",
             Fields =
             [
-                Choice("av-lat-pos", "A — Avanço Lateral sobre Posterior"),
-                Choice("av-pos-lat", "B — Avanço Posterior sobre Lateral")
+                Num("av-lat-pos", "A — Avanço Lateral sobre Posterior"),
+                Num("av-pos-lat", "B — Avanço Posterior sobre Lateral")
             ]
         },
         new()
@@ -68,13 +80,23 @@ public static class CozinhaGavetasSchema
             Header = "Fundos",
             Fields =
             [
-                Choice("av-fun-lat", "A — Avanço Fundo sobre Lateral"),
-                Choice("av-fun-cf", "B — Avanço Fundo sobre Frente/Contra Frente"),
-                Choice("av-fun-pos", "C — Avanço Fundo sobre Posterior"),
-                Choice("recuo-fundo", "D — Recuo Fundo")
+                Num("av-fun-lat", "A — Avanço Fundo sobre Lateral"),
+                Num("av-fun-cf", "B — Avanço Fundo sobre Frente/Contra Frente"),
+                Num("av-fun-pos", "C — Avanço Fundo sobre Posterior"),
+                Num("recuo-fundo", "D — Recuo Fundo")
             ]
         }
     ];
+
+    private static BoxFieldDef Num(string key, string label, float defaultValue, string group) => new()
+    {
+        Key = key,
+        Label = label,
+        Group = group,
+        Kind = BoxFieldKind.Numeric,
+        DefaultValue = defaultValue,
+        AllowNegative = true
+    };
 
     public static IEnumerable<BoxNodeDef> AllNodes()
     {

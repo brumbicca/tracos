@@ -26,6 +26,8 @@ public static class BoxAssemblyConfiguratorService
 
   public static void EnsureBoxInitialized(DimensionConfiguratorSettings settings)
   {
+    MigrateCozinhaBlindCornerDefaults(settings.CozinhaInferiorBox);
+
     MigrateShelfFromLegacyIfDefault(settings.CozinhaInferiorBox,
       settings.CozinhaInferiorShelfDepthInsetMm,
       settings.CozinhaInferiorShelfWidthInsetMm);
@@ -42,6 +44,72 @@ public static class BoxAssemblyConfiguratorService
     EnsureArmarioInitialized(settings.DormitorioArmarioBox);
     EnsureInferiorInitialized(settings.DormitorioBancadaCriadoBox);
     EnsureSuperiorInitialized(settings.DormitorioSuperiorBox);
+  }
+
+  private static void MigrateCozinhaBlindCornerDefaults(BoxAssemblySectionSettings box)
+  {
+    const int currentVersion = 1;
+    if (box.BlindCornerDefaultsVersion >= currentVersion)
+      return;
+
+    static bool IsMissingOrZero(IReadOnlyDictionary<string, float> values, string key) =>
+      !values.TryGetValue(key, out float value) || MathF.Abs(value) < 0.001f;
+
+    static bool IsMissingOr(
+      IReadOnlyDictionary<string, string> values,
+      string key,
+      params string[] accepted) =>
+      !values.TryGetValue(key, out string? value)
+      || accepted.Any(option => value.Equals(option, StringComparison.OrdinalIgnoreCase));
+
+    // Perfis gravados pela fase anterior tinham todos os parâmetros do canto reto zerados.
+    // Só migra os valores nesse estado reconhecível; personalizações do usuário são preservadas.
+    bool legacyDefaults =
+      IsMissingOrZero(box.InferiorNumeric, "cr-affb")
+      && IsMissingOrZero(box.InferiorNumeric, "cr-affs")
+      && IsMissingOrZero(box.InferiorNumeric, "cr-affl")
+      && IsMissingOrZero(box.InferiorNumeric, "cr-affd")
+      && IsMissingOrZero(box.InferiorNumeric, "cr-ava-por")
+      && IsMissingOrZero(box.InferiorNumeric, "crf-recuo-fro")
+      && IsMissingOrZero(box.InferiorNumeric, "cr-afa-lat")
+      && IsMissingOr(box.InferiorChoice, "cr-uso-dist", "Não", "Não usar")
+      && IsMissingOr(box.InferiorChoice, "crs-tipo-fro", "Parcial");
+
+    if (legacyDefaults)
+    {
+      box.InferiorNumeric["cr-affb"] = 18f;
+      box.InferiorNumeric["cr-affs"] = 18f;
+      box.InferiorNumeric["cr-affl"] = 18f;
+      box.InferiorNumeric["cr-affd"] = -12f;
+      box.InferiorNumeric["cr-ava-por"] = 27f;
+      box.InferiorNumeric["crf-recuo-fro"] = 80f;
+      box.InferiorNumeric["crf-dim-fro"] = 30f;
+      box.InferiorNumeric["cr-afa-lat"] = 30f;
+      box.InferiorChoice["cr-uso-dist"] = "Usar";
+      box.InferiorChoice["crs-tipo-fro"] = "Total";
+    }
+
+    // Normaliza os rótulos antigos sem alterar o significado dos perfis existentes.
+    NormalizeUseChoice(box.InferiorChoice, "cr-uso-dist");
+    NormalizeUseChoice(box.InferiorChoice, "crf-sup");
+    NormalizeUseChoice(box.InferiorChoice, "crf-inf");
+    NormalizeUseChoice(box.InferiorChoice, "crf-tra");
+    if (box.InferiorChoice.TryGetValue("crs-tipo-fro", out string? sarrafo)
+        && sarrafo.Equals("Inteiro", StringComparison.OrdinalIgnoreCase))
+      box.InferiorChoice["crs-tipo-fro"] = "Total";
+
+    box.BlindCornerDefaultsVersion = currentVersion;
+  }
+
+  private static void NormalizeUseChoice(Dictionary<string, string> values, string key)
+  {
+    if (!values.TryGetValue(key, out string? value))
+      return;
+
+    if (value.Equals("Sim", StringComparison.OrdinalIgnoreCase))
+      values[key] = "Usar";
+    else if (value.Equals("Não", StringComparison.OrdinalIgnoreCase))
+      values[key] = "Não usar";
   }
 
   /// <summary>
@@ -346,16 +414,51 @@ public static class BoxAssemblyConfiguratorService
 
     var (activeNumeric, activeChoice) = GetActiveDicts(section, slot);
 
+    if (activeChoice.TryGetValue("fundo-tipo", out var fundoTipo))
+    {
+      structure.BackPanelLayout = fundoTipo switch
+      {
+        "Rebaixado" => BoxBackPanelLayout.Rebaixado,
+        "Trav Vertical" => BoxBackPanelLayout.TravessaVertical,
+        "Trav Horizontal" => BoxBackPanelLayout.TravessaHorizontal,
+        "Sem fundo" => BoxBackPanelLayout.SemFundo,
+        _ => BoxBackPanelLayout.Inteiro
+      };
+    }
+
+    structure.BackHeightRecessMm = ReadSigned(activeNumeric, "fundo-rebaixo");
+    structure.BackUpperRailOffsetMm = ReadSigned(activeNumeric, "fundo-afa-sup");
+    structure.BackLowerRailOffsetMm = ReadSigned(activeNumeric, "fundo-afa-inf");
+    structure.BackSupportRailWidthMm = ReadNonNeg(activeNumeric, "fundo-dim-trav-sust");
+    structure.BackSupportRailCount = activeChoice.TryGetValue("fundo-trav-sust", out var sust) switch
+    {
+      true when sust == "2" => 2,
+      true when sust is "1" or "Sim" => 1,
+      _ => 0
+    };
+
     // Fixação Base - Fundo / Fundo - Lateral (mesmo local do configurador Inferior).
-    structure.BackAdvanceOverBaseMm = ReadNonNeg(activeNumeric, "fbf-afb");
-    structure.BaseAdvanceOverBackMm = ReadNonNeg(activeNumeric, "fbf-abf");
-    structure.BaseRecessMm = ReadNonNeg(activeNumeric, "fbf-rec-base");
-    structure.BackAdvanceOverLateralMm = ReadNonNeg(activeNumeric, "ffl-afl");
-    structure.LateralAdvanceOverBackMm = ReadNonNeg(activeNumeric, "ffl-alf");
+    structure.BackAdvanceOverBaseMm = ReadSigned(activeNumeric, "fbf-afb");
+    structure.BaseAdvanceOverBackMm = ReadSigned(activeNumeric, "fbf-abf");
+    structure.BaseRecessMm = ReadSigned(activeNumeric, "fbf-rec-base");
+    structure.BackAdvanceOverLateralMm = ReadSigned(activeNumeric, "ffl-afl");
+    structure.LateralAdvanceOverBackMm = ReadSigned(activeNumeric, "ffl-alf");
+    structure.BackAdvanceOverDivisionMm = ReadSigned(activeNumeric, "ffd-afd");
+    structure.BaseAdvanceOverLateralMm = ReadSigned(activeNumeric, "fix-lb-abl");
+    structure.LateralBottomRecessMm = ReadSigned(activeNumeric, "lat-rebaixo");
+    structure.LateralDepthGapMm = ReadSigned(activeNumeric, "lat-folga");
+    structure.LateralDepthAlignment = activeChoice.TryGetValue("lat-alinhamento", out var alignment)
+      ? alignment switch
+      {
+        "Frente" => LateralDepthAlignment.Front,
+        "Centro" => LateralDepthAlignment.Center,
+        _ => LateralDepthAlignment.Back
+      }
+      : LateralDepthAlignment.Back;
 
     // Superior/Despenseiros: chaves com sufixo -inf quando existirem.
-    if (structure.BackAdvanceOverBaseMm <= 0f && activeNumeric.TryGetValue("fbf-afb-inf", out var afbInf))
-      structure.BackAdvanceOverBaseMm = MathF.Max(0f, afbInf);
+    if (!activeNumeric.ContainsKey("fbf-afb") && activeNumeric.TryGetValue("fbf-afb-inf", out var afbInf))
+      structure.BackAdvanceOverBaseMm = afbInf;
 
     // fundo-dim-trav → largura das travessas (0 = automático no BuildBackAssembly)
     if (activeNumeric.TryGetValue("fundo-dim-trav", out var dimTrav) && dimTrav > 0f)
@@ -366,8 +469,28 @@ public static class BoxAssemblyConfiguratorService
     // sar-tipo → visibilidade individual por sarrafo
     activeChoice.TryGetValue("sar-tipo", out var sarTipo);
     structure.SarrafoVisible     = sarTipo != "Sem sarrafo";
-    structure.FrontSarrafoVisible = sarTipo is null or "Frontal" or "Ambos" or "Inteiro";
-    structure.BackSarrafoVisible  = sarTipo is "Traseiro" or "Ambos" or "Inteiro";
+    structure.SarrafoWhole = sarTipo == "Inteiro";
+    structure.FrontSarrafoVisible = !structure.SarrafoWhole && sarTipo is (null or "Frontal" or "Ambos");
+    structure.BackSarrafoVisible  = !structure.SarrafoWhole && sarTipo is ("Traseiro" or "Ambos");
+
+    activeChoice.TryGetValue("sar-seg", out var sarSeg);
+    structure.FrontSarrafoSegmented = sarSeg is "Frontal" or "Ambos" or "Inteiro";
+    structure.BackSarrafoSegmented = sarSeg is "Traseiro" or "Ambos" or "Inteiro";
+    structure.SarrafoChamfered = activeChoice.TryGetValue("sar-formato", out var formato)
+                                 && formato.Equals("Chanfrado", StringComparison.OrdinalIgnoreCase);
+    structure.SarrafoAdvanceOverLateralMm = ReadSigned(activeNumeric, "fsl-asl");
+    structure.SarrafoAdvanceOverBackMm = ReadSigned(activeNumeric, "fsfi-asf");
+    structure.BackAdvanceOverSarrafoMm = ReadSigned(activeNumeric, "fsfi-afs");
+    structure.BackSarrafoRecessMm = ReadSigned(activeNumeric, "fsfr-recuo");
+    structure.BackSarrafoLowerRecessMm = ReadSigned(activeNumeric, "fsfr-rebaixo");
+    structure.LateralAdvanceOverFrontPanelMm = ReadSigned(activeNumeric, "fpfl-alf");
+    structure.FrontPanelAdvanceOverLateralMm = ReadSigned(activeNumeric, "fpfl-afl");
+
+    structure.DivisionFrontInsetMm = ReadSigned(activeNumeric, "div-recuo-fro");
+    structure.DivisionMovableBackInsetMm = ReadSigned(activeNumeric, "div-recuo-tra-mov");
+    structure.DivisionFixedBackInsetMm = ReadSigned(activeNumeric, "div-recuo-tra-fix");
+    structure.DivisionBottomRecessMm = ReadSigned(activeNumeric, "div-rebaixo");
+    structure.DivisionSpacerWidthMm = ReadNonNeg(activeNumeric, "div-dim-dist");
 
     // sar-sent-fro → orientação do sarrafo DIANTEIRO (frontal)
     structure.FrontSarrafoIsVertical = activeChoice.TryGetValue("sar-sent-fro", out var sentFro)
@@ -384,13 +507,22 @@ public static class BoxAssemblyConfiguratorService
       structure.SarrafoTraseiroHeightMm = profTra;
 
     // sar-recuo-fro → recuo opcional do sarrafo dianteiro (0 = rente à frente)
-    structure.SarrafoDianteiroRecessMm = activeNumeric.TryGetValue("sar-recuo-fro", out var recuoFro)
-      ? MathF.Max(0f, recuoFro) : 0f;
+    structure.SarrafoDianteiroRecessMm = ReadSigned(activeNumeric, "sar-recuo-fro");
 
     foreach (var shelf in structure.Shelves)
     {
       shelf.DepthInsetMm = section.ShelfDepthInsetMm;
       shelf.WidthInsetMm = section.ShelfWidthInsetMm;
+      shelf.BackInsetMm = shelf.IsFixed
+        ? ReadSigned(activeNumeric, "prat-recuo-tra-fix")
+        : ReadSigned(activeNumeric, "prat-recuo-tra-mov");
+    }
+
+
+    if (slot is ModuleDimensionSlot.CozinhaInferior or ModuleDimensionSlot.CozinhaIlha)
+    {
+      FrentesPortasConfiguratorService.EnsureInitialized(settings);
+      FrentesPortasConfiguratorService.ApplyInferioresToStructure(settings.CozinhaFrentesPortas, structure);
     }
   }
 
@@ -410,39 +542,258 @@ public static class BoxAssemblyConfiguratorService
   private static float ReadNonNeg(Dictionary<string, float> numeric, string key) =>
     numeric.TryGetValue(key, out var value) ? MathF.Max(0f, value) : 0f;
 
+  private static float ReadSigned(Dictionary<string, float> numeric, string key) =>
+    numeric.TryGetValue(key, out var value) && float.IsFinite(value) ? value : 0f;
+
   public static void ApplyToPieces(
     ModulationRules rules,
     ModuleDefinition definition,
     DimensionConfiguratorSettings settings)
   {
+    var s = rules.Structure;
     var section = GetSectionForDefinition(definition, settings);
-    if (!section.BackPanelType.UsesSarrafo() || !rules.Structure.SarrafoVisible)
-      return;
 
-    if (rules.Pieces.Any(p => p.Role == "sarrafo"))
-      return;
-
-    rules.Pieces.Add(new ModulationPieceRule
+    foreach (var lateral in rules.Pieces.Where(p => p.Role == "lateral"))
     {
-      Id = "sarrafo",
-      Role = "sarrafo",
-      Name = "Sarrafo",
+      lateral.Length.OffsetMm = -s.LateralDepthGapMm;
+      lateral.Width.OffsetMm = -MathF.Max(s.LateralBaseOverlapMm, s.LateralBottomRecessMm);
+    }
+
+    foreach (var basePiece in rules.Pieces.Where(p => p.Role == "base-inferior"))
+    {
+      basePiece.Length.OffsetMm = 2f * s.BaseAdvanceOverLateralMm;
+      basePiece.Width = new ModulationDimensionBinding
+      {
+        Source = ModulationDimensionSource.ModuleDepth,
+        OffsetMm = s.BaseFullDepth
+          ? 0f
+          : -s.LateralDepthGapMm - s.BaseRecessMm
+      };
+    }
+
+    // Fundo inteiro/rebaixado, travessas ou ausência de fundo devem produzir a
+    // mesma lista de corte exibida pela geometria.
+    var originalBack = rules.Pieces.FirstOrDefault(p => p.Role == "fundo");
+    rules.Pieces.RemoveAll(p => p.Role == "travessa-fundo");
+    switch (s.BackPanelLayout)
+    {
+      case BoxBackPanelLayout.SemFundo:
+        rules.Pieces.RemoveAll(p => p.Role == "fundo");
+        break;
+      case BoxBackPanelLayout.TravessaVertical:
+        rules.Pieces.RemoveAll(p => p.Role == "fundo");
+        rules.Pieces.Add(Piece("travessa-fundo-v", "travessa-fundo", "Travessa de fundo vertical",
+          ModulationDimensionSource.ModuleHeight, 0f,
+          ModulationDimensionSource.Constant, s.CrossRailWidthMm > 0f ? s.CrossRailWidthMm : 54f,
+          s.PanelThicknessMm, quantity: 2));
+        break;
+      case BoxBackPanelLayout.TravessaHorizontal:
+        rules.Pieces.RemoveAll(p => p.Role == "fundo");
+        rules.Pieces.Add(Piece("travessa-fundo-h", "travessa-fundo", "Travessa de fundo horizontal",
+          ModulationDimensionSource.InnerWidth, 0f,
+          ModulationDimensionSource.Constant, s.CrossRailWidthMm > 0f ? s.CrossRailWidthMm : 54f,
+          s.PanelThicknessMm, quantity: 2));
+        break;
+      default:
+        originalBack ??= Piece("fundo", "fundo", "Fundo",
+          ModulationDimensionSource.InnerWidth, 0f,
+          ModulationDimensionSource.InnerHeight, 0f, s.BackThicknessMm);
+        originalBack.Length = new ModulationDimensionBinding
+        {
+          Source = ModulationDimensionSource.InnerWidth,
+          OffsetMm = s.BackAdvanceOverLateralMm * 2f - s.LateralAdvanceOverBackMm * 2f
+        };
+        originalBack.Width = new ModulationDimensionBinding
+        {
+          Source = ModulationDimensionSource.InnerHeight,
+          OffsetMm = s.BackPanelLayout == BoxBackPanelLayout.Rebaixado ? -s.BackHeightRecessMm : 0f
+        };
+        if (!rules.Pieces.Contains(originalBack))
+          rules.Pieces.Add(originalBack);
+        break;
+    }
+
+    var shelfPieces = rules.Pieces.Where(p => p.Role == "prateleira").ToList();
+    var shelfRule = s.Shelves.FirstOrDefault();
+    foreach (var shelfPiece in shelfPieces)
+    {
+      float rear = shelfRule?.BackInsetMm ?? 0f;
+      shelfPiece.Length.OffsetMm = -2f * (shelfRule?.WidthInsetMm ?? 0f);
+      shelfPiece.Width.OffsetMm = -(shelfRule?.DepthInsetMm ?? 0f) - rear;
+    }
+
+    if (shelfPieces.Count > 0 && s.Divisions.Count > 0)
+    {
+      float lateralGap = shelfRule?.WidthInsetMm ?? 0f;
+      var boundaries = new List<float> { 0f };
+      boundaries.AddRange(s.Divisions
+        .Select(division => Math.Clamp(division.WidthFraction, 0.05f, 0.95f))
+        .Distinct()
+        .OrderBy(value => value));
+      boundaries.Add(1f);
+
+      rules.Pieces.RemoveAll(p => p.Role == "prateleira");
+      foreach (var template in shelfPieces)
+      {
+        for (int bay = 0; bay < boundaries.Count - 1; bay++)
+        {
+          bool hasDividerOnLeft = bay > 0;
+          bool hasDividerOnRight = bay < boundaries.Count - 2;
+          float dividerAllowance =
+            (hasDividerOnLeft ? s.PanelThicknessMm * 0.5f : 0f) +
+            (hasDividerOnRight ? s.PanelThicknessMm * 0.5f : 0f);
+
+          var piece = ClonePiece(template);
+          piece.Id = $"{template.Id}-vao-{bay + 1}";
+          piece.Name = "Prateleira";
+          piece.Quantity = 1;
+          piece.Length = new ModulationDimensionBinding
+          {
+            Source = ModulationDimensionSource.InnerWidth,
+            Scale = boundaries[bay + 1] - boundaries[bay],
+            OffsetMm = -2f * lateralGap - dividerAllowance
+          };
+          rules.Pieces.Add(piece);
+        }
+      }
+    }
+
+    rules.Pieces.RemoveAll(p => p.Role is "sarrafo" or "divisoria" or "distanciador-divisoria");
+    if (s.SarrafoVisible && section.BackPanelType.UsesSarrafo())
+    {
+      string suffix = s.SarrafoChamfered ? " chanfrado" : "";
+      if (s.SarrafoWhole)
+      {
+        rules.Pieces.Add(Piece("sarrafo-inteiro", "sarrafo", $"Sarrafo inteiro{suffix}",
+          ModulationDimensionSource.InnerWidth, 2f * s.SarrafoAdvanceOverLateralMm,
+          ModulationDimensionSource.ModuleDepth, -s.SarrafoDianteiroRecessMm,
+          s.SarrafoThicknessMm));
+      }
+      else
+      {
+        AddSarrafoPiece(rules, s, front: true, s.FrontSarrafoVisible,
+          s.FrontSarrafoSegmented, suffix);
+        AddSarrafoPiece(rules, s, front: false, s.BackSarrafoVisible,
+          s.BackSarrafoSegmented, suffix);
+      }
+    }
+
+    int divisionIndex = 0;
+    foreach (var division in s.Divisions)
+    {
+      divisionIndex++;
+      float rear = division.IsFixed ? s.DivisionFixedBackInsetMm : s.DivisionMovableBackInsetMm;
+      rules.Pieces.Add(Piece($"divisoria-{divisionIndex}", "divisoria", $"Divisória {divisionIndex}",
+        ModulationDimensionSource.ModuleDepth,
+        -(s.DivisionFrontInsetMm + rear) + s.BackAdvanceOverDivisionMm,
+        ModulationDimensionSource.InnerHeight, -s.DivisionBottomRecessMm,
+        s.PanelThicknessMm));
+
+      if (s.DivisionSpacerWidthMm > 0f)
+      {
+        rules.Pieces.Add(Piece($"dist-div-{divisionIndex}", "distanciador-divisoria",
+          $"Distanciador divisória {divisionIndex}",
+          ModulationDimensionSource.Constant, s.DivisionSpacerWidthMm,
+          ModulationDimensionSource.InnerHeight, -s.DivisionBottomRecessMm,
+          s.PanelThicknessMm));
+      }
+    }
+  }
+
+  private static void AddSarrafoPiece(
+    ModulationRules rules,
+    ModulationStructure structure,
+    bool front,
+    bool visible,
+    bool segmented,
+    string suffix)
+  {
+    if (!visible)
+      return;
+
+    string side = front ? "dianteiro" : "traseiro";
+    float depth = front ? structure.SarrafoHeightMm : structure.SarrafoTraseiroHeightMm;
+    var piece = Piece($"sarrafo-{side}", "sarrafo", $"Sarrafo {side}{suffix}",
+      ModulationDimensionSource.InnerWidth, 2f * structure.SarrafoAdvanceOverLateralMm,
+      ModulationDimensionSource.Constant, depth,
+      structure.SarrafoThicknessMm,
+      quantity: segmented ? 2 : 1);
+    if (segmented)
+    {
+      piece.Length.Scale = 0.5f;
+      piece.Length.OffsetMm = structure.SarrafoAdvanceOverLateralMm - 4f;
+    }
+    rules.Pieces.Add(piece);
+  }
+
+  private static ModulationPieceRule ClonePiece(ModulationPieceRule source) =>
+    new()
+    {
+      Id = source.Id,
+      Role = source.Role,
+      Name = source.Name,
+      Length = CloneBinding(source.Length),
+      Width = CloneBinding(source.Width),
+      Thickness = CloneBinding(source.Thickness),
+      Quantity = source.Quantity,
+      EdgeBanding = source.EdgeBanding == null
+        ? null
+        : new ModulationEdgeBanding
+        {
+          Front = source.EdgeBanding.Front,
+          Back = source.EdgeBanding.Back,
+          Top = source.EdgeBanding.Top,
+          Bottom = source.EdgeBanding.Bottom
+        },
+      DrillingPattern = source.DrillingPattern
+    };
+
+  private static ModulationDimensionBinding CloneBinding(ModulationDimensionBinding source) =>
+    new()
+    {
+      Source = source.Source,
+      ConstantMm = source.ConstantMm,
+      OffsetMm = source.OffsetMm,
+      Scale = source.Scale
+    };
+
+  private static ModulationPieceRule Piece(
+    string id,
+    string role,
+    string name,
+    ModulationDimensionSource lengthSource,
+    float lengthOffset,
+    ModulationDimensionSource widthSource,
+    float widthValue,
+    float thickness,
+    int quantity = 1) =>
+    new()
+    {
+      Id = id,
+      Role = role,
+      Name = name,
       Length = new ModulationDimensionBinding
       {
-        Source = ModulationDimensionSource.InnerWidth
+        Source = lengthSource,
+        OffsetMm = lengthOffset
       },
-      Width = new ModulationDimensionBinding
-      {
-        Source = ModulationDimensionSource.Constant,
-        ConstantMm = section.SarrafoHeightMm
-      },
+      Width = widthSource == ModulationDimensionSource.Constant
+        ? new ModulationDimensionBinding
+        {
+          Source = ModulationDimensionSource.Constant,
+          ConstantMm = widthValue
+        }
+        : new ModulationDimensionBinding
+        {
+          Source = widthSource,
+          OffsetMm = widthValue
+        },
       Thickness = new ModulationDimensionBinding
       {
         Source = ModulationDimensionSource.Constant,
-        ConstantMm = section.SarrafoThicknessMm
+        ConstantMm = thickness
       },
-      Quantity = 1,
+      Quantity = quantity,
       DrillingPattern = ModulationDrillingPattern.Horizontal
-    });
-  }
+    };
 }

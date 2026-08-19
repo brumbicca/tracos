@@ -20,6 +20,14 @@ public static class ModuleDecompositionService
         float backThicknessMm,
         DimensionConfiguratorSettings? dimensionSettings)
     {
+        if (BalconyModuleBuilder.TryDecompose(module, definition, out var balconyPieces))
+            return balconyPieces;
+
+        if (DrawerModuleBuilder.TryDecompose(
+                module, definition, panelThicknessMm, backThicknessMm,
+                dimensionSettings, out var drawerPieces))
+            return drawerPieces;
+
         if (dimensionSettings != null || definition.ModulationRules is { Pieces.Count: > 0 })
         {
             var effectiveRules = DimensionConfiguratorService.CreateEffectiveRules(definition, dimensionSettings);

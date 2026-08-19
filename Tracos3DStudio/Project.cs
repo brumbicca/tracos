@@ -109,7 +109,9 @@ public sealed class Project
                 LayerId = module.LayerId,
                 InstanceDisplayName = module.InstanceDisplayName,
                 IsVisible = module.IsVisible,
-                IsLocked = module.IsLocked
+                IsLocked = module.IsLocked,
+                IsMirrored = module.IsMirrored,
+                DrawerSlideType = module.DrawerSlideType
             };
 
             var dimSettings = DimensionConfiguratorService.GetSettings(this);
@@ -120,6 +122,8 @@ public sealed class Project
                 definition,
                 dimSettings,
                 respectCatalogLimits: false);
+            foreach (string label in module.HiddenPartLabels)
+                instance.HiddenPartLabels.Add(label);
             Modules.Add(instance);
         }
 

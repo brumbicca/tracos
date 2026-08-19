@@ -70,7 +70,7 @@ public static class ModulationRulesBuilder
         rules.Structure.PanelThicknessMm = ClampThickness(state.PanelThicknessMm, 18f);
         rules.Structure.BackThicknessMm = ClampThickness(state.BackThicknessMm, 6f);
         rules.Structure.FrontThicknessMm = ClampThickness(state.FrontThicknessMm, 18f);
-        rules.Structure.FrontGapMm = Math.Max(0f, state.FrontGapMm);
+        rules.Structure.FrontGapMm = float.IsFinite(state.FrontGapMm) ? state.FrontGapMm : 4f;
 
         if (includeShelf)
         {

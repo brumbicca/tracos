@@ -24,7 +24,8 @@ public sealed class BlindCornerParams
         if (settings.CozinhaInferiorBox.InferiorChoice.TryGetValue("cr-uso-dist", out var uso) &&
             !string.IsNullOrWhiteSpace(uso))
         {
-            return uso.Equals("Sim", StringComparison.OrdinalIgnoreCase);
+            return uso.Equals("Sim", StringComparison.OrdinalIgnoreCase)
+                   || uso.Equals("Usar", StringComparison.OrdinalIgnoreCase);
         }
 
         return false;

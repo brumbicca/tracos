@@ -414,4 +414,38 @@ public class ModulePlacementServiceTests
 
         Assert.Equal(0f, cotas.Anterior, precision: 1);
     }
+
+    [Fact]
+    public void TryApplyWallCota_ValoresNegativos_ExtrapolamForaDosLimitesDaParede()
+    {
+        var wall = new WallSegment(new Vector2(0, 0), new Vector2(5000, 0))
+        {
+            Thickness = 150f,
+            Height = 2600f
+        };
+        var walls = new[] { wall };
+        var definition = ModuleCatalog.GetRequired("balcao-2-portas");
+        var initial = ModulePlacementService.PlaceAgainstWall(
+            new Vector2(2500, 400), wall, walls, definition, 800f, definition.DefaultDepth, 2500f);
+        var module = new ModuleInstance
+        {
+            DefinitionId = definition.Id,
+            Width = 800f,
+            Height = definition.DefaultHeight,
+            Depth = definition.DefaultDepth
+        };
+        module.ApplyPlacement(initial.Position, initial.RotationYDegrees, definition,
+            initial.WallId, initial.DistanceAlongWall);
+
+        Assert.True(ModulePlacementService.TryApplyWallCota(
+            module, wall, walls, definition, ModuleCotaAxis.Anterior, -120f, out _));
+        Assert.True(ModulePlacementService.TryApplyWallCota(
+            module, wall, walls, definition, ModuleCotaAxis.Inferior, -80f, out _));
+
+        var cotas = ModulePlacementService.TryComputeWallCotas(module, wall, walls);
+        Assert.NotNull(cotas);
+        Assert.Equal(-120f, cotas.Value.Anterior, precision: 1);
+        Assert.Equal(-80f, cotas.Value.Inferior, precision: 1);
+        Assert.Equal(-80f, module.Position.Y, precision: 1);
+    }
 }

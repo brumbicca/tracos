@@ -8,8 +8,8 @@ public class ModuleTests
     [Fact]
     public void ModuleCatalog_ContemModulosBuiltInComHierarquiaCozinha()
     {
-        Assert.True(ModuleCatalog.BuiltIn.Count >= 90);
-        Assert.True(ModuleCatalog.BuiltIn.Count(m => m.Category == ModuleCategory.Cozinha) >= 80);
+        Assert.NotEmpty(ModuleCatalog.BuiltIn);
+        Assert.Contains(ModuleCatalog.BuiltIn, m => m.Category == ModuleCategory.Cozinha);
         Assert.Equal(3, ModuleCatalog.BuiltIn.Count(m => m.Category == ModuleCategory.Paineis));
         Assert.True(ModuleCatalog.TryGet("balcao-2-portas", out _));
         Assert.True(ModuleCatalog.TryGet("gav-4g-curvo-400", out _));

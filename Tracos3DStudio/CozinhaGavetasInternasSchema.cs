@@ -6,16 +6,13 @@ namespace Tracos3DStudio;
 /// </summary>
 public static class CozinhaGavetasInternasSchema
 {
-    private static readonly string[] FolgaMmOptions =
-        Enumerable.Range(0, 31).Select(i => i.ToString()).ToArray();
-
-    private static BoxFieldDef Choice(string key, string label, string defaultOption = "0") => new()
+    private static BoxFieldDef Num(string key, string label, float defaultValue = 0f) => new()
     {
         Key = key,
         Label = label,
-        Kind = BoxFieldKind.Choice,
-        Options = FolgaMmOptions,
-        DefaultOption = defaultOption
+        Kind = BoxFieldKind.Numeric,
+        DefaultValue = defaultValue,
+        AllowNegative = true
     };
 
     public static readonly BoxNodeDef[] DirectNodes =
@@ -26,20 +23,21 @@ public static class CozinhaGavetasInternasSchema
             Header = "Folgas",
             Fields =
             [
-                Choice("folg-cor", "A — Folga Corrediça", "4"),
-                Choice("folg-fundo", "B — Folga até Fundo da Caixa", "0"),
-                Choice("av-lat-frente", "C — Avanço Lateral da Frente", "0"),
-                Choice("folg-sup-cf", "D — Folga Superior Contra-Frente", "0"),
-                Choice("folg-sup-lat", "E — Folga Superior Lateral", "0"),
-                Choice("folg-sup-pos", "F — Folga Superior Posterior", "0"),
-                Choice("folg-inf-cf", "G — Folga Inferior Contra-Frente", "0"),
-                Choice("folg-inf-lat", "H — Folga Inferior Lateral", "0"),
-                Choice("folg-inf-pos", "I — Folga Inferior Posterior", "0"),
-                Choice("gint-sup", "J — Folga Superior (Gavetas Internas)", "0"),
-                Choice("gint-inf", "K — Folga Inferior (Gavetas Internas)", "0"),
-                Choice("gint-entre", "L — Folga Entre Gavetas (Gavetas Internas)", "0"),
-                Choice("gaux-sup", "M — Folga Superior (Gavetas Auxiliares)", "0"),
-                Choice("gaux-inf", "N — Folga Inferior (Gavetas Auxiliares)", "0")
+                Num("folg-cor-tel", "A1 — Folga Corrediça Telescópica", 13.5f, "Gavetas Internas | Auxiliares"),
+                Num("folg-cor-inv", "A2 — Folga Corrediça Invisível", 5f, "Gavetas Internas | Auxiliares"),
+                Num("folg-fundo", "B — Folga até Fundo da Caixa", 40f, "Gavetas Internas | Auxiliares"),
+                Num("av-lat-frente", "C — Avanço Lateral da Frente", 0f, "Gavetas Internas | Auxiliares"),
+                Num("folg-sup-cf", "D — Folga Superior Contra-Frente", 0f, "Gavetas Internas | Auxiliares"),
+                Num("folg-sup-lat", "E — Folga Superior Lateral", 0f, "Gavetas Internas | Auxiliares"),
+                Num("folg-sup-pos", "F — Folga Superior Posterior", 0f, "Gavetas Internas | Auxiliares"),
+                Num("folg-inf-cf", "G — Folga Inferior Contra-Frente", 0f, "Gavetas Internas | Auxiliares"),
+                Num("folg-inf-lat", "H — Folga Inferior Lateral", 0f, "Gavetas Internas | Auxiliares"),
+                Num("folg-inf-pos", "I — Folga Inferior Posterior", 0f, "Gavetas Internas | Auxiliares"),
+                Num("gint-sup", "J — Folga Superior", 0f, "Gavetas Internas"),
+                Num("gint-inf", "K — Folga Inferior", 0f, "Gavetas Internas"),
+                Num("gint-entre", "L — Folga Entre Gavetas", 0f, "Gavetas Internas"),
+                Num("gaux-sup", "M — Folga Superior", 0f, "Gavetas Auxiliares"),
+                Num("gaux-inf", "N — Folga Inferior", 0f, "Gavetas Auxiliares")
             ]
         },
         new()
@@ -48,8 +46,8 @@ public static class CozinhaGavetasInternasSchema
             Header = "Fixação Lateral - Contra Frente",
             Fields =
             [
-                Choice("av-lat-cf", "A — Avanço Lateral sobre Contra Frente"),
-                Choice("av-cf-lat", "B — Avanço Contra Frente sobre Lateral")
+                Num("av-lat-cf", "A — Avanço Lateral sobre Contra Frente"),
+                Num("av-cf-lat", "B — Avanço Contra Frente sobre Lateral")
             ]
         },
         new()
@@ -58,8 +56,8 @@ public static class CozinhaGavetasInternasSchema
             Header = "Fixação Lateral - Posterior",
             Fields =
             [
-                Choice("av-lat-pos", "A — Avanço Lateral sobre Posterior"),
-                Choice("av-pos-lat", "B — Avanço Posterior sobre Lateral")
+                Num("av-lat-pos", "A — Avanço Lateral sobre Posterior"),
+                Num("av-pos-lat", "B — Avanço Posterior sobre Lateral")
             ]
         },
         new()
@@ -68,13 +66,23 @@ public static class CozinhaGavetasInternasSchema
             Header = "Fundos",
             Fields =
             [
-                Choice("av-fun-lat", "A — Avanço Fundo sobre Lateral"),
-                Choice("av-fun-cf", "B — Avanço Fundo sobre Frente/Contra Frente"),
-                Choice("av-fun-pos", "C — Avanço Fundo sobre Posterior"),
-                Choice("recuo-fundo", "D — Recuo Fundo")
+                Num("av-fun-lat", "A — Avanço Fundo sobre Lateral"),
+                Num("av-fun-cf", "B — Avanço Fundo sobre Frente/Contra Frente"),
+                Num("av-fun-pos", "C — Avanço Fundo sobre Posterior"),
+                Num("recuo-fundo", "D — Recuo Fundo")
             ]
         }
     ];
+
+    private static BoxFieldDef Num(string key, string label, float defaultValue, string group) => new()
+    {
+        Key = key,
+        Label = label,
+        Group = group,
+        Kind = BoxFieldKind.Numeric,
+        DefaultValue = defaultValue,
+        AllowNegative = true
+    };
 
     public static IEnumerable<BoxNodeDef> AllNodes()
     {

@@ -6,6 +6,40 @@ namespace Tracos3DStudio.Tests;
 public sealed class ModuleMeshBuilderBackAdvanceTests
 {
     [Fact]
+    public void BalcaoReto_SemFundo_NaoGeraPainelTraseiro()
+    {
+        var definition = ModuleCatalog.GetRequired("balcao-2-portas");
+        var settings = DimensionConfiguratorSettings.CreateDefault();
+        settings.CozinhaInferiorBox.InferiorChoice["fundo-tipo"] = "Sem fundo";
+
+        var instance = ModuleCatalog.CreateInstance(definition.Id, Vector3.Zero);
+        instance.SetDimensions(800f, 850f, 550f, definition, settings, respectCatalogLimits: false);
+
+        Assert.DoesNotContain(instance.Mesh.Faces, face => face.Label == "Fundo");
+    }
+
+    [Theory]
+    [InlineData("Trav Vertical", "Travessa traseira esq.", "Travessa traseira dir.")]
+    [InlineData("Trav Horizontal", "Travessa traseira inferior", "Travessa traseira superior")]
+    public void BalcaoReto_FundoPorTravessas_GeraDuasPecasSemPainelInteiro(
+        string tipo,
+        string primeira,
+        string segunda)
+    {
+        var definition = ModuleCatalog.GetRequired("balcao-2-portas");
+        var settings = DimensionConfiguratorSettings.CreateDefault();
+        settings.CozinhaInferiorBox.InferiorChoice["fundo-tipo"] = tipo;
+        settings.CozinhaInferiorBox.InferiorNumeric["fundo-dim-trav"] = 80f;
+
+        var instance = ModuleCatalog.CreateInstance(definition.Id, Vector3.Zero);
+        instance.SetDimensions(800f, 850f, 550f, definition, settings, respectCatalogLimits: false);
+
+        Assert.Contains(instance.Mesh.Faces, face => face.Label == primeira);
+        Assert.Contains(instance.Mesh.Faces, face => face.Label == segunda);
+        Assert.DoesNotContain(instance.Mesh.Faces, face => face.Label == "Fundo");
+    }
+
+    [Fact]
     public void BalcaoReto_AplicaAvancoFundoSobreLateralEBase()
     {
         var definition = ModuleCatalog.GetRequired("balcao-2-portas");

@@ -122,7 +122,7 @@ public static class BoxAssemblyArmarioSchema
     [
         new()
         {
-            Header = "Canto L | Oblíquo | Curvo",
+            Header = "Canto L | Oblíquo",
             Nodes =
             [
                 NodeFromInferior("canto-l-canto"),

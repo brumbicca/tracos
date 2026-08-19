@@ -78,7 +78,8 @@ public static class ModuleInsertDropService
                 project.Modules,
                 candidateWallId: resolved.WallId,
                 distanceAlongWall: resolved.DistanceAlongWall,
-                candidateDefinition: definition))
+                candidateDefinition: definition,
+                dimensionSettings: dimensionSettings))
         {
             error = "Colisão com outro módulo.";
             return false;

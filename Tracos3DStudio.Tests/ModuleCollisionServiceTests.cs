@@ -88,6 +88,61 @@ public class ModuleCollisionServiceTests
     }
 
     [Fact]
+    public void WouldCollide_CantoReto_NaoCriaVaoNoLadoDaPorta()
+    {
+        var settings = DimensionConfiguratorSettings.CreateDefault();
+        BoxAssemblyConfiguratorService.EnsureBoxInitialized(settings);
+        settings.CozinhaInferiorBox.InferiorNumeric["cr-afa-lat"] = 30f;
+
+        var cornerDefinition = ModuleCatalog.GetRequired("canto-cr-esq-950");
+        var corner = ModuleCatalog.CreateInstance(cornerDefinition.Id, Vector3.Zero);
+        corner.SetDimensions(950f, 720f, 550f, cornerDefinition, settings, respectCatalogLimits: false);
+
+        var next = ModuleCatalog.CreateInstance("balcao-2-portas", new Vector3(950f, 0f, 0f));
+        var wallId = Guid.NewGuid();
+        corner.AttachedWallId = wallId;
+        next.AttachedWallId = wallId;
+        corner.DistanceAlongWall = 475f;
+        next.DistanceAlongWall = 1350f;
+
+        Assert.False(ModuleCollisionService.WouldCollide(next, [corner]));
+    }
+
+    [Fact]
+    public void WouldCollide_CantoRetoReservaAfastamentoTambemNoLadoEsquerdo()
+    {
+        var settings = DimensionConfiguratorSettings.CreateDefault();
+        BoxAssemblyConfiguratorService.EnsureBoxInitialized(settings);
+        settings.CozinhaInferiorBox.InferiorNumeric["cr-afa-lat"] = 30f;
+
+        var definition = ModuleCatalog.GetRequired("canto-cr-esq-950");
+        var corner = ModuleCatalog.CreateInstance(definition.Id, Vector3.Zero);
+        corner.SetDimensions(950f, 720f, 550f, definition, settings, respectCatalogLimits: false);
+        var left = ModuleCatalog.CreateInstance("balcao-2-portas", new Vector3(-790f, 0f, 0f));
+        var wallId = Guid.NewGuid();
+        corner.AttachedWallId = wallId;
+        left.AttachedWallId = wallId;
+
+        // O balcão ocupa até X=10. O envelope antigo começava em X=30 e
+        // deixava passar; o espaço nominal do canto começa em X=0.
+        Assert.True(ModuleCollisionService.WouldCollide(left, [corner]));
+    }
+
+    [Fact]
+    public void WouldCollide_CantoRetoComModuloDaOutraParede_DetectaSobreposicao()
+    {
+        var corner = ModuleCatalog.CreateInstance("canto-cr-esq-950", Vector3.Zero);
+        var perpendicular = ModuleCatalog.CreateInstance("balcao-2-portas", new Vector3(400f, 0f, 100f));
+        corner.AttachedWallId = Guid.NewGuid();
+        perpendicular.AttachedWallId = Guid.NewGuid();
+
+        Assert.True(ModuleCollisionService.WouldCollide(perpendicular, [corner]));
+        var colliding = ModuleCollisionService.FindCollidingModuleIds([corner, perpendicular]);
+        Assert.Contains(corner.Id, colliding);
+        Assert.Contains(perpendicular.Id, colliding);
+    }
+
+    [Fact]
     public void WouldCollide_AereoSobreBalcao_MesmaFaixaHorizontal_SemColisao()
     {
         var wallId = Guid.NewGuid();
@@ -330,5 +385,22 @@ public class ModuleCollisionServiceTests
         right.DistanceAlongWall = 1900f;
 
         Assert.False(ModuleCollisionService.WouldCollide(right, [left]));
+    }
+
+    [Fact]
+    public void WouldCollide_CantoObliquo_VerificaModuloDaParedePerpendicular()
+    {
+        var wallA = Guid.NewGuid();
+        var wallB = Guid.NewGuid();
+        var corner = ModuleCatalog.CreateInstance("canto-obliquo-1p-900", Vector3.Zero);
+        corner.AttachedWallId = wallA;
+
+        var other = ModuleCatalog.CreateInstance("balcao-2-portas", new Vector3(600f, 0f, 600f));
+        other.AttachedWallId = wallB;
+
+        Assert.True(ModuleCollisionService.WouldCollide(corner, [other]));
+
+        other.Position = new Vector3(900f, 0f, 900f);
+        Assert.False(ModuleCollisionService.WouldCollide(corner, [other]));
     }
 }

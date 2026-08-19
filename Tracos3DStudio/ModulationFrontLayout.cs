@@ -21,12 +21,14 @@ public static class ModulationFrontLayout
         if (structure.FrontBays.Count == 0)
             return Array.Empty<ModulationFrontRect>();
 
-        float gap = structure.FrontGapMm >= 0f ? structure.FrontGapMm : 4f;
-        const float inset = 2f;
-        float minX = inset;
-        float minY = inset;
-        float maxX = moduleWidth - inset;
-        float maxY = moduleHeight - inset;
+        float gap = float.IsFinite(structure.FrontGapMm) ? structure.FrontGapMm : 4f;
+        float sideGap = float.IsFinite(structure.FrontSideGapMm) ? structure.FrontSideGapMm : 0f;
+        float bottomGap = float.IsFinite(structure.FrontBottomGapMm) ? structure.FrontBottomGapMm : 0f;
+        float topGap = float.IsFinite(structure.FrontTopGapMm) ? structure.FrontTopGapMm : 0f;
+        float minX = sideGap;
+        float minY = bottomGap;
+        float maxX = moduleWidth - sideGap;
+        float maxY = moduleHeight - topGap;
         float usableW = Math.Max(0f, maxX - minX);
         float usableH = Math.Max(0f, maxY - minY);
 
@@ -45,8 +47,8 @@ public static class ModulationFrontLayout
         float gap)
     {
         var rects = new List<ModulationFrontRect>(bays.Count);
-        float availableForDrawers = usableH - gap * (bays.Count + 1);
-        float y = minY + gap;
+        float availableForDrawers = usableH - gap * Math.Max(0, bays.Count - 1);
+        float y = minY;
         int index = 0;
 
         foreach (var bay in bays)
@@ -75,8 +77,8 @@ public static class ModulationFrontLayout
         float gap)
     {
         var rects = new List<ModulationFrontRect>(bays.Count);
-        float availableForDoors = usableW - gap * (bays.Count + 1);
-        float x = minX + gap;
+        float availableForDoors = usableW - gap * Math.Max(0, bays.Count - 1);
+        float x = minX;
         int index = 0;
 
         foreach (var bay in bays)

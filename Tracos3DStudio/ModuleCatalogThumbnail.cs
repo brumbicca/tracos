@@ -126,8 +126,10 @@ public static class ModuleCatalogThumbnail
             ModuleShapeKind.CornerLLeft => BuildLPlan(size, leftHand: true, definition.DoorCount),
             ModuleShapeKind.CornerLRight => BuildLPlan(size, leftHand: false, definition.DoorCount),
             ModuleShapeKind.Oblique => BuildObliquePlan(size, definition.DoorCount),
-            ModuleShapeKind.Bifold when definition.LibrarySubGroup
-                .Equals(ModuleLibraryHierarchy.SubCantosBifold, StringComparison.OrdinalIgnoreCase)
+            ModuleShapeKind.CornerDrawer => BuildObliquePlan(size, Math.Max(1, definition.DrawerCount)),
+            ModuleShapeKind.CornerCurved => BuildObliquePlan(size, definition.DoorCount),
+            ModuleShapeKind.Bifold when definition.Id
+                .StartsWith("canto-bifold-l-", StringComparison.OrdinalIgnoreCase)
                 => BuildLPlan(size,
                     leftHand: definition.Id.Contains("esq", StringComparison.OrdinalIgnoreCase),
                     doors: Math.Max(2, definition.DoorCount)),

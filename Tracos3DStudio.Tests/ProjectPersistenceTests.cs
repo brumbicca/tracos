@@ -209,6 +209,104 @@ public class ProjectPersistenceTests
         Assert.Contains("modulo-inexistente", ex.Message);
     }
 
+    [Fact]
+    public void RoundTrip_CantoObliquo_PreservaQuantidadeELadoDeAbertura()
+    {
+        var project = new Project();
+        var module = project.AddModule("canto-obliquo-1p-900", Vector3.Zero);
+        module.ObliqueDoorCount = 2;
+        module.ObliqueHingesOnLeft = false;
+
+        var document = ProjectPersistence.CreateFromProject(project);
+        var restored = ProjectPersistence.LoadProject(document).Modules.Single();
+
+        Assert.Equal("canto-obliquo-1p-900", restored.DefinitionId);
+        Assert.Equal(2, restored.ObliqueDoorCount);
+        Assert.False(restored.ObliqueHingesOnLeft);
+        Assert.Contains(restored.Mesh.Faces, f => f.Label == "Porta 1");
+        Assert.Contains(restored.Mesh.Faces, f => f.Label == "Porta 2");
+    }
+
+    [Fact]
+    public void RoundTrip_Gaveteiro_PreservaModeloDeCorredica()
+    {
+        var project = new Project();
+        var module = project.AddModule("gaveteiro", Vector3.Zero);
+        module.DrawerSlideType = DrawerSlideType.Concealed;
+
+        var document = ProjectPersistence.CreateFromProject(project);
+        var restored = ProjectPersistence.LoadProject(document).Modules.Single();
+
+        Assert.Equal(DrawerSlideType.Concealed, restored.DrawerSlideType);
+    }
+
+    [Fact]
+    public void RoundTrip_ModuloEspelhado_PreservaAtalhoI()
+    {
+        var project = new Project();
+        var module = project.AddModule("pia-2p-4g-1200", Vector3.Zero);
+        module.IsMirrored = true;
+        module.RebuildMesh(ModuleCatalog.GetRequired(module.DefinitionId),
+            DimensionConfiguratorService.GetSettings(project));
+
+        var document = ProjectPersistence.CreateFromProject(project);
+        var restored = ProjectPersistence.LoadProject(document).Modules.Single();
+
+        Assert.True(restored.IsMirrored);
+        Assert.True(ModulePartDimensionService.TryComputeLocalBounds(
+            restored, "Gaveta 1 — Frente", out _, out var drawerMax));
+        Assert.True(drawerMax.X < restored.Width * 0.5f);
+    }
+
+    [Fact]
+    public void LoadProject_CantoObliquo2PAntigo_MigraParaModuloUnico()
+    {
+        var document = new ProjectDocument
+        {
+            Modules =
+            {
+                new ModuleInstanceData
+                {
+                    DefinitionId = "canto-obliquo-2p-900",
+                    Width = 900f,
+                    Height = 850f,
+                    Depth = 900f
+                }
+            }
+        };
+
+        var restored = ProjectPersistence.LoadProject(document).Modules.Single();
+        Assert.Equal("canto-obliquo-1p-900", restored.DefinitionId);
+        Assert.Equal(2, restored.ObliqueDoorCount);
+    }
+
+    [Theory]
+    [InlineData("canto-l-esq-950", "canto-l-2p-esq-950")]
+    [InlineData("canto-l-dir-950", "canto-l-2p-dir-950")]
+    public void LoadProject_CantoLDeUmaPortaAntigo_MigraParaDuasPortas(
+        string legacyId,
+        string expectedId)
+    {
+        var document = new ProjectDocument
+        {
+            Modules =
+            {
+                new ModuleInstanceData
+                {
+                    DefinitionId = legacyId,
+                    Width = 950f,
+                    Height = 850f,
+                    Depth = 950f
+                }
+            }
+        };
+
+        var restored = ProjectPersistence.LoadProject(document).Modules.Single();
+        Assert.Equal(expectedId, restored.DefinitionId);
+        Assert.Contains(restored.Mesh.Faces, f => f.Label == "Porta dir.");
+        Assert.Contains(restored.Mesh.Faces, f => f.Label == "Porta esq.");
+    }
+
     private static Project BuildClosedRoomProject()
     {
         var project = new Project();

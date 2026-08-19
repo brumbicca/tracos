@@ -200,13 +200,16 @@ public static class ModulePlacementService
         float distanceAlongInner,
         Vector2 interiorNormal,
         float? mountYOverride = null,
-        float moduleHeight = 0f)
+        float moduleHeight = 0f,
+        bool clampToWallFace = true)
     {
         var innerFace = WallInnerFaceService.GetInnerFace(wall, walls);
         float halfWidth = moduleWidth * 0.5f;
         float minCenter = WallEdgeMargin + halfWidth;
         float maxCenter = Math.Max(minCenter, innerFace.Length - WallEdgeMargin - halfWidth);
-        float centerAlong = Math.Clamp(distanceAlongInner, minCenter, maxCenter);
+        float centerAlong = clampToWallFace
+            ? Math.Clamp(distanceAlongInner, minCenter, maxCenter)
+            : distanceAlongInner;
 
         // A frente do módulo (eixo local Z) deve ser PERPENDICULAR à parede e apontar
         // para o interior. A interiorNormal (direção ao centro do ambiente) pode ser
@@ -231,7 +234,9 @@ public static class ModulePlacementService
 
         // Centro do módulo sobre a face interna, no ponto do clique; recuar meia largura
         // pelo eixo de largura fornece o canto traseiro-esquerdo (origem local do mesh).
-        Vector2 faceCenter = innerFace.PointAtDistance(centerAlong);
+        Vector2 faceCenter = clampToWallFace
+            ? innerFace.PointAtDistance(centerAlong)
+            : innerFace.InnerStart + innerFace.Direction * centerAlong;
         Vector2 backLeft = faceCenter - widthAxis * halfWidth;
 
         float wallTop = wall.FloorOffset + MathF.Max(wall.HeightStart, wall.HeightEnd);
@@ -240,7 +245,8 @@ public static class ModulePlacementService
             : definition.IsWallMounted ? 1400f : wall.FloorOffset;
         float heightForClamp = moduleHeight > 0f ? moduleHeight : definition.DefaultHeight;
         float mountY = mountYOverride ?? defaultMountY;
-        mountY = Math.Clamp(mountY, wall.FloorOffset, MathF.Max(wall.FloorOffset, wallTop - heightForClamp));
+        if (clampToWallFace)
+            mountY = Math.Clamp(mountY, wall.FloorOffset, MathF.Max(wall.FloorOffset, wallTop - heightForClamp));
         float rotationY = MathHelper.RadiansToDegrees(MathF.Atan2(front.X, front.Y));
 
         return new ModulePlacementResult
@@ -270,17 +276,9 @@ public static class ModulePlacementService
     {
         error = null;
 
-        if (value < 0f)
-        {
-            error = "Cota não pode ser negativa.";
-            return false;
-        }
-
         var innerFace = WallInnerFaceService.GetInnerFace(wall, walls);
         float halfWidth = module.Width * 0.5f;
         float wallTop = wall.FloorOffset + MathF.Max(wall.HeightStart, wall.HeightEnd);
-        float minCenter = WallEdgeMargin + halfWidth;
-        float maxCenter = Math.Max(minCenter, innerFace.Length - WallEdgeMargin - halfWidth);
 
         float centerAlong = module.DistanceAlongWall;
         // Preserva a altura atual por padrão: editar uma cota horizontal (Anterior/Posterior)
@@ -303,21 +301,6 @@ public static class ModulePlacementService
                 break;
         }
 
-        if (centerAlong < minCenter - 0.5f || centerAlong > maxCenter + 0.5f)
-        {
-            error = $"Cota excede a face interna ({innerFace.Length:0} mm).";
-            return false;
-        }
-
-        float minY = wall.FloorOffset;
-        float maxY = MathF.Max(minY, wallTop - module.Height);
-
-        if (mountYOverride < minY - 0.5f || mountYOverride > maxY + 0.5f)
-        {
-            error = "Cota vertical excede o pé-direito da parede.";
-            return false;
-        }
-
         Vector2 interiorNormal = InteriorNormalFromRotation(module.RotationYDegrees);
         var placement = PlaceOnInsertionFace(
             wall,
@@ -328,7 +311,8 @@ public static class ModulePlacementService
             centerAlong,
             interiorNormal,
             mountYOverride,
-            module.Height);
+            module.Height,
+            clampToWallFace: false);
 
         module.ApplyPlacement(
             placement.Position,
@@ -395,10 +379,10 @@ public static class ModulePlacementService
 
         return new ModuleWallCotas
         {
-            Anterior = Math.Max(0f, leftAlong),
-            Posterior = Math.Max(0f, innerFace.Length - rightAlong),
-            Inferior = Math.Max(0f, moduleBottom - wall.FloorOffset),
-            Superior = Math.Max(0f, wallTop - moduleTop)
+            Anterior = leftAlong,
+            Posterior = innerFace.Length - rightAlong,
+            Inferior = moduleBottom - wall.FloorOffset,
+            Superior = wallTop - moduleTop
         };
     }
 
@@ -499,10 +483,10 @@ public static class ModulePlacementService
 
         return new ModuleWallCotas
         {
-            Anterior = Math.Max(0f, leftAlong),
-            Posterior = Math.Max(0f, innerFace.Length - rightAlong),
-            Inferior = Math.Max(0f, moduleBottom - wall.FloorOffset),
-            Superior = Math.Max(0f, wallTop - moduleTop)
+            Anterior = leftAlong,
+            Posterior = innerFace.Length - rightAlong,
+            Inferior = moduleBottom - wall.FloorOffset,
+            Superior = wallTop - moduleTop
         };
     }
 
